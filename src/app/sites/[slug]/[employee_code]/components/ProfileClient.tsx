@@ -277,7 +277,7 @@ END:VCARD`
   }
 
   return (
-    <div className="w-full min-h-screen bg-background flex flex-col items-center overflow-x-hidden font-sans pb-20 pt-4 text-foreground transition-colors duration-300">
+    <div style={{ fontFamily: 'var(--font-outfit)' }} className="w-full min-h-screen bg-background flex flex-col items-center overflow-x-hidden font-sans pb-20 pt-4 text-foreground transition-colors duration-300">
       
       {/* Figma Container Max Width - Scales for Tablets */}
       <div className="w-full max-w-md md:max-w-2xl mx-auto relative px-5 md:px-10 flex flex-col pt-2 ">
