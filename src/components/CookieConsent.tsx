@@ -3,9 +3,15 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Cookie, X } from 'lucide-react'
 import { Button } from './ui/button'
+import { usePathname } from 'next/navigation'
 
 export function CookieConsent() {
+  const pathname = usePathname()
   const [show, setShow] = useState(false)
+
+  if (pathname?.startsWith('/sites')) {
+    return null;
+  }
 
   useEffect(() => {
     // Check if user has already accepted or declined
