@@ -18,20 +18,20 @@ export default function Header({ hideNavLinks = false }: HeaderProps) {
   return (
     <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-        
+
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
-          <span className="text-xl font-bold tracking-tight text-foreground">frixn</span>
+          <span className="text-xl font-bold tracking-tight text-foreground">frixn.</span>
         </Link>
-        
+
         {/* Centered Nav */}
         {!hideNavLinks && (
           <nav className="hidden md:flex gap-8 text-[11px] font-black uppercase tracking-widest text-muted-foreground">
             {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
-                href={link.href} 
+              <Link
+                key={link.name}
+                href={link.href}
                 className="hover:text-[#007AFF] transition-colors"
               >
                 {link.name}
@@ -39,7 +39,7 @@ export default function Header({ hideNavLinks = false }: HeaderProps) {
             ))}
           </nav>
         )}
-        
+
         {/* Actions */}
         <div className="flex items-center gap-4">
           <ThemeToggle />

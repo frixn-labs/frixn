@@ -27,13 +27,13 @@ export default function ContactPage() {
       {/* Left Section: Branding & Visuals */}
       <section className="relative hidden lg:flex lg:w-1/2 flex-col justify-between p-4 lg:p-6 overflow-hidden bg-[#050505]">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 z-0 opacity-40 bg-cover bg-center transition-transform duration-[15s] ease-out hover:scale-105"
-          style={{ 
+          style={{
             backgroundImage: `url('https://i.pinimg.com/736x/fd/14/24/fd1424f35f473c44b3fd1112067d011f.jpg')`,
           }}
         />
-        
+
         {/* Overlays */}
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/20 via-black/60 to-black/90" />
         <div className="absolute inset-0 z-1 bg-[radial-gradient(ellipse_at_top_left,rgba(0,113,227,0.15),transparent_50%)]" />
@@ -42,7 +42,7 @@ export default function ContactPage() {
         <div className="relative z-10 w-full flex justify-start">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
-            <span className="text-xl font-bold tracking-tight text-white">frixn</span>
+            <span className="text-xl font-bold tracking-tight text-white">frixn.</span>
           </Link>
         </div>
 
@@ -66,7 +66,7 @@ export default function ContactPage() {
 
       {/* Right Section: Core Form */}
       <section className="lg:w-1/2 w-full flex flex-col p-4 lg:p-6 bg-background relative z-20 min-h-screen lg:min-h-0 overflow-y-auto overflow-x-hidden pt-12 lg:pt-6">
-        
+
         {/* Mobile Logo */}
         <div className="lg:hidden flex justify-start mb-6">
           <Link href="/" className="flex items-center gap-2">
@@ -77,7 +77,7 @@ export default function ContactPage() {
 
         {/* Main Centered Container */}
         <div className="flex-1 flex flex-col justify-center items-center w-full">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.4 }}
@@ -91,13 +91,13 @@ export default function ContactPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80 ml-1">Full Name</label>
                   <div className="relative group">
-                    <Input 
-                      placeholder="John Doe" 
+                    <Input
+                      placeholder="John Doe"
                       required
                       className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
                     />
@@ -108,9 +108,9 @@ export default function ContactPage() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80 ml-1">Phone Number</label>
                   <div className="relative group">
-                    <Input 
+                    <Input
                       type="tel"
-                      placeholder="+91 98765 43210" 
+                      placeholder="+91 98765 43210"
                       required
                       className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
                     />
@@ -122,9 +122,9 @@ export default function ContactPage() {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80 ml-1">Org Email</label>
                 <div className="relative group">
-                  <Input 
-                    type="email" 
-                    placeholder="name@company.com" 
+                  <Input
+                    type="email"
+                    placeholder="name@company.com"
                     required
                     className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
                   />
@@ -136,8 +136,8 @@ export default function ContactPage() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80 ml-1">Organization</label>
                   <div className="relative group">
-                    <Input 
-                      placeholder="Company Inc." 
+                    <Input
+                      placeholder="Company Inc."
                       required
                       className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
                     />
@@ -148,8 +148,8 @@ export default function ContactPage() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80 ml-1">Team Size</label>
                   <div className="relative group">
-                    <Input 
-                      placeholder="e.g. 50-100" 
+                    <Input
+                      placeholder="e.g. 50-100"
                       required
                       className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
                     />
@@ -158,8 +158,8 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
                 className="w-full h-11 mt-4 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.98]"
               >
