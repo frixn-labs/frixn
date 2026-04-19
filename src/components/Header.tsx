@@ -21,7 +21,7 @@ export default function Header({ hideNavLinks = false }: HeaderProps) {
         
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Zap className="w-8 h-8 text-[#0071e3]" />
+          <img src="/logo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
           <span className="text-xl font-bold tracking-tight text-foreground">frixn</span>
         </Link>
         

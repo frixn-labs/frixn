@@ -42,7 +42,7 @@ export default function LoginPage() {
         {/* Top: Logo */}
         <div className="relative z-10 w-full flex justify-start">
           <Link href="/" className="flex items-center gap-2">
-            <Zap className="w-8 h-8 text-[#0071e3]" />
+            <img src="/logo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
             <span className="text-xl font-bold tracking-tight text-white">frixn</span>
           </Link>
         </div>
@@ -71,7 +71,7 @@ export default function LoginPage() {
         {/* Mobile Logo */}
         <div className="lg:hidden flex justify-start">
           <Link href="/" className="flex items-center gap-2">
-            <Zap className="w-8 h-8 text-[#0071e3]" />
+            <img src="/logo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
             <span className="text-xl font-bold tracking-tight text-foreground">frixn</span>
           </Link>
         </div>
