@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { supabase } from "@/lib/supabase"
-import { Edit, ArrowLeft, Search, MoreVertical, Briefcase, Mail, Phone, Calendar, MapPin, MousePointerClick, UserPlus, Fingerprint, ExternalLink, Globe, Link as LinkIcon, Contact, FileText } from "lucide-react"
+import { Edit, ArrowLeft, Search, MoreVertical, Briefcase, Mail, Phone, Calendar, MapPin, MousePointerClick, UserPlus, Zap, ExternalLink, Globe, Link as LinkIcon, Contact, FileText } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { addDays, format } from "date-fns"
@@ -345,7 +345,7 @@ export default function EmployeeDetailPage() {
         if (!employee) {
             return (
                 <div className="flex flex-col items-center justify-center h-full">
-                    <Fingerprint className="w-16 h-16 text-muted-foreground/30 mb-4" />
+                    <Zap className="w-16 h-16 text-muted-foreground/30 mb-4" />
                     <h2 className="text-xl font-bold">Record Not Found</h2>
                     <p className="text-muted-foreground">This employee profile may have been deleted.</p>
                 </div>

@@ -134,7 +134,7 @@ export default function AdminLogin() {
         </form>
 
         <div className="mt-10 text-center text-xs text-secondary/50 font-black uppercase tracking-[0.2em]">
-          Secure TapConnect Link
+          Secure frixn Link
         </div>
       </motion.div>
     </div>

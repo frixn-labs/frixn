@@ -79,7 +79,7 @@ const cases = [
     renderMockup: () => (
       <div className="w-full mt-5 flex flex-col gap-2">
         {[
-          { icon: Link, label: "tapconnect.me/yourname", badge: "42k Taps" },
+          { icon: Link, label: "frixn.me/yourname", badge: "42k Taps" },
           { icon: Smartphone, label: "Instagram · TikTok · X", badge: "3 linked" },
           { icon: Globe, label: "Booking page linked", badge: "Live" },
         ].map((row, i) => (
@@ -105,7 +105,7 @@ export default function UseCases() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground tracking-tight">Built for <span className="gradient-text">Everyone</span></h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Whether you're solo or scaling to thousands, TapConnect grows with you.</p>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Whether you're solo or scaling to thousands, frixn grows with you.</p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">

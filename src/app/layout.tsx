@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Plus_Jakarta_Sans, Outfit, DM_Sans } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { CookieConsent } from '@/components/CookieConsent'
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { cn } from "@/lib/utils";
@@ -12,8 +13,8 @@ const fontOutfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 const fontDMSans = DM_Sans({ subsets: ['latin'], variable: '--font-dmsans' });
 
 export const metadata: Metadata = {
-  title: 'TapConnect | Smart Digital Identity',
-  description: 'Tap. Connect. Share Instantly. TapConnect turns your NFC card into a powerful digital identity.',
+  title: 'frixn | Smart Digital Identity',
+  description: 'Tap. Connect. Share Instantly. frixn turns your NFC card into a powerful digital identity.',
 }
 
 export default function RootLayout({
@@ -57,6 +58,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>

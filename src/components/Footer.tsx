@@ -63,16 +63,16 @@ export default function Footer() {
           className="w-full text-center py-4"
         >
           <h1 className="text-[13vw] font-black text-foreground tracking-[-0.04em] leading-[0.8] select-none uppercase">
-            TapConnect
+            frixn
           </h1>
         </motion.div>
 
         {/* Bottom Metadata Bar */}
         <div className="pt-12 mt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-border/50">
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
-            <span>© {currentYear} tapconnect inc.</span>
-            <Link href="#" className="hover:text-foreground transition-colors">privacy policy</Link>
-            <Link href="#" className="hover:text-foreground transition-colors">terms and condition</Link>
+            <span>© {currentYear} frixn inc.</span>
+            <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">privacy policy</Link>
+            <Link href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">terms and condition</Link>
           </div>
           <div className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30">
              v1.0.4 - beta stable

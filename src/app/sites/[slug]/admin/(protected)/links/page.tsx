@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Link as LinkIcon, Plus, GripVertical, Edit, Trash, ExternalLink, Globe, Contact, FileText, Loader2, Sparkles, X, MousePointer2 } from 'lucide-react'
@@ -41,6 +42,11 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
     const [editingLink, setEditingLink] = React.useState<CardLink | undefined>()
     const [clickCounts, setClickCounts] = React.useState<Record<string, number>>({})
 
+    const [productsRecordId, setProductsRecordId] = React.useState<string | null>(null)
+    const [products, setProducts] = React.useState<string[]>([])
+    const [newProduct, setNewProduct] = React.useState<string>("")
+    const [isAddingProduct, setIsAddingProduct] = React.useState(false)
+
     const showAiSummary = aiSettings?.links_enabled && !locallyDismissed
 
     const fetchClickData = React.useCallback(async (oId: string) => {
@@ -75,6 +81,19 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                 .eq('org_id', orgData.id)
                 .order('display_order', { ascending: true })
             if (data) setLinks(data)
+
+            const { data: prodData } = await supabase
+                .from('products')
+                .select('*')
+                .eq('org_id', orgData.id)
+                .single()
+            if (prodData) {
+                setProductsRecordId(prodData.id)
+                setProducts(prodData.products || [])
+            } else {
+                setProducts([])
+                setProductsRecordId(null)
+            }
         }
         setLoading(false)
     }, [slug, fetchClickData])
@@ -162,11 +181,67 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
             )
             .subscribe()
 
+        const productsChannel = supabase
+            .channel(`products:${orgId}`)
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'tapconnect', table: 'products', filter: `org_id=eq.${orgId}` },
+                (payload) => {
+                    if (payload.eventType === 'DELETE') {
+                        setProductsRecordId(null)
+                        setProducts([])
+                    } else {
+                        const newRow = payload.new as any
+                        setProductsRecordId(newRow.id)
+                        setProducts(newRow.products || [])
+                    }
+                }
+            )
+            .subscribe()
+
         return () => { 
             supabase.removeChannel(channel)
             supabase.removeChannel(clickChannel)
+            supabase.removeChannel(productsChannel)
         }
     }, [orgId])
+
+    const handleAddProduct = async () => {
+        if (!newProduct.trim() || !orgId) return
+        setIsAddingProduct(true)
+        try {
+            const updatedProducts = [...products, newProduct.trim()]
+            if (productsRecordId) {
+                const { error } = await supabase.from('products').update({ products: updatedProducts }).eq('id', productsRecordId)
+                if (error) {
+                    console.error("Supabase Update Error:", error)
+                    alert(`Supabase Error: ${error.message}`)
+                } else {
+                    setProducts(updatedProducts)
+                    setNewProduct("")
+                }
+            } else {
+                const { data, error } = await supabase.from('products').insert({ org_id: orgId, products: updatedProducts }).select().single()
+                if (error) {
+                    console.error("Supabase Insert Error:", error)
+                    alert(`Supabase Error: ${error.message}`)
+                } else if (data) {
+                    setProductsRecordId(data.id)
+                    setProducts(updatedProducts)
+                    setNewProduct("")
+                }
+            }
+        } finally {
+            setIsAddingProduct(false)
+        }
+    }
+
+    const handleDeleteProduct = async (indexToDelete: number) => {
+        if (!productsRecordId) return
+        const updatedProducts = products.filter((_, i) => i !== indexToDelete)
+        setProducts(updatedProducts)
+        await supabase.from('products').update({ products: updatedProducts }).eq('id', productsRecordId)
+    }
 
     // Optimistic reorder + batch persist
     const handleReorder = async (newOrder: CardLink[]) => {
@@ -455,6 +530,70 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                                 </Reorder.Item>
                             ))}
                         </Reorder.Group>
+                    </div>
+                </div>
+            )}
+
+            {/* Products list */}
+            {!loading && (
+                <div className="bg-card border rounded-xl overflow-hidden shadow-sm mt-8">
+                    <div className="px-6 py-4 flex items-center justify-between border-b bg-muted/20">
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">Organization Products</span>
+                            <Badge variant="secondary" className="text-[10px] uppercase font-bold">
+                                {products.length} {products.length === 1 ? 'Product' : 'Products'}
+                            </Badge>
+                        </div>
+                        <span className="text-xs text-muted-foreground hidden sm:block">
+                            Changes save instantly
+                        </span>
+                    </div>
+
+                    <div className="p-5 flex flex-col gap-4">
+                        <div className="flex items-center gap-3">
+                            <Input 
+                                placeholder="Add a new product/service..." 
+                                value={newProduct} 
+                                onChange={(e) => setNewProduct(e.target.value)} 
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleAddProduct()
+                                }}
+                                className="flex-1"
+                            />
+                            <Button onClick={handleAddProduct} disabled={isAddingProduct || !newProduct.trim()}>
+                                {isAddingProduct ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                                Add
+                            </Button>
+                        </div>
+
+                        {products.length > 0 ? (
+                            <div className="flex flex-col gap-2 mt-2">
+                                {products.map((product, idx) => (
+                                    <div key={idx} className="flex items-center justify-between bg-background border px-4 py-3 rounded-lg group">
+                                        <div className="flex items-center gap-3 w-full">
+                                            <div className="w-7 h-7 flex items-center justify-center bg-primary/10 text-primary rounded-md font-bold text-xs tabular-nums shrink-0">
+                                                {idx + 1}
+                                            </div>
+                                            <span className="font-semibold text-sm">{product}</span>
+                                        </div>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="w-8 h-8 opacity-40 hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all shrink-0" 
+                                            onClick={() => handleDeleteProduct(idx)}
+                                        >
+                                            <Trash className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bg-background border px-4 py-8 rounded-lg mt-2 flex flex-col items-center justify-center text-center">
+                                <FileText className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                                <span className="text-sm font-semibold text-foreground">No Products Defined</span>
+                                <span className="text-xs text-muted-foreground mt-1">Add your first custom product or package above.</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

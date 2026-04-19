@@ -1,5 +1,6 @@
 "use client"
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { Users, ThumbsUp, Sparkles, ArrowRight, Share2, Smartphone } from 'lucide-react'
 import { NfcIcon } from './NfcIcon'
 
@@ -22,9 +23,9 @@ export default function Hero() {
           </p>
           
           <div className="mb-16">
-            <button className="apple-btn px-8 py-4 font-semibold text-lg flex items-center gap-3 shadow-md hover:shadow-lg hover:scale-105 transition-all">
-              Open Account <ArrowRight className="w-5 h-5 pointer-events-none" />
-            </button>
+            <Link href="/contact" className="apple-btn px-8 py-4 font-semibold text-lg inline-flex items-center gap-3 shadow-md hover:shadow-lg hover:scale-105 transition-all">
+              Talk to Sales <ArrowRight className="w-5 h-5 pointer-events-none" />
+            </Link>
           </div>
 
           {/* Stats Row */}
