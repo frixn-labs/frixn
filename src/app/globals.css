@@ -7,7 +7,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Premium Blue Theme Colors */ 
+  /* Premium Blue Theme Colors */
   --background: #f8f9fa;
   --foreground: #1c1c1c;
 
@@ -18,10 +18,10 @@
   --popover-foreground: #1c1c1c;
 
   /* Premium Blue */
-  --primary: #007AFF; 
+  --primary: #FF3D00;
   --primary-foreground: #ffffff;
 
-  --secondary: #ececec; 
+  --secondary: #ececec;
   --secondary-foreground: #1c1c1c;
 
   --muted: #f2f2f2;
@@ -35,40 +35,45 @@
 
   --border: #e6e6e6;
   --input: #e6e6e6;
-  --ring: #007AFF;
+  --ring: #FF3D00;
 
   --radius: 0.375rem;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  --chart-1: #2563EB;   /* iOS - Deep Blue */
-  --chart-2: #60A5FA;   /* Android - Sky Blue */
-  --chart-3: #1D4ED8;   /* Windows - Med Blue */
-  --chart-4: #93C5FD;   /* Mac - Light Blue */
-  --chart-5: #3B82F6;   /* Other - Mid Blue */
+  --chart-1: #2563EB;
+  /* iOS - Deep Blue */
+  --chart-2: #60A5FA;
+  /* Android - Sky Blue */
+  --chart-3: #1D4ED8;
+  /* Windows - Med Blue */
+  --chart-4: #93C5FD;
+  /* Mac - Light Blue */
+  --chart-5: #3B82F6;
+  /* Other - Mid Blue */
 
   --sidebar: #f8f9fa;
   --sidebar-foreground: #1c1c1c;
-  --sidebar-primary: #007AFF;
+  --sidebar-primary: #FF3D00;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #ececec;
   --sidebar-accent-foreground: #1c1c1c;
   --sidebar-border: #e6e6e6;
-  --sidebar-ring: #007AFF;
+  --sidebar-ring: #FF3D00;
 }
 
 .dark {
   /* Premium Blue Dark Theme Colors */
   --background: #1c1c1c;
   --foreground: #ededed;
-  
+
   --card: #232323;
   --card-foreground: #ededed;
 
   --popover: #232323;
   --popover-foreground: #ededed;
 
-  --primary: #007AFF; 
+  --primary: #FF3D00;
   --primary-foreground: #ffffff;
 
   --secondary: #2e2e2e;
@@ -85,22 +90,27 @@
 
   --border: #3e3e3e;
   --input: #3e3e3e;
-  --ring: #007AFF;
-  
-  --chart-1: #2563EB;   /* iOS - Deep Blue */
-  --chart-2: #60A5FA;   /* Android - Sky Blue */
-  --chart-3: #1D4ED8;   /* Windows - Med Blue */
-  --chart-4: #93C5FD;   /* Mac - Light Blue */
-  --chart-5: #3B82F6;   /* Other - Mid Blue */
-  
+  --ring: #FF3D00;
+
+  --chart-1: #2563EB;
+  /* iOS - Deep Blue */
+  --chart-2: #60A5FA;
+  /* Android - Sky Blue */
+  --chart-3: #1D4ED8;
+  /* Windows - Med Blue */
+  --chart-4: #93C5FD;
+  /* Mac - Light Blue */
+  --chart-5: #3B82F6;
+  /* Other - Mid Blue */
+
   --sidebar: #1c1c1c;
   --sidebar-foreground: #ededed;
-  --sidebar-primary: #007AFF;
+  --sidebar-primary: #FF3D00;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #2e2e2e;
   --sidebar-accent-foreground: #ededed;
   --sidebar-border: #3e3e3e;
-  --sidebar-ring: #007AFF;
+  --sidebar-ring: #FF3D00;
 }
 
 @theme inline {
@@ -151,13 +161,20 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply tracking-normal font-sans transition-colors duration-300 bg-background text-foreground;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply tracking-tight;
   }
+
   html {
     @apply font-sans;
   }
@@ -166,27 +183,49 @@
 
   /* Advanced Chart Color Mappings */
   html[data-chart="ocean"] {
-    --chart-1: #2563EB !important; --chart-2: #60A5FA !important; --chart-3: #1D4ED8 !important; --chart-4: #93C5FD !important; --chart-5: #3B82F6 !important;
+    --chart-1: #2563EB !important;
+    --chart-2: #60A5FA !important;
+    --chart-3: #1D4ED8 !important;
+    --chart-4: #93C5FD !important;
+    --chart-5: #3B82F6 !important;
   }
+
   html[data-chart="sunset"] {
-    --chart-1: #F43F5E !important; --chart-2: #FB923C !important; --chart-3: #DB2777 !important; --chart-4: #FBBF24 !important; --chart-5: #E11D48 !important;
+    --chart-1: #F43F5E !important;
+    --chart-2: #FB923C !important;
+    --chart-3: #DB2777 !important;
+    --chart-4: #FBBF24 !important;
+    --chart-5: #E11D48 !important;
   }
+
   html[data-chart="emerald"] {
-    --chart-1: #10B981 !important; --chart-2: #34D399 !important; --chart-3: #059669 !important; --chart-4: #6EE7B7 !important; --chart-5: #047857 !important;
+    --chart-1: #10B981 !important;
+    --chart-2: #34D399 !important;
+    --chart-3: #059669 !important;
+    --chart-4: #6EE7B7 !important;
+    --chart-5: #047857 !important;
   }
+
   html[data-chart="neon"] {
-    --chart-1: #8B5CF6 !important; --chart-2: #C084FC !important; --chart-3: #7C3AED !important; --chart-4: #E879F9 !important; --chart-5: #6D28D9 !important;
+    --chart-1: #8B5CF6 !important;
+    --chart-2: #C084FC !important;
+    --chart-3: #7C3AED !important;
+    --chart-4: #E879F9 !important;
+    --chart-5: #6D28D9 !important;
   }
 
   html[data-font="inter"] {
     --font-sans: var(--font-inter);
   }
+
   html[data-font="jakarta"] {
     --font-sans: var(--font-jakarta);
   }
+
   html[data-font="outfit"] {
     --font-sans: var(--font-outfit);
   }
+
   html[data-font="dmsans"] {
     --font-sans: var(--font-dmsans);
   }
@@ -196,19 +235,24 @@
   .glass-panel {
     @apply bg-white/70 backdrop-blur-2xl border border-black/5 shadow-sm;
   }
+
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-[#FF5A5F] via-[#8B5CF6] to-[#3B82F6];
   }
+
   .apple-btn {
-    @apply bg-primary hover:bg-[#0077ED] transition-colors text-white rounded-full font-medium border border-transparent;
+    @apply bg-primary hover:bg-[#FF3D00] transition-colors text-white rounded-full font-medium border border-transparent;
   }
+
   .apple-btn-outline {
     @apply bg-transparent hover:bg-black/5 transition-colors text-foreground rounded-full font-medium border border-border;
   }
+
   /* Keeping the vibrant cards for the hero as they provide a good contrast with the clean white bg */
   .gradient-card-1 {
     @apply bg-gradient-to-br from-[#EC4899] via-[#F43F5E] to-[#F97316] shadow-xl text-white border-0;
   }
+
   .gradient-card-2 {
     @apply bg-gradient-to-br from-[#8B5CF6] via-[#6366F1] to-[#0EA5E9] shadow-xl text-white border-0;
   }

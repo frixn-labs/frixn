@@ -121,7 +121,7 @@ let _cardColumnFiltersCache: ColumnFiltersState = []
 export function NfcCardsDataTable({ slug }: { slug: string }) {
   const [data, setData] = React.useState<NfcCardData[]>(_cardDataCache[slug] || [])
   const [orgId, setOrgId] = React.useState<string | null>(null)
-  const [orgColors, setOrgColors] = React.useState({ brand_color: '#0071e3', accent_color: '#0071e3' })
+  const [orgColors, setOrgColors] = React.useState({ brand_color: '#FF3D00', accent_color: '#FF3D00' })
   const [loading, setLoading] = React.useState(!_cardDataCache[slug])
   const router = useRouter()
 
@@ -148,8 +148,8 @@ export function NfcCardsDataTable({ slug }: { slug: string }) {
     if (orgData) {
       setOrgId(orgData.id)
       setOrgColors({ 
-         brand_color: orgData.brand_color || '#0071e3', 
-         accent_color: orgData.accent_color || '#0071e3' 
+         brand_color: orgData.brand_color || '#FF3D00', 
+         accent_color: orgData.accent_color || '#FF3D00' 
       })
       
       const { data: cardData } = await supabase

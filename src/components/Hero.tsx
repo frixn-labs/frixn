@@ -59,7 +59,7 @@ export default function Hero() {
         <div className="relative h-[500px] flex items-center justify-center lg:mt-0 mt-12 w-full lg:w-[110%]">
           
           {/* Tile Pattern Doodle Art (Circle, Triangle, Square) */}
-          <div className="absolute top-[-20%] bottom-[-20%] right-[-30%] left-0 pointer-events-none z-0 overflow-hidden text-[#0071e3]/[0.04] mask-gradient-to-l">
+          <div className="absolute top-[-20%] bottom-[-20%] right-[-30%] left-0 pointer-events-none z-0 overflow-hidden text-[#FF3D00]/[0.04] mask-gradient-to-l">
             <svg className="absolute w-full h-full max-w-none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="shape-pattern" x="0" y="0" width="300" height="200" patternUnits="userSpaceOnUse">
@@ -84,7 +84,7 @@ export default function Hero() {
               initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
               animate={{ opacity: 1, scale: 1, rotate: -8, x: -20, y: 40 }}
               transition={{ duration: 0.8, type: "spring", bounce: 0.3 }}
-              className="absolute z-10 w-[360px] h-[220px] rounded-[2rem] bg-gradient-to-br from-[#0071e3] to-[#004b99] shadow-xl flex items-center justify-center right-1/2 transform translate-x-1/2 border border-white/10"
+              className="absolute z-10 w-[360px] h-[220px] rounded-[2rem] bg-gradient-to-br from-[#FF3D00] to-[#CC3100] shadow-xl flex items-center justify-center right-1/2 transform translate-x-1/2 border border-white/10"
             >
               <NfcIcon size={48} className="text-white/60" />
               <div className="absolute inset-0 bg-gradient-to-tr from-white/0 to-white/10 rounded-[2rem] pointer-events-none" />

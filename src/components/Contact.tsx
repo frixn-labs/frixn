@@ -13,7 +13,7 @@ const materials = [
 const colors = [
   { id: 'black', hex: '#1d1d1f', label: 'Black' },
   { id: 'gray', hex: '#8e8e93', label: 'Gray' },
-  { id: 'sky', hex: '#0071e3', label: 'Blue' },
+  { id: 'sky', hex: '#FF3D00', label: 'Blue' },
   { id: 'leaf', hex: '#34c759', label: 'Green' },
   { id: 'coral', hex: '#ff3b30', label: 'Red' },
   { id: 'gold', hex: '#ffcc00', label: 'Yellow' },
@@ -89,12 +89,12 @@ export default function Contact() {
                   className="w-full space-y-8"
                 >
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3 text-[#0071e3] font-black text-[10px] uppercase tracking-[0.3em]">
-                       <span className="w-8 h-px bg-[#0071e3]/20" />
+                    <div className="flex items-center gap-3 text-[#FF3D00] font-black text-[10px] uppercase tracking-[0.3em]">
+                       <span className="w-8 h-px bg-[#FF3D00]/20" />
                        Question {step + 1} of {questions.length}
                     </div>
                     <h3 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight leading-tight flex items-start gap-4">
-                       <currentQuestion.icon className="w-8 h-8 text-[#0071e3]/40 mt-1 shrink-0" />
+                       <currentQuestion.icon className="w-8 h-8 text-[#FF3D00]/40 mt-1 shrink-0" />
                        {currentQuestion.label}
                     </h3>
                   </div>
@@ -157,7 +157,7 @@ export default function Contact() {
                   </p>
                   <button 
                     onClick={() => { setStep(0); setIsCompleted(false); setAnswers({}); }}
-                    className="text-[#0071e3] font-bold text-xs uppercase tracking-widest hover:underline"
+                    className="text-[#FF3D00] font-bold text-xs uppercase tracking-widest hover:underline"
                   >
                     Send another inquiry
                   </button>
@@ -226,12 +226,12 @@ export default function Contact() {
                   key={c.id}
                   onClick={() => setColor(c)}
                   className={`w-6 h-6 rounded-full border-2 transition-all hover:scale-110 relative ${
-                    color.id === c.id ? 'border-[#0071e3] scale-110' : 'border-transparent'
+                    color.id === c.id ? 'border-[#FF3D00] scale-110' : 'border-transparent'
                   }`}
                   style={{ backgroundColor: c.hex }}
                 >
                    {color.id === c.id && (
-                     <motion.div layoutId="color-ring-small" className="absolute -inset-1.5 border border-[#0071e3]/30 rounded-full" />
+                     <motion.div layoutId="color-ring-small" className="absolute -inset-1.5 border border-[#FF3D00]/30 rounded-full" />
                    )}
                 </button>
               ))}

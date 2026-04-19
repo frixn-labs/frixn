@@ -32,7 +32,7 @@ export default function Header({ hideNavLinks = false }: HeaderProps) {
               <Link 
                 key={link.name} 
                 href={link.href} 
-                className="hover:text-[#0071e3] transition-colors"
+                className="hover:text-[#FF3D00] transition-colors"
               >
                 {link.name}
               </Link>

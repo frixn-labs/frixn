@@ -116,7 +116,7 @@ export default function TechStack() {
               className="absolute z-20 w-24 h-24 rounded-full bg-card flex items-center justify-center shadow-lg border border-border/50"
               style={{ left: ORBIT_SIZE / 2 - 48, top: ORBIT_SIZE / 2 - 48 }}
             >
-              <div className="w-16 h-16 rounded-full bg-[#0071e3] flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-[#FF3D00] flex items-center justify-center">
                 <NfcIcon size={36} className="brightness-[100]" />
               </div>
             </motion.div>
@@ -142,9 +142,9 @@ export default function TechStack() {
             transition={{ duration: 0.7 }}
             className="flex-1 max-w-md lg:pl-12"
           >
-            <div className="inline-flex items-center gap-2 bg-[#0071e3]/5 border border-[#0071e3]/10 rounded-full px-3 py-1 mb-6">
-              <Zap className="w-3.5 h-3.5 text-[#0071e3]" />
-              <span className="text-[9px] font-black text-[#0071e3] uppercase tracking-[0.15em]">Sync Systems</span>
+            <div className="inline-flex items-center gap-2 bg-[#FF3D00]/5 border border-[#FF3D00]/10 rounded-full px-3 py-1 mb-6">
+              <Zap className="w-3.5 h-3.5 text-[#FF3D00]" />
+              <span className="text-[9px] font-black text-[#FF3D00] uppercase tracking-[0.15em]">Sync Systems</span>
             </div>
 
             <h3 className="text-2xl md:text-3xl font-bold mb-4 text-foreground tracking-tight leading-tight">
@@ -181,7 +181,7 @@ export default function TechStack() {
 
             <motion.div
               whileHover={{ x: 5 }}
-              className="flex items-center gap-2 text-[#0071e3] font-bold text-xs uppercase tracking-widest cursor-pointer"
+              className="flex items-center gap-2 text-[#FF3D00] font-bold text-xs uppercase tracking-widest cursor-pointer"
             >
               <span>Explore all Integrations</span>
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
