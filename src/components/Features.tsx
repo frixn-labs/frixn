@@ -69,7 +69,7 @@ export default function Features() {
                   <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }} />
                 </div>
 
-                <div className="w-12 h-12 rounded-2xl bg-[#FF3D00] shadow-md flex items-center justify-center z-10">
+                <div className="w-12 h-12 rounded-2xl bg-[#007AFF] shadow-md flex items-center justify-center z-10">
                   <RefreshCw className="w-5 h-5 text-white animate-spin-slow" style={{ animationDuration: '3s' }} />
                 </div>
               </div>
@@ -91,7 +91,7 @@ export default function Features() {
              <div className="w-full bg-muted/50 rounded-2xl h-[180px] mb-8 flex flex-col items-start justify-center p-6 border border-border/50 gap-4">
                 {/* Chat Bubble Mockup emulating AI Chat UI */}
                 <div className="flex items-center gap-3 self-start max-w-[90%] relative">
-                  <div className="w-8 h-8 rounded-full bg-[#FF3D00] flex items-center justify-center text-white shadow-md flex-shrink-0 z-10 relative">
+                  <div className="w-8 h-8 rounded-full bg-[#007AFF] flex items-center justify-center text-white shadow-md flex-shrink-0 z-10 relative">
                     <Shield className="w-4 h-4" />
                   </div>
                   <div className="bg-background px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-xs font-medium text-muted-foreground border border-border/50">
@@ -102,7 +102,7 @@ export default function Features() {
                   <div className="bg-background px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm text-xs font-medium text-foreground text-right border border-border/50">
                     Permission granted<br/>system wide.
                   </div>
-                  <div className="w-7 h-7 rounded-full bg-primary/20 border-[3px] border-muted absolute -right-3 -bottom-3 flex items-center justify-center text-[#FF3D00]">
+                  <div className="w-7 h-7 rounded-full bg-primary/20 border-[3px] border-muted absolute -right-3 -bottom-3 flex items-center justify-center text-[#007AFF]">
                     <Shield className="w-3 h-3" />
                   </div>
                 </div>
@@ -125,13 +125,13 @@ export default function Features() {
                 {/* Search / Analytics elements strictly matching AI Web Search UI */}
                 <div className="w-full max-w-[220px] bg-background rounded-full h-12 shadow-sm flex items-center px-2 mb-6 border border-border/50 gap-3">
                   <div className="w-8 h-8 rounded-full border border-border/50 flex items-center justify-center bg-background flex-shrink-0 shadow-sm">
-                    <Search className="w-4 h-4 text-[#FF3D00]" strokeWidth={2} />
+                    <Search className="w-4 h-4 text-[#007AFF]" strokeWidth={2} />
                   </div>
                   <div className="h-2 w-28 bg-primary/20 rounded-full mx-auto mr-4" />
                 </div>
                 <div className="w-full flex flex-col gap-3 px-6">
-                  <motion.div initial={{ width: 0 }} whileInView={{ width: "80%" }} transition={{ duration: 1 }} className="h-2.5 bg-[#FF3D00] rounded-full" />
-                  <motion.div initial={{ width: 0 }} whileInView={{ width: "50%" }} transition={{ duration: 1, delay: 0.2 }} className="h-2.5 bg-[#FF3D00]/80 rounded-full" />
+                  <motion.div initial={{ width: 0 }} whileInView={{ width: "80%" }} transition={{ duration: 1 }} className="h-2.5 bg-[#007AFF] rounded-full" />
+                  <motion.div initial={{ width: 0 }} whileInView={{ width: "50%" }} transition={{ duration: 1, delay: 0.2 }} className="h-2.5 bg-[#007AFF]/80 rounded-full" />
                 </div>
              </div>
              <div>
@@ -150,11 +150,11 @@ export default function Features() {
            >
              <div className="w-full bg-muted/50 rounded-2xl h-[180px] mb-8 flex items-center justify-center border border-border/50 relative">
                 {/* Background Texture mock */}
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(#FF3D00 1px, transparent 1px)", backgroundSize: "12px 12px" }}></div>
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(#007AFF 1px, transparent 1px)", backgroundSize: "12px 12px" }}></div>
                 {/* Big Blue Icon Box strictly matching AI Image Editor UI */}
                 <motion.div 
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="w-20 h-20 bg-[#FF3D00] shadow-md rounded-[1.2rem] flex items-center justify-center relative z-10"
+                  className="w-20 h-20 bg-[#007AFF] shadow-md rounded-[1.2rem] flex items-center justify-center relative z-10"
                 >
                   <Palette className="w-8 h-8 text-white" />
                 </motion.div>
@@ -190,14 +190,14 @@ export default function Features() {
                     </div>
                   </div>
                   <div className="flex-1 p-6 flex flex-col gap-4 relative">
-                    <div className="w-16 h-16 rounded-full bg-[#FF3D00]/10 self-center mb-2 flex items-center justify-center border border-[#FF3D00]/20">
-                      <ThumbsUp className="w-6 h-6 text-[#FF3D00]" />
+                    <div className="w-16 h-16 rounded-full bg-[#007AFF]/10 self-center mb-2 flex items-center justify-center border border-[#007AFF]/20">
+                      <ThumbsUp className="w-6 h-6 text-[#007AFF]" />
                     </div>
-                    <div className="h-2.5 w-48 bg-[#FF3D00]/30 rounded-full self-center" />
+                    <div className="h-2.5 w-48 bg-[#007AFF]/30 rounded-full self-center" />
                     <div className="h-2 w-32 bg-foreground/5 rounded-full self-center mb-4" />
                     <div className="flex gap-4 px-10">
                        <div className="flex-1 h-10 bg-muted rounded-xl border border-border/50" />
-                       <div className="flex-1 h-10 bg-[#FF3D00]/10 border border-[#FF3D00]/20 rounded-xl" />
+                       <div className="flex-1 h-10 bg-[#007AFF]/10 border border-[#007AFF]/20 rounded-xl" />
                     </div>
                   </div>
                 </motion.div>

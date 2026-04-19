@@ -52,9 +52,9 @@ export default function Showcase() {
             transition={{ duration: 0.7 }}
             className="order-2 lg:order-1"
           >
-            <div className="inline-flex items-center gap-2 bg-[#FF3D00]/5 border border-[#FF3D00]/10 rounded-full px-4 py-2 mb-8">
-              <Zap className="w-4 h-4 text-[#FF3D00]" />
-              <span className="text-xs font-bold text-[#FF3D00] uppercase tracking-widest">Live Dashboard</span>
+            <div className="inline-flex items-center gap-2 bg-[#007AFF]/5 border border-[#007AFF]/10 rounded-full px-4 py-2 mb-8">
+              <Zap className="w-4 h-4 text-[#007AFF]" />
+              <span className="text-xs font-bold text-[#007AFF] uppercase tracking-widest">Live Dashboard</span>
             </div>
 
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground tracking-tight leading-[1.1]">
@@ -79,7 +79,7 @@ export default function Showcase() {
                   transition={{ delay: 0.1 + i * 0.1 }}
                   className="flex items-center gap-4 group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[#FF3D00]/5 border border-[#FF3D00]/10 flex items-center justify-center text-[#FF3D00] group-hover:bg-[#FF3D00] group-hover:text-white transition-all duration-300 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#007AFF]/5 border border-[#007AFF]/10 flex items-center justify-center text-[#007AFF] group-hover:bg-[#007AFF] group-hover:text-white transition-all duration-300 flex-shrink-0">
                     <item.icon className="w-5 h-5" />
                   </div>
                   <span className="font-semibold text-foreground">{item.text}</span>
@@ -101,7 +101,7 @@ export default function Showcase() {
             className="order-1 lg:order-2 relative"
           >
             {/* Ambient glow */}
-            <div className="absolute inset-0 bg-[#FF3D00]/5 blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute inset-0 bg-[#007AFF]/5 blur-[80px] rounded-full pointer-events-none" />
 
             <div className="relative bg-card rounded-[2rem] shadow-2xl border border-border/50 overflow-hidden">
               {/* Dashboard header bar */}
@@ -113,7 +113,7 @@ export default function Showcase() {
                     <div className="w-3 h-3 rounded-full bg-[#28c840]" />
                   </div>
                   <div className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-[#FF3D00]" /> Analytics Overview
+                    <Activity className="w-4 h-4 text-[#007AFF]" /> Analytics Overview
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ export default function Showcase() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    { label: 'Total Taps', value: 2405, suffix: '', color: '#FF3D00', icon: MousePointer },
+                    { label: 'Total Taps', value: 2405, suffix: '', color: '#007AFF', icon: MousePointer },
                     { label: 'Connections', value: 891, suffix: '', color: '#7c3aed', icon: Users },
                     { label: 'CRM Exports', value: 143, suffix: '', color: '#059669', icon: Download },
                   ].map((stat, i) => (
@@ -165,7 +165,7 @@ export default function Showcase() {
                   <div className="h-28 flex items-end gap-1.5 group">
                     {bars.map((height, i) => (
                       <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end" onMouseEnter={() => setHoveredBar(i)} onMouseLeave={() => setHoveredBar(null)}>
-                        <div className="text-[9px] font-bold text-[#FF3D00] transition-all duration-200 mb-1" style={{ opacity: hoveredBar === i ? 1 : 0 }}>
+                        <div className="text-[9px] font-bold text-[#007AFF] transition-all duration-200 mb-1" style={{ opacity: hoveredBar === i ? 1 : 0 }}>
                           {height * 10}
                         </div>
                         <motion.div
@@ -174,7 +174,7 @@ export default function Showcase() {
                           viewport={{ once: true }}
                           transition={{ delay: i * 0.05, duration: 0.4, type: 'spring' }}
                           className="w-full rounded-t-lg cursor-pointer transition-all duration-200"
-                          style={{ background: hoveredBar === i ? '#FF3D00' : hoveredBar !== null ? '#e0e9ff' : '#FF3D0080' }}
+                          style={{ background: hoveredBar === i ? '#007AFF' : hoveredBar !== null ? '#e0e9ff' : '#007AFF80' }}
                         />
                         <div className="text-[8px] font-medium text-muted-foreground/50">{weekDays[i]}</div>
                       </div>
@@ -197,16 +197,16 @@ export default function Showcase() {
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 + i * 0.1 }}
                         whileHover={{ x: 4 }}
-                        className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border/50 cursor-pointer hover:border-[#FF3D00]/40 transition-all"
+                        className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border/50 cursor-pointer hover:border-[#007AFF]/40 transition-all"
                       >
-                        <div className="w-8 h-8 rounded-full bg-[#FF3D00]/10 flex items-center justify-center text-[#FF3D00] flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[#007AFF]/10 flex items-center justify-center text-[#007AFF] flex-shrink-0">
                           <act.icon className="w-3.5 h-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-bold text-foreground truncate">{act.name}</div>
                           <div className="text-[10px] text-muted-foreground">{act.time}</div>
                         </div>
-                        <div className="text-[10px] font-bold text-[#FF3D00] bg-[#FF3D00]/5 px-2 py-1 rounded-full border border-[#FF3D00]/10 flex-shrink-0">
+                        <div className="text-[10px] font-bold text-[#007AFF] bg-[#007AFF]/5 px-2 py-1 rounded-full border border-[#007AFF]/10 flex-shrink-0">
                           {act.tag}
                         </div>
                       </motion.div>

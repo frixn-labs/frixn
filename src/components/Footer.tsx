@@ -32,7 +32,7 @@ export default function Footer() {
                 <Link 
                   key={link.name} 
                   href={link.href}
-                  className="text-[11px] font-black uppercase tracking-widest text-foreground hover:text-[#FF3D00] transition-all"
+                  className="text-[11px] font-black uppercase tracking-widest text-foreground hover:text-[#007AFF] transition-all"
                 >
                   {link.name}
                 </Link>
@@ -45,12 +45,12 @@ export default function Footer() {
                 <Link 
                   key={link.name} 
                   href={link.href}
-                  className="text-[11px] font-black uppercase tracking-widest text-foreground hover:text-[#FF3D00] transition-all"
+                  className="text-[11px] font-black uppercase tracking-widest text-foreground hover:text-[#007AFF] transition-all"
                 >
                   {link.name}
                 </Link>
               ))}
-              <Link href="#" className="text-[11px] font-black uppercase tracking-widest text-foreground hover:text-[#FF3D00] transition-all">Support</Link>
+              <Link href="#" className="text-[11px] font-black uppercase tracking-widest text-foreground hover:text-[#007AFF] transition-all">Support</Link>
             </div>
           </div>
         </div>
