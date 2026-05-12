@@ -9,19 +9,16 @@ export function CookieConsent() {
   const pathname = usePathname()
   const [show, setShow] = useState(false)
 
-  if (pathname?.startsWith('/sites')) {
-    return null;
-  }
-
   useEffect(() => {
-    // Check if user has already accepted or declined
+    // Don't show on /sites/* pages
+    if (pathname?.startsWith('/sites')) return
+
     const consent = localStorage.getItem('tapconnect-cookie-consent')
     if (!consent) {
-      // Show after a small delay for better UX
       const timer = setTimeout(() => setShow(true), 1500)
       return () => clearTimeout(timer)
     }
-  }, [])
+  }, [pathname])
 
   const handleAccept = () => {
     localStorage.setItem('tapconnect-cookie-consent', 'accepted')
@@ -32,6 +29,10 @@ export function CookieConsent() {
     localStorage.setItem('tapconnect-cookie-consent', 'declined')
     setShow(false)
   }
+
+  // Suppress rendering entirely on dashboard/admin routes
+  if (pathname?.startsWith('/sites')) return null
+
 
   return (
     <AnimatePresence>

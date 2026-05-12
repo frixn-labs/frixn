@@ -1,12 +1,13 @@
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
-import Features from '@/components/Features'
+import StatsStrip from '@/components/StatsStrip'
+import ProblemStatement from '@/components/ProblemStatement'
 import HowItWorks from '@/components/HowItWorks'
-import Showcase from '@/components/Showcase'
+import ImpactStatement from '@/components/ImpactStatement'
+import Features from '@/components/Features'
 import UseCases from '@/components/UseCases'
-import TechStack from '@/components/TechStack'
 import Pricing from '@/components/Pricing'
-import Contact from '@/components/Contact'
+import MarketStats from '@/components/MarketStats'
 import CTA from '@/components/CTA'
 import Footer from '@/components/Footer'
 
@@ -15,15 +16,17 @@ export default function Home() {
     <main className="min-h-screen bg-background text-foreground selection:bg-primary/30">
       <Header />
       <Hero />
-      <Features />
+      <StatsStrip />
+      <ProblemStatement />
       <HowItWorks />
-      <Showcase />
+      <ImpactStatement />
       <UseCases />
-      <TechStack />
+      <Features />
       <Pricing />
-      <Contact />
+      <MarketStats />
       <CTA />
       <Footer />
     </main>
   )
 }
+

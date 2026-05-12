@@ -15,6 +15,8 @@ import {
   Sparkles,
   Command
 } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { useAIAssistant } from './ai-assistant-provider'
 
 import {
   Sidebar,
@@ -32,6 +34,7 @@ export function AppSidebar({ org, ...props }: React.ComponentProps<typeof Sideba
   const pathname = usePathname()
   const params = useParams()
   const slug = params?.slug as string
+  const { toggle } = useAIAssistant()
 
   // Dynamic router resolving for module locations
   const menuItems = [
@@ -50,8 +53,16 @@ export function AppSidebar({ org, ...props }: React.ComponentProps<typeof Sideba
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="hover:bg-accent/50 transition-colors">
               <Link href={`/sites/${slug}/admin/dashboard`}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" strokeWidth={1.5} />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden border border-border/50">
+                  {org?.logo_url ? (
+                    <img 
+                      src={org.logo_url} 
+                      alt={org.name} 
+                      className="size-full object-cover" 
+                    />
+                  ) : (
+                    <Command className="size-4 text-muted-foreground" strokeWidth={1.5} />
+                  )}
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold tracking-tight">{org?.name || 'Enterprise'}</span>
@@ -68,16 +79,21 @@ export function AppSidebar({ org, ...props }: React.ComponentProps<typeof Sideba
                 <svg width="0" height="0" className="absolute">
                   <defs>
                     <linearGradient id="ai-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#60a5fa" />
-                      <stop offset="100%" stopColor="#2563eb" />
+                      <stop offset="0%" stopColor="#FF3D00" />
+                      <stop offset="100%" stopColor="#E8A020" />
                     </linearGradient>
                   </defs>
                 </svg>
-                <SidebarMenuButton className="hover:bg-primary/5 hover:text-primary transition-colors h-9">
+                <SidebarMenuButton 
+                  onClick={toggle}
+                  className="hover:bg-primary/5 hover:text-primary transition-colors h-9"
+                >
                     <Sparkles stroke="url(#ai-gradient)" strokeWidth={2} />
                     <span className="font-semibold text-xs tracking-tight">Ask Assistant</span>
                     <SidebarMenuBadge className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                        <span className="text-xs">⌘</span>I
+                        <span className="text-xs group-data-[os=mac]:inline hidden">⌘</span>
+                        <span className="text-[9px] group-data-[os=windows]:inline hidden">Ctrl</span>
+                        I
                     </SidebarMenuBadge>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -115,7 +131,18 @@ export function AppSidebar({ org, ...props }: React.ComponentProps<typeof Sideba
              </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-             <SidebarMenuButton tooltip="Sign Out" className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground">
+             <SidebarMenuButton 
+               tooltip="Sign Out" 
+               className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+               onClick={async () => {
+                 // 1. Clear Supabase auth
+                 await supabase.auth.signOut()
+                 // 2. Clear internal session cookies (important for Slug Guard)
+                 await fetch('/api/auth/logout', { method: 'POST' })
+                 // 3. Redirect to login
+                 window.location.href = '/login'
+               }}
+             >
                <LogOut />
                <span>Sign Out</span>
              </SidebarMenuButton>

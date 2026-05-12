@@ -96,8 +96,8 @@ export default function SettingsPage() {
   const [invoices, setInvoices] = React.useState<any[]>([])
   const [loadingInvoices, setLoadingInvoices] = React.useState(true)
   
-  const [appAccent, setAppAccent] = React.useState('#2563EB')
-  const [appChartTheme, setAppChartTheme] = React.useState('ocean')
+  const [appAccent, setAppAccent] = React.useState('#FF3D00')
+  const [appChartTheme, setAppChartTheme] = React.useState('signal')
   const [appFont, setAppFont] = React.useState('Inter')
   const [isMounted, setIsMounted] = React.useState(false)
   
@@ -161,6 +161,7 @@ export default function SettingsPage() {
       else if (appFont === 'Jakarta') document.documentElement.dataset.font = 'jakarta'
       else if (appFont === 'Outfit') document.documentElement.dataset.font = 'outfit'
       else if (appFont === 'DM Sans') document.documentElement.dataset.font = 'dmsans'
+      else if (appFont === 'Sora') document.documentElement.dataset.font = 'sora'
   }, [appFont, isMounted])
   
   const [formData, setFormData] = React.useState<OrgFormData>({
@@ -338,16 +339,9 @@ export default function SettingsPage() {
             links_enabled: aiData.links_enabled || false,
           })
           setPrompts(Array.isArray(aiData.prompts) ? aiData.prompts : [])
-        } else if (!aiData) {
-            // If no settings found, initialize with defaults (limit to 6)
-            setPrompts([
-                { "prompt": "Provide a concise summary of the dataset including totals, trends, and key highlights." },
-                { "prompt": "Summarize the dataset and highlight the most important insights and patterns." },
-                { "prompt": "Filter the dataset based on selected criteria and return relevant results." },
-                { "prompt": "Format the dataset into a clean and structured table view." },
-                { "prompt": "Analyze the dataset and identify key trends, anomalies, and insights." },
-                { "prompt": "Prepare the dataset in a structured format suitable for Excel export." }
-            ])
+        } else {
+            // No settings or error, start with empty list
+            setPrompts([])
         }
       } catch (err) {
           console.error("AI Settings Fetch Error:", err)
@@ -734,97 +728,6 @@ export default function SettingsPage() {
                 </div>
             </section>
 
-            <Separator className="opacity-50" />
-
-            {/* Brand Customization & NFC Preview Section */}
-            <section className="relative">
-                
-
-                <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
-                        <Palette className="w-[18px] h-[18px] text-purple-500" />
-                    </div>
-                    <div className="space-y-1 mt-0.5">
-                        <h2 className="text-lg font-bold tracking-tight">Brand Customization</h2>
-                        <p className="text-sm text-muted-foreground">Design your organization's digital interface and smart hardware colors.</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    {/* Left: NFC Card Preview */}
-                    <div className="flex flex-col items-center justify-center space-y-6 relative">
-                        {/* Glow Effect */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-3xl opacity-50 pointer-events-none rounded-full" style={{ backgroundColor: formData.brand_color }} />
-                        
-                        <div 
-                            className="relative w-[320px] h-[200px] rounded-[24px] shadow-2xl border border-white/20 overflow-hidden transform transition-all duration-500 z-10" 
-                            style={{ backgroundColor: formData.brand_color }}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-black/10 to-transparent" />
-                            
-                            {/* NFC Symbol (White, Top Right) */}
-                            <div className="absolute top-6 right-6 text-white">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-90 drop-shadow-md">
-                                    <path d="M6 2L6 22" />
-                                    <path d="M10 4L10 20" />
-                                    <path d="M14 6L14 18" />
-                                    <path d="M18 8L18 16" />
-                                </svg>
-                            </div>
-
-                            {/* Text Details (Accent Color, Logo Removed) */}
-                            <div className="absolute bottom-6 left-6 flex flex-col gap-0.5" style={{ color: formData.accent_color }}>
-                                <span className="font-extrabold tracking-wide drop-shadow-md text-[15px]">{formData.name || 'Organization Identity'}</span>
-                                <span className="font-bold text-[10px] uppercase tracking-widest opacity-90">Smart Access</span>
-                            </div>
-                        </div>
-                        <Label className="text-xs font-medium text-muted-foreground text-center">Live Smart Card Preview</Label>
-                    </div>
-
-                    {/* Right: Color Pickers */}
-                    <div className="space-y-6">
-                        <div className="flex flex-col h-full justify-between space-y-4 pt-2">
-                            <Label className="text-sm font-medium leading-none mb-1">Visual Identity Tokens</Label>
-                            
-                            {/* Brand Color Picker */}
-                            <ColorPicker 
-                                value={formData.brand_color} 
-                                onChange={(color, hex) => setFormData({...formData, brand_color: hex})}
-                                trigger="click"
-                            >
-                                <div className="group relative h-[88px] w-full rounded-2xl flex items-center px-6 gap-6 cursor-pointer hover:-translate-y-1 transition-all border border-border/40 bg-muted/10 shadow-sm overflow-hidden">
-                                    <div className="absolute inset-0 z-0 transition-opacity opacity-0 group-hover:opacity-10" style={{ backgroundColor: formData.brand_color }} />
-                                    <div className="w-12 h-12 rounded-xl border-[3px] border-background shadow-md shrink-0 z-10" style={{ backgroundColor: formData.brand_color }} />
-                                    <div className="flex flex-col z-10 flex-1">
-                                        <span className="text-base font-bold tracking-tight">Primary Brand Color</span>
-                                        <span className="text-xs font-mono text-muted-foreground uppercase">{formData.brand_color}</span>
-                                    </div>
-                                </div>
-                            </ColorPicker>
-
-                            {/* Accent Color Picker */}
-                            <ColorPicker 
-                                value={formData.accent_color} 
-                                onChange={(color, hex) => setFormData({...formData, accent_color: hex})}
-                                trigger="click"
-                            >
-                                <div className="group relative h-[88px] w-full rounded-2xl flex items-center px-6 gap-6 cursor-pointer hover:-translate-y-1 transition-all border border-border/40 bg-muted/10 shadow-sm overflow-hidden">
-                                    <div className="absolute inset-0 z-0 transition-opacity opacity-0 group-hover:opacity-10" style={{ backgroundColor: formData.accent_color }} />
-                                    <div className="w-12 h-12 rounded-xl border-[3px] border-background shadow-md shrink-0 z-10" style={{ backgroundColor: formData.accent_color }} />
-                                    <div className="flex flex-col z-10 flex-1">
-                                        <span className="text-base font-bold tracking-tight">Highlight Accent Color</span>
-                                        <span className="text-xs font-mono text-muted-foreground uppercase">{formData.accent_color}</span>
-                                    </div>
-                                </div>
-                            </ColorPicker>
-                            <p className="text-[10px] text-muted-foreground/60 italic font-medium px-2 pt-2">
-                                These colors dictate the styling of physical hardware and digital wallets.
-                            </p>
-                        </div>
-                    </div>
-                 </div>
-            </section>
-
             <div className="flex justify-end pt-2 pb-6">
                 <Button 
                     onClick={handleSaveProfile} 
@@ -1177,7 +1080,7 @@ export default function SettingsPage() {
                             <p className="text-sm text-muted-foreground">Highlight color for main objects, e.g. buttons</p>
                       </div>
                       <div className="flex items-center gap-4">
-                          {['#2563EB', '#06B6D4', '#10B981', '#8B5CF6', '#F59E0B'].map(color => (
+                          {['#FF3D00', '#2563EB', '#06B6D4', '#10B981', '#8B5CF6', '#F59E0B'].map(color => (
                               <button
                                  key={color}
                                  onClick={() => setAppAccent(color)}
@@ -1196,8 +1099,9 @@ export default function SettingsPage() {
                             <Label className="text-base font-bold text-foreground/90">Data Visualization Colors</Label>
                             <p className="text-sm text-muted-foreground">Select a dynamic color palette mapping across all progress bars, statistics, and live charts</p>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
                           {[
+                              { id: 'signal', name: 'Signal Orange', colors: ['#FF3D00', '#FF6D3A', '#FF8C5A', '#FFB38A', '#FFCBA8'] },
                               { id: 'ocean', name: 'Ocean Blue', colors: ['#2563EB', '#60A5FA', '#1D4ED8', '#93C5FD', '#3B82F6'] },
                               { id: 'sunset', name: 'Vibrant Sunset', colors: ['#F43F5E', '#FB923C', '#DB2777', '#FBBF24', '#E11D48'] },
                               { id: 'emerald', name: 'Emerald Forest', colors: ['#10B981', '#34D399', '#059669', '#6EE7B7', '#047857'] },
@@ -1226,7 +1130,7 @@ export default function SettingsPage() {
                             <p className="text-sm text-muted-foreground">Font style for text and headings</p>
                       </div>
                       <div className="flex flex-wrap items-center gap-4">
-                          {[{ name: 'Inter', family: 'var(--font-inter)' }, { name: 'Jakarta', family: 'var(--font-jakarta)' }, { name: 'Outfit', family: 'var(--font-outfit)' }, { name: 'DM Sans', family: 'var(--font-dmsans)' }].map(f => (
+                          {[{ name: 'Inter', family: 'var(--font-inter)' }, { name: 'Jakarta', family: 'var(--font-jakarta)' }, { name: 'Outfit', family: 'var(--font-outfit)' }, { name: 'DM Sans', family: 'var(--font-dmsans)' }, { name: 'Sora', family: 'var(--font-sora)' }].map(f => (
                               <button
                                  key={f.name}
                                  title={f.name}
@@ -1547,50 +1451,72 @@ export default function SettingsPage() {
                     )}
 
                     <div className="grid grid-cols-1 gap-4">
-                        {prompts.map((p, idx) => (
-                            <div key={idx} className="group border border-border/40 bg-card rounded-2xl p-5 hover:border-primary/20 hover:shadow-sm transition-all animate-in slide-in-from-bottom-2 duration-300">
-                                <div className="flex items-start justify-between gap-6">
-                                    <div className="flex-1 space-y-3">
-                                        <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="text-[9px] font-black tracking-[0.2em] uppercase text-muted-foreground bg-muted/20 border-border/40 border-none px-2 py-0.5">Prompt #{idx + 1}</Badge>
-                                        </div>
-                                        {isEditingPrompt?.index === idx ? (
-                                            <div className="space-y-3">
-                                                <Input 
-                                                    className="h-11 bg-muted/20 border-primary/30 font-medium shadow-inner"
-                                                    value={isEditingPrompt.text}
-                                                    onChange={(e) => setIsEditingPrompt({ ...isEditingPrompt, text: e.target.value })}
-                                                />
-                                                <div className="flex items-center gap-2">
-                                                    <Button size="sm" className="h-8 px-4 text-[10px] font-bold uppercase tracking-widest rounded-lg" onClick={() => {
-                                                        const newPrompts = [...prompts]
-                                                        newPrompts[idx] = { prompt: isEditingPrompt.text }
-                                                        setPrompts(newPrompts)
-                                                        handleSaveAISettings(undefined, newPrompts)
-                                                        setIsEditingPrompt(null)
-                                                    }}>Save Changes</Button>
-                                                    <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest" onClick={() => setIsEditingPrompt(null)}>Cancel</Button>
-                                                </div>
+                        {prompts.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 bg-muted/5 rounded-3xl gap-4 animate-in fade-in zoom-in-95 duration-500">
+                                <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
+                                    <Brain className="w-8 h-8 text-primary/40" />
+                                </div>
+                                <div className="text-center space-y-1">
+                                    <p className="text-sm font-bold text-foreground">No prompts defined yet</p>
+                                    <p className="text-xs text-muted-foreground max-w-[300px] leading-relaxed">
+                                        Your AI Prompt Library is currently empty. Add your first instruction to help our models process your data more effectively.
+                                    </p>
+                                </div>
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => setIsAddingPrompt(true)}
+                                    className="mt-2 h-9 px-6 rounded-xl font-bold text-[10px] uppercase tracking-widest border-primary/20 hover:bg-primary/5 hover:text-primary transition-all active:scale-95"
+                                >
+                                    Define First Prompt
+                                </Button>
+                            </div>
+                        ) : (
+                            prompts.map((p: any, idx: number) => (
+                                <div key={idx} className="group border border-border/40 bg-card rounded-2xl p-5 hover:border-primary/20 hover:shadow-sm transition-all animate-in slide-in-from-bottom-2 duration-300">
+                                    <div className="flex items-start justify-between gap-6">
+                                        <div className="flex-1 space-y-3">
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="outline" className="text-[9px] font-black tracking-[0.2em] uppercase text-muted-foreground bg-muted/20 border-border/40 border-none px-2 py-0.5">Prompt #{idx + 1}</Badge>
                                             </div>
-                                        ) : (
-                                            <p className="text-sm font-semibold leading-relaxed text-foreground/80 pl-1">{p.prompt}</p>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-1 opacity-10 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 transition-transform">
-                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-colors" onClick={() => setIsEditingPrompt({ index: idx, text: p.prompt })}>
-                                            <Pencil className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/5 rounded-xl transition-colors" onClick={() => {
-                                            const nextPrompts = prompts.filter((_, i) => i !== idx)
-                                            setPrompts(nextPrompts)
-                                            handleSaveAISettings(undefined, nextPrompts)
-                                        }}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                            {isEditingPrompt?.index === idx ? (
+                                                <div className="space-y-3">
+                                                    <Input 
+                                                        className="h-11 bg-muted/20 border-primary/30 font-medium shadow-inner"
+                                                        value={isEditingPrompt.text}
+                                                        onChange={(e) => setIsEditingPrompt({ ...isEditingPrompt, text: e.target.value })}
+                                                    />
+                                                    <div className="flex items-center gap-2">
+                                                        <Button size="sm" className="h-8 px-4 text-[10px] font-bold uppercase tracking-widest rounded-lg" onClick={() => {
+                                                            const newPrompts = [...prompts]
+                                                            newPrompts[idx] = { prompt: isEditingPrompt.text }
+                                                            setPrompts(newPrompts)
+                                                            handleSaveAISettings(undefined, newPrompts)
+                                                            setIsEditingPrompt(null)
+                                                        }}>Save Changes</Button>
+                                                        <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest" onClick={() => setIsEditingPrompt(null)}>Cancel</Button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm font-semibold leading-relaxed text-foreground/80 pl-1">{p.prompt}</p>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-1 opacity-10 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 transition-transform">
+                                            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-colors" onClick={() => setIsEditingPrompt({ index: idx, text: p.prompt })}>
+                                                <Pencil className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/5 rounded-xl transition-colors" onClick={() => {
+                                                const nextPrompts = prompts.filter((_: any, i: number) => i !== idx)
+                                                setPrompts(nextPrompts)
+                                                handleSaveAISettings(undefined, nextPrompts)
+                                            }}>
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
             </section>

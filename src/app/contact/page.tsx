@@ -25,7 +25,7 @@ export default function ContactPage() {
       </div>
 
       {/* Left Section: Branding & Visuals */}
-      <section className="relative hidden lg:flex lg:w-1/2 flex-col justify-between p-4 lg:p-6 overflow-hidden bg-[#050505]">
+      <section className="relative hidden lg:flex lg:w-1/2 flex-col justify-between p-4 lg:p-6 overflow-hidden bg-[#0A0A0B]">
         {/* Background Image */}
         <div
           className="absolute inset-0 z-0 opacity-40 bg-cover bg-center transition-transform duration-[15s] ease-out hover:scale-105"
@@ -36,12 +36,12 @@ export default function ContactPage() {
 
         {/* Overlays */}
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/20 via-black/60 to-black/90" />
-        <div className="absolute inset-0 z-1 bg-[radial-gradient(ellipse_at_top_left,rgba(0,113,227,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 z-1 bg-[radial-gradient(ellipse_at_top_left,rgba(255,61,0,0.15),transparent_50%)]" />
 
         {/* Top: Logo */}
         <div className="relative z-10 w-full flex justify-start">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
+            <img src="/brandlogo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
             <span className="text-xl font-bold tracking-tight text-white">frixn.</span>
           </Link>
         </div>
@@ -55,7 +55,7 @@ export default function ContactPage() {
           >
             <h1 className="text-5xl xl:text-6xl font-black text-white leading-tight mb-5 tracking-tighter">
               Accelerate <br />
-              <span className="text-primary">Your Growth.</span>
+              <span className="text-[#FF3D00]">Your Growth.</span>
             </h1>
             <p className="text-base xl:text-lg text-white/60 leading-relaxed font-medium mb-12 max-w-md">
               Engage with our enterprise experts to customize your networking infrastructure. Scale efficiently and lead your industry.
@@ -70,7 +70,7 @@ export default function ContactPage() {
         {/* Mobile Logo */}
         <div className="lg:hidden flex justify-start mb-6">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
+            <img src="/brandlogo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
             <span className="text-xl font-bold tracking-tight text-foreground">frixn</span>
           </Link>
         </div>
@@ -161,7 +161,7 @@ export default function ContactPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 mt-4 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.98]"
+                className="w-full h-11 mt-4 rounded-xl bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold text-sm shadow-lg shadow-[#FF3D00]/20 transition-all hover:scale-[1.01] active:scale-[0.98]"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />

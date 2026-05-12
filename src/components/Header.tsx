@@ -9,10 +9,11 @@ interface HeaderProps {
 export default function Header({ hideNavLinks = false }: HeaderProps) {
   const navLinks = [
     { name: 'Home', href: '#' },
+    { name: 'How it works', href: '#how-it-works' },
+    { name: 'Industries', href: '#use-cases' },
     { name: 'Features', href: '#features' },
-    { name: 'how it works?', href: '#how-it-works' },
-    { name: 'pricing', href: '#pricing' },
-    { name: 'reach us', href: '#contact' },
+    { name: 'Pricing', href: '#pricing' },
+    { name: 'Reach us', href: '#cta' },
   ]
 
   return (
@@ -21,7 +22,7 @@ export default function Header({ hideNavLinks = false }: HeaderProps) {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
+          <img src="/brandlogo.png" alt="frixn logo" className="w-8 h-8 object-contain drop-shadow-sm" />
           <span className="text-xl font-bold tracking-tight text-foreground">frixn.</span>
         </Link>
 
@@ -32,7 +33,7 @@ export default function Header({ hideNavLinks = false }: HeaderProps) {
               <Link
                 key={link.name}
                 href={link.href}
-                className="hover:text-[#007AFF] transition-colors"
+                className="hover:text-[#FF3D00] transition-colors"
               >
                 {link.name}
               </Link>
@@ -46,7 +47,7 @@ export default function Header({ hideNavLinks = false }: HeaderProps) {
           <Link href="/login" className="hidden md:block text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
             Login
           </Link>
-          <Link href="/contact" className="apple-btn px-5 py-1.5 text-[13px] shadow-sm text-center">
+          <Link href="/contact" className="hidden md:block bg-[#FF3D00] text-white hover:bg-[#FF3D00] px-5 py-1.5 text-[13px] font-bold rounded-full text-center">
             Talk to Sales
           </Link>
         </div>

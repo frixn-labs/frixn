@@ -2,9 +2,17 @@ import { cookies } from 'next/headers'
 
 export async function setSession(orgSlug: string, orgId: string) {
   const cookieStore = await cookies()
-  // Store session as a JSON string in an HTTP-only cookie
-  // Scoped to the current session (no maxAge = expires on browser close)
+  
+  // 1. Store slug-specific session
   cookieStore.set(`tapconnect_session_${orgSlug}`, JSON.stringify({ orgId, orgSlug }), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/'
+  })
+
+  // 2. Store global active slug pointer for security guards
+  cookieStore.set(`tapconnect_active_slug`, orgSlug, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -23,7 +31,11 @@ export async function getSession(orgSlug: string) {
   }
 }
 
-export async function clearSession(orgSlug: string) {
+export async function clearSession() {
   const cookieStore = await cookies()
-  cookieStore.delete(`tapconnect_session_${orgSlug}`)
+  const activeSlug = cookieStore.get('tapconnect_active_slug')?.value
+  if (activeSlug) {
+    cookieStore.delete(`tapconnect_session_${activeSlug}`)
+  }
+  cookieStore.delete(`tapconnect_active_slug`)
 }
