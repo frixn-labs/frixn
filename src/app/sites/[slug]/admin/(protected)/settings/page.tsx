@@ -3,45 +3,45 @@
 import * as React from "react"
 import { useParams } from "next/navigation"
 import { ColorPicker } from 'antd'
-import { 
-  Settings, 
-  User, 
-  ShieldCheck, 
-  Palette, 
-  Bell, 
-  History, 
-  Save, 
-  Loader2,
-  CheckCircle2,
-  Globe,
-  Mail,
-  Smartphone,
-  ShieldAlert,
-  KeyRound,
-  MessageSquare,
-  Lock,
-  Camera,
-  ExternalLink,
-  CalendarDays,
-  Users,
-  IndianRupee,
-  Monitor,
-  MonitorSmartphone,
-  MapPin,
-  Activity,
-  ShieldCheck as ShieldCheckIcon,
-  ShieldIcon,
-  CreditCard,
-  Download,
-  Search,
-  Filter,
-  MoreVertical,
-  Sparkles,
-  Plus,
-  Pencil,
-  Trash2,
-  Wand2,
-  Brain
+import {
+    Settings,
+    User,
+    ShieldCheck,
+    Palette,
+    Bell,
+    History,
+    Save,
+    Loader2,
+    CheckCircle2,
+    Globe,
+    Mail,
+    Smartphone,
+    ShieldAlert,
+    KeyRound,
+    MessageSquare,
+    Lock,
+    Camera,
+    ExternalLink,
+    CalendarDays,
+    Users,
+    IndianRupee,
+    Monitor,
+    MonitorSmartphone,
+    MapPin,
+    Activity,
+    ShieldCheck as ShieldCheckIcon,
+    ShieldIcon,
+    CreditCard,
+    Download,
+    Search,
+    Filter,
+    MoreVertical,
+    Sparkles,
+    Plus,
+    Pencil,
+    Trash2,
+    Wand2,
+    Brain
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -61,730 +61,730 @@ import { useRole } from "@/components/role-provider"
 
 // Mock data for Audit Logs
 const MOCK_LOGS = [
-  { id: 1, action: "Organization profile updated", user: "Admin", date: "2 mins ago", type: "system" },
-  { id: 2, action: "New employee 'John Doe' added", user: "Admin", date: "1 hour ago", type: "employee" },
-  { id: 3, action: "Brand color changed to #2563EB", user: "Admin", date: "3 hours ago", type: "appearance" },
-  { id: 4, action: "Monthly billing report exported", user: "Admin", date: "Yesterday", type: "billing" },
-  { id: 5, action: "Support ticket #442 closed", user: "System", date: "2 days ago", type: "support" },
-  { id: 6, action: "NFC Card provisioned for Sarah Smith", user: "Admin", date: "3 days ago", type: "card" },
+    { id: 1, action: "Organization profile updated", user: "Admin", date: "2 mins ago", type: "system" },
+    { id: 2, action: "New employee 'John Doe' added", user: "Admin", date: "1 hour ago", type: "employee" },
+    { id: 3, action: "Brand color changed to #2563EB", user: "Admin", date: "3 hours ago", type: "appearance" },
+    { id: 4, action: "Monthly billing report exported", user: "Admin", date: "Yesterday", type: "billing" },
+    { id: 5, action: "Support ticket #442 closed", user: "System", date: "2 days ago", type: "support" },
+    { id: 6, action: "NFC Card provisioned for Sarah Smith", user: "Admin", date: "3 days ago", type: "card" },
 ]
 
 interface OrgFormData {
-  name: string
-  logo_url: string
-  admin_name: string
-  admin_email: string
-  admin_phone: string
-  brand_color: string
-  accent_color: string
+    name: string
+    logo_url: string
+    admin_name: string
+    admin_email: string
+    admin_phone: string
+    brand_color: string
+    accent_color: string
 }
 
 export default function SettingsPage() {
-  const params = useParams()
-  const slug = params.slug as string
-  const { theme, setTheme } = useTheme()
-  const { role, orgId } = useRole()
+    const params = useParams()
+    const slug = params.slug as string
+    const { theme, setTheme } = useTheme()
+    const { role, orgId } = useRole()
 
-  const [loading, setLoading] = React.useState(true)
-  const [saving, setSaving] = React.useState(false)
-  const [uploading, setUploading] = React.useState(false)
-  const [orgData, setOrgData] = React.useState<any>(null)
-  const [stats, setStats] = React.useState({
-    employeeCount: 0,
-    healthStatus: 'Checking...'
-  })
-  
-  const [invoices, setInvoices] = React.useState<any[]>([])
-  const [loadingInvoices, setLoadingInvoices] = React.useState(true)
-  const [passwordLastChanged, setPasswordLastChanged] = React.useState<string | null>(null)
-  
-  // Fetch the real password-last-changed timestamp from Supabase auth user
-  React.useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user?.updated_at) {
-        setPasswordLastChanged(data.user.updated_at)
-      }
+    const [loading, setLoading] = React.useState(true)
+    const [saving, setSaving] = React.useState(false)
+    const [uploading, setUploading] = React.useState(false)
+    const [orgData, setOrgData] = React.useState<any>(null)
+    const [stats, setStats] = React.useState({
+        employeeCount: 0,
+        healthStatus: 'Checking...'
     })
-  }, [])
-  
-  const [appAccent, setAppAccent] = React.useState('#FF3D00')
-  const [appChartTheme, setAppChartTheme] = React.useState('signal')
-  const [appFont, setAppFont] = React.useState('Inter')
-  const [isMounted, setIsMounted] = React.useState(false)
-  
-  const [extraEmails, setExtraEmails] = React.useState<string[]>([])
-  const [newEmailInput, setNewEmailInput] = React.useState('')
-  const [notifSettings, setNotifSettings] = React.useState<any>({
-    id: "",
-    leads: false,
-    taps: false,
-    nfc_cards: false,
-    daily_pulse: false,
-    weekly_roundup: false,
-    monthly_digest: false,
-    invoices_receipts: false,
-    accounting_updates: false,
-    upcoming_bills: false,
-  })
-  
-  // AI Settings State
-  const [aiSettings, setAiSettings] = React.useState({
-    employees_enabled: false,
-    nfc_cards_enabled: false,
-    leads_enabled: false,
-    links_enabled: false,
-  })
-  const [prompts, setPrompts] = React.useState<{prompt: string}[]>([])
-  const [aiLoading, setAiLoading] = React.useState(false)
-  const [isEditingPrompt, setIsEditingPrompt] = React.useState<{index: number, text: string} | null>(null)
-  const [newPromptText, setNewPromptText] = React.useState('')
-  const [isAddingPrompt, setIsAddingPrompt] = React.useState(false)
 
-  React.useEffect(() => {
-     const storedAccent = localStorage.getItem('app-accent')
-     const storedChart = localStorage.getItem('app-chart-theme')
-     const storedFont = localStorage.getItem('app-font')
-     
-     if (storedAccent) setAppAccent(storedAccent)
-     if (storedChart) setAppChartTheme(storedChart)
-     if (storedFont) setAppFont(storedFont)
-     
-     setIsMounted(true)
-  }, [])
+    const [invoices, setInvoices] = React.useState<any[]>([])
+    const [loadingInvoices, setLoadingInvoices] = React.useState(true)
+    const [passwordLastChanged, setPasswordLastChanged] = React.useState<string | null>(null)
 
-  React.useEffect(() => {
-      if (!isMounted) return
-      localStorage.setItem('app-accent', appAccent)
-      document.documentElement.style.setProperty('--primary', appAccent)
-      document.documentElement.style.setProperty('--ring', appAccent)
-  }, [appAccent, isMounted])
-
-  React.useEffect(() => {
-      if (!isMounted) return
-      localStorage.setItem('app-chart-theme', appChartTheme)
-      document.documentElement.dataset.chart = appChartTheme
-  }, [appChartTheme, isMounted])
-
-  React.useEffect(() => {
-      if (!isMounted) return
-      localStorage.setItem('app-font', appFont)
-      if (appFont === 'Inter') document.documentElement.dataset.font = 'inter'
-      else if (appFont === 'Jakarta') document.documentElement.dataset.font = 'jakarta'
-      else if (appFont === 'Outfit') document.documentElement.dataset.font = 'outfit'
-      else if (appFont === 'DM Sans') document.documentElement.dataset.font = 'dmsans'
-      else if (appFont === 'Sora') document.documentElement.dataset.font = 'sora'
-  }, [appFont, isMounted])
-  
-  const [formData, setFormData] = React.useState<OrgFormData>({
-    name: "",
-    logo_url: "",
-    admin_name: "",
-    admin_email: "",
-    admin_phone: "",
-    brand_color: "#2563eb",
-    accent_color: "#eab308",
-  })
-
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const brandColorRef = React.useRef<HTMLInputElement>(null)
-  const accentColorRef = React.useRef<HTMLInputElement>(null)
-
-  // Fetch Org Data
-  const fetchOrgData = React.useCallback(async () => {
-    setLoading(true)
-    const { data: org, error: orgError } = await supabase
-      .from('organizations')
-      .select('*')
-      .eq('slug', slug)
-      .single()
-    
-    if (org && !orgError) {
-      setOrgData(org)
-      setFormData({
-        name: org.name || "",
-        logo_url: org.logo_url || "",
-        admin_name: org.admin_name || "",
-        admin_email: org.admin_email || "",
-        admin_phone: org.admin_phone || "",
-        brand_color: org.brand_color || "#2563eb",
-        accent_color: org.accent_color || "#eab308",
-      })
-
-      // Fetch Employee Stats
-      const { count, error: countError } = await supabase
-        .from('employees')
-        .select('*', { count: 'exact', head: true })
-        .eq('org_id', org.id)
-      
-      setStats({
-        employeeCount: count || 0,
-        healthStatus: countError ? 'Degraded' : 'Healthy'
-      })
-    }
-
-    setLoading(false)
-
-    // Load Connected Devices / Sessions
-    if (org?.id) {
-      setLoadingInvoices(true)
-      try {
-        const { data: invData, error: invError } = await supabase
-          .from('billing')
-          .select('*')
-          .eq('org_id', org.id)
-          .order('created_at', { ascending: false })
-        
-        if (!invError && invData) {
-          setInvoices(invData)
-        } else {
-          setInvoices([])
-        }
-      } catch (err) {
-        setInvoices([])
-      } finally {
-        setLoadingInvoices(false)
-      }
-
-      // Real-time Billing Subscription
-      const billingChannel = supabase
-        .channel(`billing:${org.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'tapconnect',
-            table: 'billing',
-            filter: `org_id=eq.${org.id}`,
-          },
-          (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setInvoices(prev => [payload.new, ...prev])
-            } else if (payload.eventType === 'UPDATE') {
-              setInvoices(prev => prev.map(inv => inv.id === payload.new.id ? payload.new : inv))
-            } else if (payload.eventType === 'DELETE') {
-              setInvoices(prev => prev.filter(inv => inv.id === payload.old.id))
+    // Fetch the real password-last-changed timestamp from Supabase auth user
+    React.useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            if (data?.user?.updated_at) {
+                setPasswordLastChanged(data.user.updated_at)
             }
-          }
-        )
-        .subscribe()
-
-      // Fetch Notification Settings
-      try {
-        const { data: notifData, error: notifError } = await supabase
-          .from('notification_settings')
-          .select('*')
-          .eq(role === 'employee' ? 'employee_id' : 'org_id', role === 'employee' ? orgId : org.id)
-          .maybeSingle()
-
-        if (notifData) {
-            setNotifSettings(notifData)
-            if (notifData.additional_recipients) setExtraEmails(notifData.additional_recipients)
-        } else if (!notifError) {
-            const insertPayload = role === 'employee'
-              ? { employee_id: orgId, org_id: null }
-              : { org_id: org.id }
-            
-            const { data: newNotif } = await supabase
-               .from('notification_settings')
-               .insert([insertPayload])
-               .select()
-               .single()
-            if (newNotif) setNotifSettings(newNotif)
-        }
-      } catch (err) {
-        console.error("Notif fetch error", err)
-      }
-      
-      // Real-time Notification Subscription
-      const notifChannel = supabase
-        .channel(`notifs:${org.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'tapconnect',
-            table: 'notification_settings',
-            filter: role === 'employee' ? `employee_id=eq.${orgId}` : `org_id=eq.${org.id}`,
-          },
-          (payload) => {
-             setNotifSettings((prev: any) => ({ ...prev, ...payload.new }))
-             if (payload.new.additional_recipients) {
-                 setExtraEmails(payload.new.additional_recipients)
-             } else {
-                 setExtraEmails([])
-             }
-          }
-        )
-        .subscribe()
-
-      // Fetch AI Usage Settings
-      setAiLoading(true)
-      try {
-        const { data: aiData, error: aiError } = await supabase
-          .from('ai_usage')
-          .select('*')
-          .eq('org_id', org.id)
-          .maybeSingle()
-        
-        if (!aiError && aiData) {
-          setAiSettings({
-            employees_enabled: aiData.employees_enabled || false,
-            nfc_cards_enabled: aiData.nfc_cards_enabled || false,
-            leads_enabled: aiData.leads_enabled || false,
-            links_enabled: aiData.links_enabled || false,
-          })
-          setPrompts(Array.isArray(aiData.prompts) ? aiData.prompts : [])
-        } else {
-            // No settings or error, start with empty list
-            setPrompts([])
-        }
-      } catch (err) {
-          console.error("AI Settings Fetch Error:", err)
-      } finally {
-        setAiLoading(false)
-      }
-
-      return () => {
-        supabase.removeChannel(billingChannel)
-        supabase.removeChannel(notifChannel)
-      }
-    } else {
-      setLoadingInvoices(false)
-    }
-  }, [slug, role, orgId])
-
-  React.useEffect(() => {
-    fetchOrgData()
-  }, [fetchOrgData])
-
-  const handleSaveProfile = async () => {
-    setSaving(true)
-    const { error } = await supabase
-      .from('organizations')
-      .update({
-        name: formData.name,
-        admin_name: formData.admin_name,
-        admin_email: formData.admin_email,
-        admin_phone: formData.admin_phone,
-        brand_color: formData.brand_color,
-        accent_color: formData.accent_color,
-      })
-      .eq('id', orgData.id)
-    
-    if (!error) {
-      setOrgData({ ...orgData, ...formData })
-    }
-    setSaving(false)
-  }
-
-  const handlePlanChange = async (newPlan: 'basic' | 'premium') => {
-    if (!orgData?.id) return
-    setSaving(true)
-    
-    try {
-      const invoiceNum = `INV-${Math.random().toString(36).substring(2, 7).toUpperCase()}-${Date.now().toString().slice(-4)}`
-      const baseAmount = newPlan === 'premium' ? 60000 : 5000
-      const gst = Math.round(baseAmount * 0.18)
-      
-      const { error } = await supabase
-        .from('billing')
-        .insert([{
-          org_id: orgData.id,
-          invoice_number: invoiceNum,
-          plan: newPlan,
-          period_start: new Date().toISOString().split('T')[0],
-          period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          gst_percent: 18,
-          gst_amount: gst,
-          total_amount: baseAmount + gst,
-          status: 'pending',
-          payment_method: 'Manual Selection'
-        }])
-      
-      if (error) throw error
-    } catch (err) {
-      console.error("Plan Change Error:", err)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleDeleteInvoice = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('billing')
-        .delete()
-        .eq('id', id)
-      
-      if (error) throw error
-    } catch (err) {
-      console.error("Delete Invoice Error:", err)
-    }
-  }
-
-  const handleUpdateInvoiceStatus = async (id: string, currentStatus: string) => {
-    const statusCycle: Record<string, string> = {
-      'pending': 'paid',
-      'paid': 'overdue',
-      'overdue': 'pending'
-    }
-    const nextStatus = statusCycle[currentStatus] || 'pending'
-    
-    try {
-      const { error } = await supabase
-        .from('billing')
-        .update({ status: nextStatus, paid_at: nextStatus === 'paid' ? new Date().toISOString() : null })
-        .eq('id', id)
-      
-      if (error) throw error
-    } catch (err) {
-      console.error("Update Status Error:", err)
-    }
-  }
-
-  const handleSaveAISettings = async (updatedSettings?: any, updatedPrompts?: any[]) => {
-    if (!orgData?.id) return
-    setSaving(true)
-    
-    // Check if record exists
-    const { data: existing } = await supabase
-      .from('ai_usage')
-      .select('id')
-      .eq('org_id', orgData.id)
-      .maybeSingle()
-    
-    const payload = {
-      org_id: orgData.id,
-      ...(updatedSettings || aiSettings),
-      prompts: (updatedPrompts || prompts),
-      updated_at: new Date().toISOString()
-    }
-    
-    let error
-    if (existing) {
-      const { error: updateError } = await supabase
-        .from('ai_usage')
-        .update(payload)
-        .eq('id', existing.id)
-      error = updateError
-    } else {
-      const { error: insertError } = await supabase
-        .from('ai_usage')
-        .insert([payload])
-      error = insertError
-    }
-    
-    if (error) {
-        console.error("Save AI Error:", error)
-    }
-    setSaving(false)
-  }
-
-  const handleNotificationToggle = async (key: string, value: boolean) => {
-     if (!notifSettings.id) return
-     const updated = {
-       ...notifSettings,
-       [key]: value,
-       updated_at: new Date().toISOString()
-     }
-     setNotifSettings(updated)
-     await supabase
-       .from('notification_settings')
-       .update({
-         org_id: role === 'employee' ? null : (orgData?.id || null),
-         leads: updated.leads,
-         taps: updated.taps,
-         nfc_cards: updated.nfc_cards,
-         daily_pulse: updated.daily_pulse,
-         weekly_roundup: updated.weekly_roundup,
-         monthly_digest: updated.monthly_digest,
-         invoices_receipts: updated.invoices_receipts,
-         accounting_updates: updated.accounting_updates,
-         upcoming_bills: updated.upcoming_bills,
-         updated_at: updated.updated_at
-       })
-       .eq('id', notifSettings.id)
-  }
-
-  const handleUpdateExtraEmails = async (newEmails: string[]) => {
-      setExtraEmails(newEmails);
-      if (!notifSettings.id) return;
-      await supabase
-        .from('notification_settings')
-        .update({ 
-          org_id: role === 'employee' ? null : (orgData?.id || null),
-          additional_recipients: newEmails,
-          updated_at: new Date().toISOString()
         })
-        .eq('id', notifSettings.id)
-  }
+    }, [])
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file || !orgData) return
+    const [appAccent, setAppAccent] = React.useState('#FF3D00')
+    const [appChartTheme, setAppChartTheme] = React.useState('signal')
+    const [appFont, setAppFont] = React.useState('Inter')
+    const [isMounted, setIsMounted] = React.useState(false)
 
-    setUploading(true)
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random()}.${fileExt}`
-    const filePath = `${slug}/${fileName}`
+    const [extraEmails, setExtraEmails] = React.useState<string[]>([])
+    const [newEmailInput, setNewEmailInput] = React.useState('')
+    const [notifSettings, setNotifSettings] = React.useState<any>({
+        id: "",
+        leads: false,
+        taps: false,
+        nfc_cards: false,
+        daily_pulse: false,
+        weekly_roundup: false,
+        monthly_digest: false,
+        invoices_receipts: false,
+        accounting_updates: false,
+        upcoming_bills: false,
+    })
 
-    const { error: uploadError } = await supabase.storage
-      .from('tapconnect')
-      .upload(filePath, file)
+    // AI Settings State
+    const [aiSettings, setAiSettings] = React.useState({
+        employees_enabled: false,
+        nfc_cards_enabled: false,
+        leads_enabled: false,
+        links_enabled: false,
+    })
+    const [prompts, setPrompts] = React.useState<{ prompt: string }[]>([])
+    const [aiLoading, setAiLoading] = React.useState(false)
+    const [isEditingPrompt, setIsEditingPrompt] = React.useState<{ index: number, text: string } | null>(null)
+    const [newPromptText, setNewPromptText] = React.useState('')
+    const [isAddingPrompt, setIsAddingPrompt] = React.useState(false)
 
-    if (uploadError) {
-      console.error('Error uploading logo:', uploadError)
-      setUploading(false)
-      return
+    React.useEffect(() => {
+        const storedAccent = localStorage.getItem('app-accent')
+        const storedChart = localStorage.getItem('app-chart-theme')
+        const storedFont = localStorage.getItem('app-font')
+
+        if (storedAccent) setAppAccent(storedAccent)
+        if (storedChart) setAppChartTheme(storedChart)
+        if (storedFont) setAppFont(storedFont)
+
+        setIsMounted(true)
+    }, [])
+
+    React.useEffect(() => {
+        if (!isMounted) return
+        localStorage.setItem('app-accent', appAccent)
+        document.documentElement.style.setProperty('--primary', appAccent)
+        document.documentElement.style.setProperty('--ring', appAccent)
+    }, [appAccent, isMounted])
+
+    React.useEffect(() => {
+        if (!isMounted) return
+        localStorage.setItem('app-chart-theme', appChartTheme)
+        document.documentElement.dataset.chart = appChartTheme
+    }, [appChartTheme, isMounted])
+
+    React.useEffect(() => {
+        if (!isMounted) return
+        localStorage.setItem('app-font', appFont)
+        if (appFont === 'Inter') document.documentElement.dataset.font = 'inter'
+        else if (appFont === 'Jakarta') document.documentElement.dataset.font = 'jakarta'
+        else if (appFont === 'Outfit') document.documentElement.dataset.font = 'outfit'
+        else if (appFont === 'DM Sans') document.documentElement.dataset.font = 'dmsans'
+        else if (appFont === 'Sora') document.documentElement.dataset.font = 'sora'
+    }, [appFont, isMounted])
+
+    const [formData, setFormData] = React.useState<OrgFormData>({
+        name: "",
+        logo_url: "",
+        admin_name: "",
+        admin_email: "",
+        admin_phone: "",
+        brand_color: "#2563eb",
+        accent_color: "#eab308",
+    })
+
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const brandColorRef = React.useRef<HTMLInputElement>(null)
+    const accentColorRef = React.useRef<HTMLInputElement>(null)
+
+    // Fetch Org Data
+    const fetchOrgData = React.useCallback(async () => {
+        setLoading(true)
+        const { data: org, error: orgError } = await supabase
+            .from('organizations')
+            .select('*')
+            .eq('slug', slug)
+            .single()
+
+        if (org && !orgError) {
+            setOrgData(org)
+            setFormData({
+                name: org.name || "",
+                logo_url: org.logo_url || "",
+                admin_name: org.admin_name || "",
+                admin_email: org.admin_email || "",
+                admin_phone: org.admin_phone || "",
+                brand_color: org.brand_color || "#2563eb",
+                accent_color: org.accent_color || "#eab308",
+            })
+
+            // Fetch Employee Stats
+            const { count, error: countError } = await supabase
+                .from('employees')
+                .select('*', { count: 'exact', head: true })
+                .eq('org_id', org.id)
+
+            setStats({
+                employeeCount: count || 0,
+                healthStatus: countError ? 'Degraded' : 'Healthy'
+            })
+        }
+
+        setLoading(false)
+
+        // Load Connected Devices / Sessions
+        if (org?.id) {
+            setLoadingInvoices(true)
+            try {
+                const { data: invData, error: invError } = await supabase
+                    .from('billing')
+                    .select('*')
+                    .eq('org_id', org.id)
+                    .order('created_at', { ascending: false })
+
+                if (!invError && invData) {
+                    setInvoices(invData)
+                } else {
+                    setInvoices([])
+                }
+            } catch (err) {
+                setInvoices([])
+            } finally {
+                setLoadingInvoices(false)
+            }
+
+            // Real-time Billing Subscription
+            const billingChannel = supabase
+                .channel(`billing:${org.id}`)
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'tapconnect',
+                        table: 'billing',
+                        filter: `org_id=eq.${org.id}`,
+                    },
+                    (payload) => {
+                        if (payload.eventType === 'INSERT') {
+                            setInvoices(prev => [payload.new, ...prev])
+                        } else if (payload.eventType === 'UPDATE') {
+                            setInvoices(prev => prev.map(inv => inv.id === payload.new.id ? payload.new : inv))
+                        } else if (payload.eventType === 'DELETE') {
+                            setInvoices(prev => prev.filter(inv => inv.id === payload.old.id))
+                        }
+                    }
+                )
+                .subscribe()
+
+            // Fetch Notification Settings
+            try {
+                const { data: notifData, error: notifError } = await supabase
+                    .from('notification_settings')
+                    .select('*')
+                    .eq(role === 'employee' ? 'employee_id' : 'org_id', role === 'employee' ? orgId : org.id)
+                    .maybeSingle()
+
+                if (notifData) {
+                    setNotifSettings(notifData)
+                    if (notifData.additional_recipients) setExtraEmails(notifData.additional_recipients)
+                } else if (!notifError) {
+                    const insertPayload = role === 'employee'
+                        ? { employee_id: orgId, org_id: null }
+                        : { org_id: org.id }
+
+                    const { data: newNotif } = await supabase
+                        .from('notification_settings')
+                        .insert([insertPayload])
+                        .select()
+                        .single()
+                    if (newNotif) setNotifSettings(newNotif)
+                }
+            } catch (err) {
+                console.error("Notif fetch error", err)
+            }
+
+            // Real-time Notification Subscription
+            const notifChannel = supabase
+                .channel(`notifs:${org.id}`)
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'tapconnect',
+                        table: 'notification_settings',
+                        filter: role === 'employee' ? `employee_id=eq.${orgId}` : `org_id=eq.${org.id}`,
+                    },
+                    (payload) => {
+                        setNotifSettings((prev: any) => ({ ...prev, ...payload.new }))
+                        if (payload.new.additional_recipients) {
+                            setExtraEmails(payload.new.additional_recipients)
+                        } else {
+                            setExtraEmails([])
+                        }
+                    }
+                )
+                .subscribe()
+
+            // Fetch AI Usage Settings
+            setAiLoading(true)
+            try {
+                const { data: aiData, error: aiError } = await supabase
+                    .from('ai_usage')
+                    .select('*')
+                    .eq('org_id', org.id)
+                    .maybeSingle()
+
+                if (!aiError && aiData) {
+                    setAiSettings({
+                        employees_enabled: aiData.employees_enabled || false,
+                        nfc_cards_enabled: aiData.nfc_cards_enabled || false,
+                        leads_enabled: aiData.leads_enabled || false,
+                        links_enabled: aiData.links_enabled || false,
+                    })
+                    setPrompts(Array.isArray(aiData.prompts) ? aiData.prompts : [])
+                } else {
+                    // No settings or error, start with empty list
+                    setPrompts([])
+                }
+            } catch (err) {
+                console.error("AI Settings Fetch Error:", err)
+            } finally {
+                setAiLoading(false)
+            }
+
+            return () => {
+                supabase.removeChannel(billingChannel)
+                supabase.removeChannel(notifChannel)
+            }
+        } else {
+            setLoadingInvoices(false)
+        }
+    }, [slug, role, orgId])
+
+    React.useEffect(() => {
+        fetchOrgData()
+    }, [fetchOrgData])
+
+    const handleSaveProfile = async () => {
+        setSaving(true)
+        const { error } = await supabase
+            .from('organizations')
+            .update({
+                name: formData.name,
+                admin_name: formData.admin_name,
+                admin_email: formData.admin_email,
+                admin_phone: formData.admin_phone,
+                brand_color: formData.brand_color,
+                accent_color: formData.accent_color,
+            })
+            .eq('id', orgData.id)
+
+        if (!error) {
+            setOrgData({ ...orgData, ...formData })
+        }
+        setSaving(false)
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('tapconnect')
-      .getPublicUrl(filePath)
+    const handlePlanChange = async (newPlan: 'basic' | 'premium') => {
+        if (!orgData?.id) return
+        setSaving(true)
 
-    const { error: updateError } = await supabase
-      .from('organizations')
-      .update({ logo_url: publicUrl })
-      .eq('id', orgData.id)
+        try {
+            const invoiceNum = `INV-${Math.random().toString(36).substring(2, 7).toUpperCase()}-${Date.now().toString().slice(-4)}`
+            const baseAmount = newPlan === 'premium' ? 60000 : 5000
+            const gst = Math.round(baseAmount * 0.18)
 
-    if (!updateError) {
-      setFormData((prev: OrgFormData) => ({ ...prev, logo_url: publicUrl }))
-      setOrgData((prev: any) => ({ ...prev, logo_url: publicUrl }))
+            const { error } = await supabase
+                .from('billing')
+                .insert([{
+                    org_id: orgData.id,
+                    invoice_number: invoiceNum,
+                    plan: newPlan,
+                    period_start: new Date().toISOString().split('T')[0],
+                    period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    gst_percent: 18,
+                    gst_amount: gst,
+                    total_amount: baseAmount + gst,
+                    status: 'pending',
+                    payment_method: 'Manual Selection'
+                }])
+
+            if (error) throw error
+        } catch (err) {
+            console.error("Plan Change Error:", err)
+        } finally {
+            setSaving(false)
+        }
     }
-    setUploading(false)
-  }
 
-  if (loading) {
+    const handleDeleteInvoice = async (id: string) => {
+        try {
+            const { error } = await supabase
+                .from('billing')
+                .delete()
+                .eq('id', id)
+
+            if (error) throw error
+        } catch (err) {
+            console.error("Delete Invoice Error:", err)
+        }
+    }
+
+    const handleUpdateInvoiceStatus = async (id: string, currentStatus: string) => {
+        const statusCycle: Record<string, string> = {
+            'pending': 'paid',
+            'paid': 'overdue',
+            'overdue': 'pending'
+        }
+        const nextStatus = statusCycle[currentStatus] || 'pending'
+
+        try {
+            const { error } = await supabase
+                .from('billing')
+                .update({ status: nextStatus, paid_at: nextStatus === 'paid' ? new Date().toISOString() : null })
+                .eq('id', id)
+
+            if (error) throw error
+        } catch (err) {
+            console.error("Update Status Error:", err)
+        }
+    }
+
+    const handleSaveAISettings = async (updatedSettings?: any, updatedPrompts?: any[]) => {
+        if (!orgData?.id) return
+        setSaving(true)
+
+        // Check if record exists
+        const { data: existing } = await supabase
+            .from('ai_usage')
+            .select('id')
+            .eq('org_id', orgData.id)
+            .maybeSingle()
+
+        const payload = {
+            org_id: orgData.id,
+            ...(updatedSettings || aiSettings),
+            prompts: (updatedPrompts || prompts),
+            updated_at: new Date().toISOString()
+        }
+
+        let error
+        if (existing) {
+            const { error: updateError } = await supabase
+                .from('ai_usage')
+                .update(payload)
+                .eq('id', existing.id)
+            error = updateError
+        } else {
+            const { error: insertError } = await supabase
+                .from('ai_usage')
+                .insert([payload])
+            error = insertError
+        }
+
+        if (error) {
+            console.error("Save AI Error:", error)
+        }
+        setSaving(false)
+    }
+
+    const handleNotificationToggle = async (key: string, value: boolean) => {
+        if (!notifSettings.id) return
+        const updated = {
+            ...notifSettings,
+            [key]: value,
+            updated_at: new Date().toISOString()
+        }
+        setNotifSettings(updated)
+        await supabase
+            .from('notification_settings')
+            .update({
+                org_id: role === 'employee' ? null : (orgData?.id || null),
+                leads: updated.leads,
+                taps: updated.taps,
+                nfc_cards: updated.nfc_cards,
+                daily_pulse: updated.daily_pulse,
+                weekly_roundup: updated.weekly_roundup,
+                monthly_digest: updated.monthly_digest,
+                invoices_receipts: updated.invoices_receipts,
+                accounting_updates: updated.accounting_updates,
+                upcoming_bills: updated.upcoming_bills,
+                updated_at: updated.updated_at
+            })
+            .eq('id', notifSettings.id)
+    }
+
+    const handleUpdateExtraEmails = async (newEmails: string[]) => {
+        setExtraEmails(newEmails);
+        if (!notifSettings.id) return;
+        await supabase
+            .from('notification_settings')
+            .update({
+                org_id: role === 'employee' ? null : (orgData?.id || null),
+                additional_recipients: newEmails,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', notifSettings.id)
+    }
+
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file || !orgData) return
+
+        setUploading(true)
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Math.random()}.${fileExt}`
+        const filePath = `${slug}/${fileName}`
+
+        const { error: uploadError } = await supabase.storage
+            .from('tapconnect')
+            .upload(filePath, file)
+
+        if (uploadError) {
+            console.error('Error uploading logo:', uploadError)
+            setUploading(false)
+            return
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('tapconnect')
+            .getPublicUrl(filePath)
+
+        const { error: updateError } = await supabase
+            .from('organizations')
+            .update({ logo_url: publicUrl })
+            .eq('id', orgData.id)
+
+        if (!updateError) {
+            setFormData((prev: OrgFormData) => ({ ...prev, logo_url: publicUrl }))
+            setOrgData((prev: any) => ({ ...prev, logo_url: publicUrl }))
+        }
+        setUploading(false)
+    }
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground animate-pulse font-medium">Synchronizing organization vault...</p>
+            </div>
+        )
+    }
+
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground animate-pulse font-medium">Synchronizing organization vault...</p>
-      </div>
-    )
-  }
+        <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-2xl ring-1 ring-primary/20">
+                        <Settings className="w-7 h-7 text-primary" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            {role === 'employee' ? 'My Settings' : 'Organization Settings'}
+                        </h1>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            {role === 'employee'
+                                ? 'Configure your personal preferences, security, and AI settings.'
+                                : 'Configure your organization\'s environment, administrative profile, and security.'}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-  return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-primary/10 rounded-2xl ring-1 ring-primary/20">
-              <Settings className="w-7 h-7 text-primary" strokeWidth={1.5} />
-          </div>
-          <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {role === 'employee' ? 'My Settings' : 'Organization Settings'}
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                {role === 'employee' 
-                  ? 'Configure your personal preferences, security, and AI settings.' 
-                  : 'Configure your organization\'s environment, administrative profile, and security.'}
-              </p>
-          </div>
-        </div>
-      </div>
-
-      <Tabs defaultValue={role === 'employee' ? 'security' : 'profile'} className="w-full">
-        <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-8 overflow-x-auto overflow-y-hidden whitespace-nowrap">
-          {role !== 'employee' && (
-            <TabsTrigger value="profile" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
-              Profile
-            </TabsTrigger>
-          )}
-          {role !== 'employee' && (
-            <TabsTrigger value="billing" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
-              Billing
-            </TabsTrigger>
-          )}
-          <TabsTrigger value="security" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
-            Security
-          </TabsTrigger>
-          <TabsTrigger value="appearance" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
-            Appearance
-          </TabsTrigger>
-          <TabsTrigger value="notification" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
-            Notifications
-          </TabsTrigger>
-          {/* <TabsTrigger value="ai" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+            <Tabs defaultValue={role === 'employee' ? 'security' : 'profile'} className="w-full">
+                <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-8 overflow-x-auto overflow-y-hidden whitespace-nowrap">
+                    {role !== 'employee' && (
+                        <TabsTrigger value="profile" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+                            Profile
+                        </TabsTrigger>
+                    )}
+                    {role !== 'employee' && (
+                        <TabsTrigger value="billing" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+                            Billing
+                        </TabsTrigger>
+                    )}
+                    <TabsTrigger value="security" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+                        Security
+                    </TabsTrigger>
+                    <TabsTrigger value="appearance" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+                        Appearance
+                    </TabsTrigger>
+                    <TabsTrigger value="notification" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+                        Notifications
+                    </TabsTrigger>
+                    {/* <TabsTrigger value="ai" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
             AI Labs
           </TabsTrigger> */}
-          {/* {role !== 'employee' && (
+                    {/* {role !== 'employee' && (
             <TabsTrigger value="audit" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
               Audit Logs
             </TabsTrigger>
           )} */}
-        </TabsList>
+                </TabsList>
 
-        <div className="mt-2 min-h-[500px]">
-          {/* ── PROFILE TAB ────────────────────────────────────────────────── */}
-          <TabsContent value="profile" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
-            {/* General Identity */}
-            <section>
-                <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
-                        <Globe className="w-[18px] h-[18px] text-blue-500" />
-                    </div>
-                    <div className="space-y-1 mt-0.5">
-                        <h2 className="text-lg font-bold tracking-tight">General Identity</h2>
-                        <p className="text-sm text-muted-foreground">Basic organizational data and branding identifiers.</p>
-                    </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-                    {/* Left Column: Upload Logo */}
-                    <div className="flex flex-col w-full">
-                        <Label className="text-sm font-medium leading-none mb-3">Upload Your Logo</Label>
-                        <div 
-                            className="group relative w-full h-[228px] bg-muted/20 border-2 border-dashed border-primary/30 rounded-3xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/50 hover:bg-primary/[0.02] transition-all overflow-hidden p-6"
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            {uploading ? (
-                                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                            ) : formData.logo_url ? (
-                                <>
-                                    <img src={formData.logo_url} alt="Logo" className="w-full h-full object-contain p-2 drop-shadow-md" />
-                                    <div className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
-                                        <div className="flex flex-col items-center gap-3 scale-95 group-hover:scale-100 transition-transform">
-                                            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-xl">
-                                                <Camera className="w-6 h-6 text-primary-foreground" />
+                <div className="mt-2 min-h-[500px]">
+                    {/* ── PROFILE TAB ────────────────────────────────────────────────── */}
+                    <TabsContent value="profile" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
+                        {/* General Identity */}
+                        <section>
+                            <div className="flex items-start gap-4 mb-8">
+                                <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
+                                    <Globe className="w-[18px] h-[18px] text-blue-500" />
+                                </div>
+                                <div className="space-y-1 mt-0.5">
+                                    <h2 className="text-lg font-bold tracking-tight">General Identity</h2>
+                                    <p className="text-sm text-muted-foreground">Basic organizational data and branding identifiers.</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+                                {/* Left Column: Upload Logo */}
+                                <div className="flex flex-col w-full">
+                                    <Label className="text-sm font-medium leading-none mb-3">Upload Your Logo</Label>
+                                    <div
+                                        className="group relative w-full h-[228px] bg-muted/20 border-2 border-dashed border-primary/30 rounded-3xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/50 hover:bg-primary/[0.02] transition-all overflow-hidden p-6"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        {uploading ? (
+                                            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                                        ) : formData.logo_url ? (
+                                            <>
+                                                <img src={formData.logo_url} alt="Logo" className="w-full h-full object-contain p-2 drop-shadow-md" />
+                                                <div className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                                    <div className="flex flex-col items-center gap-3 scale-95 group-hover:scale-100 transition-transform">
+                                                        <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-xl">
+                                                            <Camera className="w-6 h-6 text-primary-foreground" />
+                                                        </div>
+                                                        <p className="text-xs font-black tracking-[0.2em] uppercase text-foreground drop-shadow-md">Change Logo</p>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center scale-95 group-hover:scale-100 transition-transform">
+                                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                                                    <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+                                                        <span className="text-primary-foreground text-3xl font-light leading-none">+</span>
+                                                    </div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="font-extrabold text-sm tracking-tight text-foreground">Click to upload your logo</p>
+                                                    <p className="text-xs text-muted-foreground mt-1.5 font-medium">Supports JPG, PNG (Max 5MB)</p>
+                                                </div>
                                             </div>
-                                            <p className="text-xs font-black tracking-[0.2em] uppercase text-foreground drop-shadow-md">Change Logo</p>
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="flex flex-col items-center justify-center scale-95 group-hover:scale-100 transition-transform">
-                                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                                        <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg">
-                                            <span className="text-primary-foreground text-3xl font-light leading-none">+</span>
-                                        </div>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-extrabold text-sm tracking-tight text-foreground">Click to upload your logo</p>
-                                        <p className="text-xs text-muted-foreground mt-1.5 font-medium">Supports JPG, PNG (Max 5MB)</p>
+                                        )}
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleLogoUpload}
+                                            className="hidden"
+                                            accept="image/*"
+                                        />
                                     </div>
                                 </div>
-                            )}
-                            <input 
-                                type="file" 
-                                ref={fileInputRef} 
-                                onChange={handleLogoUpload} 
-                                className="hidden" 
-                                accept="image/*"
-                            />
-                        </div>
-                    </div>
 
-                    {/* Right Column: Identity Details Stack */}
-                    <div className="flex flex-col justify-center space-y-8 h-[228px] mt-7">
-                        <div className="space-y-2.5">
-                            <Label className="text-sm font-medium leading-none">Company Name</Label>
-                            <Input 
-                                value={formData.name}
-                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                placeholder="Enter the name..."
-                                className="h-14 text-sm font-bold border-border/40 bg-muted/10 focus:bg-background transition-colors"
-                            />
-                        </div>
-                        
-                        <div className="space-y-2.5">
-                            <Label className="text-sm font-medium leading-none">Company Website (Slug)</Label>
-                            <div className="h-14 flex items-center px-5 gap-3 bg-muted/40 border border-border/40 rounded-xl text-sm font-bold text-muted-foreground">
-                                <Globe className="w-5 h-5 opacity-40 shrink-0" />
-                                <span className="truncate whitespace-nowrap overflow-hidden">envitra.in/sites/<span className="text-foreground">{orgData?.slug}</span></span>
-                                <Lock className="w-4 h-4 ml-auto opacity-30 shrink-0" />
+                                {/* Right Column: Identity Details Stack */}
+                                <div className="flex flex-col justify-center space-y-8 h-[228px] mt-7">
+                                    <div className="space-y-2.5">
+                                        <Label className="text-sm font-medium leading-none">Company Name</Label>
+                                        <Input
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            placeholder="Enter the name..."
+                                            className="h-14 text-sm font-bold border-border/40 bg-muted/10 focus:bg-background transition-colors"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2.5">
+                                        <Label className="text-sm font-medium leading-none">Company Website (Slug)</Label>
+                                        <div className="h-14 flex items-center px-5 gap-3 bg-muted/40 border border-border/40 rounded-xl text-sm font-bold text-muted-foreground">
+                                            <Globe className="w-5 h-5 opacity-40 shrink-0" />
+                                            <span className="truncate whitespace-nowrap overflow-hidden">envitra.in/sites/<span className="text-foreground">{orgData?.slug}</span></span>
+                                            <Lock className="w-4 h-4 ml-auto opacity-30 shrink-0" />
+                                        </div>
+                                        <p className="text-[10px] text-muted-foreground/60 italic font-medium px-1">This permanent URL connects users to your public portal.</p>
+                                    </div>
+                                </div>
                             </div>
-                            <p className="text-[10px] text-muted-foreground/60 italic font-medium px-1">This permanent URL connects users to your public portal.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                        </section>
 
-            <Separator className="opacity-50" />
+                        <Separator className="opacity-50" />
 
-            {/* Admin Profile Section */}
-            <section>
-                <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
-                        <ShieldCheck className="w-[18px] h-[18px] text-primary" />
-                    </div>
-                    <div className="space-y-1 mt-0.5">
-                        <h2 className="text-lg font-bold tracking-tight">Administrative Liaison</h2>
-                        <p className="text-sm text-muted-foreground">Primary account holder and administrative contact details.</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="space-y-6">
-                        <div className="space-y-2.5">
-                            <Label className="text-sm font-medium leading-none">Admin Full Name</Label>
-                            <Input 
-                                value={formData.admin_name}
-                                onChange={(e) => setFormData({...formData, admin_name: e.target.value})}
-                                className="h-14 font-bold border-border/40 bg-muted/5 focus:bg-background"
-                            />
-                        </div>
-                        <div className="space-y-2.5">
-                            <Label className="text-sm font-medium leading-none">Admin Email Address</Label>
-                            <div className="relative">
-                                <Input 
-                                    value={formData.admin_email}
-                                    onChange={(e) => setFormData({...formData, admin_email: e.target.value})}
-                                    className="h-14 font-bold pl-12 border-border/40 bg-muted/5 focus:bg-background"
-                                />
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/40" />
+                        {/* Admin Profile Section */}
+                        <section>
+                            <div className="flex items-start gap-4 mb-8">
+                                <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
+                                    <ShieldCheck className="w-[18px] h-[18px] text-primary" />
+                                </div>
+                                <div className="space-y-1 mt-0.5">
+                                    <h2 className="text-lg font-bold tracking-tight">Administrative Liaison</h2>
+                                    <p className="text-sm text-muted-foreground">Primary account holder and administrative contact details.</p>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="space-y-6">
-                        <div className="space-y-2.5">
-                            <Label className="text-sm font-medium leading-none">Admin Phone Number</Label>
-                            <div className="relative">
-                                <Input 
-                                    value={formData.admin_phone}
-                                    onChange={(e) => setFormData({...formData, admin_phone: e.target.value})}
-                                    className="h-14 font-bold pl-12 border-border/40 bg-muted/5 focus:bg-background"
-                                />
-                                <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/40" />
-                            </div>
-                        </div>
-                        <div className="space-y-2.5">
-                            <Label className="text-sm font-medium leading-none">Onboarded At</Label>
-                            <div className="flex items-center gap-3 px-5 h-14 bg-muted/20 border border-border/40 rounded-xl text-sm font-bold text-muted-foreground/60 italic">
-                                <CalendarDays className="w-5 h-5" />
-                                <span>{orgData?.onboarded_at ? format(new Date(orgData.onboarded_at), 'PPP') : 'Not available'}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
-            <div className="flex justify-end pt-2 pb-6">
-                <Button 
-                    onClick={handleSaveProfile} 
-                    disabled={saving}
-                    className="min-w-[180px] h-11 font-semibold text-sm shadow-sm hover:-translate-y-0.5 transition-all"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> 
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" /> 
-                      Save Changes
-                    </>
-                  )}
-                </Button>
-            </div>
-          </TabsContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                <div className="space-y-6">
+                                    <div className="space-y-2.5">
+                                        <Label className="text-sm font-medium leading-none">Admin Full Name</Label>
+                                        <Input
+                                            value={formData.admin_name}
+                                            onChange={(e) => setFormData({ ...formData, admin_name: e.target.value })}
+                                            className="h-14 font-bold border-border/40 bg-muted/5 focus:bg-background"
+                                        />
+                                    </div>
+                                    <div className="space-y-2.5">
+                                        <Label className="text-sm font-medium leading-none">Admin Email Address</Label>
+                                        <div className="relative">
+                                            <Input
+                                                value={formData.admin_email}
+                                                onChange={(e) => setFormData({ ...formData, admin_email: e.target.value })}
+                                                className="h-14 font-bold pl-12 border-border/40 bg-muted/5 focus:bg-background"
+                                            />
+                                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/40" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="space-y-2.5">
+                                        <Label className="text-sm font-medium leading-none">Admin Phone Number</Label>
+                                        <div className="relative">
+                                            <Input
+                                                value={formData.admin_phone}
+                                                onChange={(e) => setFormData({ ...formData, admin_phone: e.target.value })}
+                                                className="h-14 font-bold pl-12 border-border/40 bg-muted/5 focus:bg-background"
+                                            />
+                                            <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/40" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2.5">
+                                        <Label className="text-sm font-medium leading-none">Onboarded At</Label>
+                                        <div className="flex items-center gap-3 px-5 h-14 bg-muted/20 border border-border/40 rounded-xl text-sm font-bold text-muted-foreground/60 italic">
+                                            <CalendarDays className="w-5 h-5" />
+                                            <span>{orgData?.onboarded_at ? format(new Date(orgData.onboarded_at), 'PPP') : 'Not available'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
 
-          {/* ── BILLING TAB ──────────────────────────────────────────────── */}
-          {role !== 'employee' && (
-            <TabsContent value="billing" className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
-              <section>
-                  {/*
+                        <div className="flex justify-end pt-2 pb-6">
+                            <Button
+                                onClick={handleSaveProfile}
+                                disabled={saving}
+                                className="min-w-[180px] h-11 font-semibold text-sm shadow-sm hover:-translate-y-0.5 transition-all"
+                            >
+                                {saving ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="w-4 h-4 mr-2" />
+                                        Save Changes
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </TabsContent>
+
+                    {/* ── BILLING TAB ──────────────────────────────────────────────── */}
+                    {role !== 'employee' && (
+                        <TabsContent value="billing" className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
+                            <section>
+                                {/*
                   <div className="flex items-start gap-4 mb-8">
                       <div className="p-2.5 bg-primary/10 rounded-xl ring-1 ring-primary/20 shrink-0">
                           <CreditCard className="w-[18px] h-[18px] text-primary" />
@@ -850,460 +850,460 @@ export default function SettingsPage() {
                   </div>
                   */}
 
-                  {/* Next Billing Cycle Summary Card */}
-                  {(() => {
-                      let nextBillingDate = "—"
-                      if (invoices && invoices.length > 0 && invoices[0]?.created_at) {
-                          try {
-                              const latestDate = new Date(invoices[0].created_at)
-                              latestDate.setMonth(latestDate.getMonth() + 1)
-                              nextBillingDate = latestDate.toLocaleDateString('en-IN', {
-                                  day: '2-digit', month: 'long', year: 'numeric'
-                              })
-                          } catch (e) {
-                              nextBillingDate = "—"
-                          }
-                      } else {
-                          try {
-                              const defaultDate = new Date()
-                              defaultDate.setMonth(defaultDate.getMonth() + 1)
-                              nextBillingDate = defaultDate.toLocaleDateString('en-IN', {
-                                  day: '2-digit', month: 'long', year: 'numeric'
-                              })
-                          } catch (e) {
-                              nextBillingDate = "—"
-                          }
-                      }
-                      
-                      const seatCount = stats?.employeeCount || 0
-                      const nextAmount = seatCount * 499
+                                {/* Next Billing Cycle Summary Card */}
+                                {(() => {
+                                    let nextBillingDate = "—"
+                                    if (invoices && invoices.length > 0 && invoices[0]?.created_at) {
+                                        try {
+                                            const latestDate = new Date(invoices[0].created_at)
+                                            latestDate.setMonth(latestDate.getMonth() + 1)
+                                            nextBillingDate = latestDate.toLocaleDateString('en-IN', {
+                                                day: '2-digit', month: 'long', year: 'numeric'
+                                            })
+                                        } catch (e) {
+                                            nextBillingDate = "—"
+                                        }
+                                    } else {
+                                        try {
+                                            const defaultDate = new Date()
+                                            defaultDate.setMonth(defaultDate.getMonth() + 1)
+                                            nextBillingDate = defaultDate.toLocaleDateString('en-IN', {
+                                                day: '2-digit', month: 'long', year: 'numeric'
+                                            })
+                                        } catch (e) {
+                                            nextBillingDate = "—"
+                                        }
+                                    }
 
-                      return (
-                          <div className="mb-8 bg-card border border-border/80 rounded-2xl p-6 shadow-sm overflow-hidden relative">
-                              {/* Sleek subtle background gradient orb */}
-                              <div className="absolute -right-20 -bottom-20 w-60 h-60 bg-[#FF3D00]/5 rounded-full blur-3xl pointer-events-none" />
-                              
-                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pb-3 border-b border-border/50 mb-5">
-                                  Upcoming Subscription Cycle
-                              </p>
+                                    const seatCount = stats?.employeeCount || 0
+                                    const nextAmount = seatCount * 499
 
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-                                  {/* Next Billing Date */}
-                                  <div className="flex items-center gap-4">
-                                      <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-                                          <CalendarDays className="w-5 h-5 text-[#FF3D00]" />
-                                      </div>
-                                      <div className="space-y-0.5">
-                                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Next Billing Date</p>
-                                          <p className="text-sm font-black text-foreground">{nextBillingDate}</p>
-                                      </div>
-                                  </div>
+                                    return (
+                                        <div className="mb-8 bg-card border border-border/80 rounded-2xl p-6 shadow-sm overflow-hidden relative">
+                                            {/* Sleek subtle background gradient orb */}
+                                            <div className="absolute -right-20 -bottom-20 w-60 h-60 bg-[#FF3D00]/5 rounded-full blur-3xl pointer-events-none" />
 
-                                  {/* Active Seats (Count) */}
-                                  <div className="flex items-center gap-4 border-t md:border-t-0 md:border-x border-border/50 pt-4 md:pt-0 md:px-6">
-                                      <div className="w-10 h-10 rounded-xl bg-[#FF3D00]/10 flex items-center justify-center shrink-0">
-                                          <Users className="w-5 h-5 text-[#FF3D00]" />
-                                      </div>
-                                      <div className="space-y-0.5">
-                                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Active Seats (Employees)</p>
-                                          <p className="text-sm font-black text-foreground">{seatCount} active {seatCount === 1 ? 'seat' : 'seats'}</p>
-                                      </div>
-                                  </div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pb-3 border-b border-border/50 mb-5">
+                                                Upcoming Subscription Cycle
+                                            </p>
 
-                                  {/* Projected Invoice Amount */}
-                                  <div className="flex items-center gap-4 border-t md:border-t-0 pt-4 md:pt-0">
-                                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                                          <IndianRupee className="w-5 h-5 text-emerald-500" />
-                                      </div>
-                                      <div className="space-y-0.5">
-                                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Projected Invoice Amount</p>
-                                          <div className="flex items-baseline gap-1">
-                                              <p className="text-base font-black text-emerald-600">₹{nextAmount.toLocaleString('en-IN')}</p>
-                                              <span className="text-[10px] font-medium text-muted-foreground">/ month</span>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      )
-                  })()}
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                                                {/* Next Billing Date */}
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+                                                        <CalendarDays className="w-5 h-5 text-[#FF3D00]" />
+                                                    </div>
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Next Billing Date</p>
+                                                        <p className="text-sm font-black text-foreground">{nextBillingDate}</p>
+                                                    </div>
+                                                </div>
 
-                  {/* Billing History Table */}
-                  <BillingDataTable 
-                      data={invoices} 
-                      onDelete={handleDeleteInvoice}
-                      onStatusChange={handleUpdateInvoiceStatus}
-                  />
-              </section>
-            </TabsContent>
-          )}
+                                                {/* Active Seats (Count) */}
+                                                <div className="flex items-center gap-4 border-t md:border-t-0 md:border-x border-border/50 pt-4 md:pt-0 md:px-6">
+                                                    <div className="w-10 h-10 rounded-xl bg-[#FF3D00]/10 flex items-center justify-center shrink-0">
+                                                        <Users className="w-5 h-5 text-[#FF3D00]" />
+                                                    </div>
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Active Seats (Employees)</p>
+                                                        <p className="text-sm font-black text-foreground">{seatCount} active {seatCount === 1 ? 'seat' : 'seats'}</p>
+                                                    </div>
+                                                </div>
 
-          {/* ── SECURITY TAB ──────────────────────────────────────────────── */}
-          <TabsContent value="security" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
-            {/* Account Security Portfolio */}
-            <section>
-                <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
-                        <KeyRound className="w-[18px] h-[18px] text-primary" />
-                    </div>
-                    <div className="space-y-1 mt-0.5">
-                        <h2 className="text-lg font-bold tracking-tight">Account Security Portfolio</h2>
-                        <p className="text-sm text-muted-foreground">Update your administrative access credentials and manage secure session keys.</p>
-                    </div>
-                </div>
+                                                {/* Projected Invoice Amount */}
+                                                <div className="flex items-center gap-4 border-t md:border-t-0 pt-4 md:pt-0">
+                                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                                                        <IndianRupee className="w-5 h-5 text-emerald-500" />
+                                                    </div>
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Projected Invoice Amount</p>
+                                                        <div className="flex items-baseline gap-1">
+                                                            <p className="text-base font-black text-emerald-600">₹{nextAmount.toLocaleString('en-IN')}</p>
+                                                            <span className="text-[10px] font-medium text-muted-foreground">/ month</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })()}
 
-                <div className="space-y-6">
-                    <div className="border border-border/40 bg-card rounded-2xl overflow-hidden">
-                        <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                             <div className="flex items-start gap-4">
-                                 <div className="p-3 bg-muted/50 rounded-xl shrink-0 mt-0.5 sm:mt-0">
-                                    <Lock className="w-5 h-5 text-muted-foreground" />
-                                 </div>
-                                 <div className="space-y-1">
-                                     <h3 className="font-bold tracking-tight">Account Password</h3>
-                                     <p className="text-xs text-muted-foreground font-medium">
-                                       Last changed{' '}
-                                       <span className="font-semibold text-foreground/80">
-                                         {passwordLastChanged
-                                           ? format(new Date(passwordLastChanged), 'MMM d, yyyy')
-                                           : 'Not available'}
-                                       </span>
-                                     </p>
-                                 </div>
-                             </div>
-                             <Button
-                               variant="secondary"
-                               className="h-9 font-semibold text-xs px-5 shadow-sm w-full sm:w-auto"
-                               onClick={async () => {
-                                 await supabase.auth.signOut()
-                                 await fetch('/api/auth/logout', { method: 'POST' })
-                                 window.location.href = 'http://localhost:3000/forgot-password?source=change-password'
-                               }}
-                             >
-                               Change Password
-                             </Button>
-                        </div>
-                        <div className="px-6 py-3.5 bg-amber-500/5 dark:bg-amber-500/10 border-t border-amber-500/10 flex items-start gap-3">
-                            <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-                            <p className="text-[11px] text-amber-800 dark:text-amber-200/80 font-medium leading-relaxed">
-                                For security reasons, resetting your password will instantly terminate all active administrative sessions across all devices.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <Separator className="opacity-50" />
-
-            {/* 2FA Section */}
-            <section>
-                <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
-                        <ShieldAlert className="w-[18px] h-[18px] text-rose-500" />
-                    </div>
-                    <div className="space-y-1 mt-0.5">
-                        <h2 className="text-lg font-bold tracking-tight">Two-factor authentication (2FA)</h2>
-                        <p className="text-sm text-muted-foreground">Keep your account secure by enabling 2FA via SMS or using OTP form authenticator app.</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* SMS 2FA */}
-                    <div className="border border-border/40 bg-muted/5 rounded-2xl flex flex-row items-center p-5 gap-4">
-                        <div className="p-2.5 bg-muted/50 rounded-xl shrink-0">
-                            <MessageSquare className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 space-y-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-semibold tracking-tight">Text message (SMS)</h3>
-                                <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">Coming Soon</Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">Receive a one-time passcode via SMS each time you log in.</p>
-                        </div>
-                        <div className="shrink-0 opacity-30">
-                            <Switch checked={false} disabled />
-                        </div>
-                    </div>
-
-                    {/* TOTP 2FA */}
-                    <div className="border border-border/40 bg-muted/5 rounded-2xl flex flex-row items-center p-5 gap-4">
-                        <div className="p-2.5 bg-muted/50 rounded-xl shrink-0">
-                            <ShieldCheck className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 space-y-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-semibold tracking-tight">Authenticator app (TOTP)</h3>
-                                <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">Coming Soon</Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">Use an app to receive a temporary one-time passcode each time you log in.</p>
-                        </div>
-                        <div className="shrink-0 opacity-30">
-                            <Switch checked={false} disabled />
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-          </TabsContent>
-
-          {/* ── APPEARANCE TAB ────────────────────────────────────────────── */}
-          <TabsContent value="appearance" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
-            <section>
-                <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
-                        <Palette className="w-[18px] h-[18px] text-primary" />
-                    </div>
-                    <div className="space-y-1 mt-0.5">
-                        <h2 className="text-lg font-bold tracking-tight">Interface Preferences</h2>
-                        <p className="text-sm text-muted-foreground">Customize how Tap Connect looks on your administrative devices.</p>
-                    </div>
-                </div>
-
-                <div className="divide-y divide-border/50">
-                  {/* Row 1: Theme */}
-                  <div className="py-8 first:pt-0 last:pb-0">
-                      <div className="space-y-1 mb-6">
-                            <Label className="text-base font-bold text-foreground/90">Theme</Label>
-                            <p className="text-sm text-muted-foreground">Select your default interface theme</p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-6">
-                          {/* Dark */}
-                          <div className="group cursor-pointer flex flex-col items-center gap-3" onClick={() => setTheme('dark')}>
-                              <div className={cn("w-40 h-24 rounded-xl border-2 overflow-hidden transition-all", theme === 'dark' ? "border-primary shadow-sm" : "border-transparent bg-muted/20 hover:border-border/60")}>
-                                   <div className="w-full h-full bg-slate-950 flex flex-col">
-                                       <div className="h-5 w-full border-b border-white/10 flex items-center px-2 gap-1.5 shrink-0">
-                                            <div className="w-6 h-1.5 rounded-full bg-white/20"></div>
-                                            <div className="w-10 h-1.5 rounded-full bg-white/10 ml-auto mr-1"></div>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-                                       </div>
-                                       <div className="flex-1 p-2 flex gap-2">
-                                           <div className="w-8 h-full rounded-md bg-white/5"></div>
-                                           <div className="flex-1 space-y-1.5">
-                                               <div className="w-full h-9 rounded-md bg-white/10"></div>
-                                               <div className="w-3/4 h-2.5 rounded-md bg-white/5"></div>
-                                           </div>
-                                       </div>
-                                   </div>
-                              </div>
-                              <span className={cn("text-xs font-semibold", theme === 'dark' ? "text-primary" : "text-muted-foreground group-hover:text-foreground/80")}>Dark</span>
-                          </div>
-
-                          {/* System */}
-                          <div className="group cursor-pointer flex flex-col items-center gap-3" onClick={() => setTheme('system')}>
-                              <div className={cn("w-40 h-24 rounded-xl border-2 overflow-hidden transition-all flex", theme === 'system' ? "border-primary shadow-sm" : "border-transparent bg-muted/20 hover:border-border/60")}>
-                                   <div className="w-1/2 h-full bg-slate-100 flex flex-col border-r border-border/80">
-                                       <div className="h-5 w-full border-b border-black/5 flex items-center px-2 gap-1 shrink-0">
-                                            <div className="w-5 h-1.5 rounded-full bg-black/10"></div>
-                                       </div>
-                                       <div className="flex-1 p-2 flex flex-col gap-1.5">
-                                            <div className="w-full h-7 rounded-md bg-white shadow-sm"></div>
-                                            <div className="w-2/3 h-2 rounded-md bg-black/5"></div>
-                                       </div>
-                                   </div>
-                                   <div className="w-1/2 h-full bg-slate-950 flex flex-col">
-                                       <div className="h-5 w-full border-b border-white/10 flex items-center justify-end px-1.5 gap-1.5 shrink-0">
-                                            <div className="w-6 h-1.5 rounded-full bg-white/10 mr-1"></div>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-                                       </div>
-                                       <div className="flex-1 p-2 flex gap-1.5">
-                                            <div className="w-6 h-full rounded-md bg-white/5"></div>
-                                            <div className="flex-1 h-7 rounded-md bg-white/10"></div>
-                                       </div>
-                                   </div>
-                              </div>
-                              <span className={cn("text-xs font-semibold", theme === 'system' ? "text-foreground" : "text-muted-foreground group-hover:text-foreground/80")}>System</span>
-                          </div>
-
-                          {/* Light */}
-                          <div className="group cursor-pointer flex flex-col items-center gap-3" onClick={() => setTheme('light')}>
-                              <div className={cn("w-40 h-24 rounded-xl border-2 overflow-hidden transition-all", theme === 'light' ? "border-primary shadow-sm" : "border-transparent bg-muted/20 hover:border-border/60")}>
-                                   <div className="w-full h-full bg-slate-100 flex flex-col">
-                                       <div className="h-5 w-full border-b border-black/5 flex items-center px-2 gap-1.5 shrink-0">
-                                            <div className="w-6 h-1.5 rounded-full bg-black/10"></div>
-                                            <div className="w-10 h-1.5 rounded-full bg-black/5 ml-auto mr-1"></div>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-                                       </div>
-                                       <div className="flex-1 p-2 flex gap-2">
-                                           <div className="w-8 h-full rounded-md bg-white border border-black/5"></div>
-                                           <div className="flex-1 space-y-1.5">
-                                               <div className="w-full h-9 rounded-md bg-white border border-black/5 shadow-sm"></div>
-                                               <div className="w-3/4 h-2.5 rounded-md bg-black/5"></div>
-                                           </div>
-                                       </div>
-                                   </div>
-                              </div>
-                              <span className={cn("text-xs font-semibold", theme === 'light' ? "text-primary" : "text-muted-foreground group-hover:text-foreground/80")}>Light</span>
-                          </div>
-                      </div>
-                  </div>
-
-                  {/* Row 2: Accent Color */}
-                  <div className="py-8">
-                       <div className="space-y-1 mb-6">
-                            <Label className="text-base font-bold text-foreground/90">Accent Color</Label>
-                            <p className="text-sm text-muted-foreground">Highlight color for main objects, e.g. buttons</p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                          {['#FF3D00', '#2563EB', '#06B6D4', '#10B981', '#8B5CF6', '#F59E0B'].map(color => (
-                              <button
-                                 key={color}
-                                 onClick={() => setAppAccent(color)}
-                                 className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-all", appAccent === color ? "ring-[2.5px] ring-offset-[3px] ring-offset-background scale-110 shadow-sm" : "hover:scale-105 shadow-sm")}
-                                 style={{ backgroundColor: color, '--tw-ring-color': color } as React.CSSProperties}
-                              >
-                                  {appAccent === color && <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />}
-                              </button>
-                          ))}
-                      </div>
-                  </div>
-
-                  {/* Row 3: Chart Palette Theme */}
-                  <div className="py-8">
-                       <div className="space-y-1 mb-6">
-                            <Label className="text-base font-bold text-foreground/90">Data Visualization Colors</Label>
-                            <p className="text-sm text-muted-foreground">Select a dynamic color palette mapping across all progress bars, statistics, and live charts</p>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-                          {[
-                              { id: 'signal', name: 'Signal Orange', colors: ['#FF3D00', '#FF6D3A', '#FF8C5A', '#FFB38A', '#FFCBA8'] },
-                              { id: 'ocean', name: 'Ocean Blue', colors: ['#2563EB', '#60A5FA', '#1D4ED8', '#93C5FD', '#3B82F6'] },
-                              { id: 'sunset', name: 'Vibrant Sunset', colors: ['#F43F5E', '#FB923C', '#DB2777', '#FBBF24', '#E11D48'] },
-                              { id: 'emerald', name: 'Emerald Forest', colors: ['#10B981', '#34D399', '#059669', '#6EE7B7', '#047857'] },
-                              { id: 'neon', name: 'Neon Cyberpunk', colors: ['#8B5CF6', '#C084FC', '#7C3AED', '#E879F9', '#6D28D9'] }
-                          ].map(theme => (
-                              <div 
-                                  key={theme.id}
-                                  onClick={() => setAppChartTheme(theme.id)}
-                                  className={cn("cursor-pointer rounded-2xl border-2 p-5 transition-all hover:border-border", appChartTheme === theme.id ? "border-primary bg-primary/5 shadow-sm" : "border-border/40 bg-muted/20")}
-                              >
-                                  <span className={cn("text-[15px] font-bold block mb-4", appChartTheme === theme.id ? "text-primary" : "text-foreground")}>{theme.name}</span>
-                                  <div className="flex w-full h-10 overflow-hidden rounded-lg shadow-inner">
-                                      {theme.colors.map((c, i) => (
-                                          <div key={i} className="flex-1 h-full" style={{ backgroundColor: c }}></div>
-                                      ))}
-                                  </div>
-                              </div>
-                          ))}
-                      </div>
-                  </div>
-
-                  {/* Row 4: Font Style */}
-                  <div className="py-8">
-                      <div className="space-y-1 mb-6">
-                            <Label className="text-base font-bold text-foreground/90">Font style</Label>
-                            <p className="text-sm text-muted-foreground">Font style for text and headings</p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-4">
-                          {[{ name: 'Inter', family: 'var(--font-inter)' }, { name: 'Jakarta', family: 'var(--font-jakarta)' }, { name: 'Outfit', family: 'var(--font-outfit)' }, { name: 'DM Sans', family: 'var(--font-dmsans)' }, { name: 'Sora', family: 'var(--font-sora)' }].map(f => (
-                              <button
-                                 key={f.name}
-                                 title={f.name}
-                                 onClick={() => setAppFont(f.name)}
-                                 style={{ fontFamily: f.family }}
-                                 className={cn("h-14 px-5 rounded-xl border-2 flex flex-col items-center justify-center transition-all", appFont === f.name ? "border-primary text-primary shadow-sm bg-primary/5" : "border-border/60 text-foreground/80 hover:bg-muted/50 hover:border-border")}
-                              >
-                                  <span className="text-lg font-bold leading-none">Aa</span>
-                                  <span className="text-[9px] mt-1.5 uppercase tracking-widest font-bold opacity-60 leading-none">{f.name}</span>
-                              </button>
-                          ))}
-                      </div>
-                  </div>
-                </div>
-            </section>
-          </TabsContent>
-
-          {/* ── NOTIFICATIONS TAB ─────────────────────────────────────────── */}
-          <TabsContent value="notification" className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500 pb-10 w-full">
-            <div className="flex items-start gap-4 mb-8 border-b border-border/40 pb-6 w-full">
-                <div className="p-2.5 bg-primary/10 rounded-xl ring-1 ring-primary/20 shrink-0">
-                    <Bell className="w-[18px] h-[18px] text-primary" />
-                </div>
-                <div className="space-y-1.5 mt-0.5">
-                    <h2 className="text-xl font-bold tracking-tight">Notification Preferences</h2>
-                    <p className="text-sm text-muted-foreground">Choose what updates you want to receive and manage your communication flow.</p>
-                </div>
-            </div>
-
-            <div className="space-y-10 w-full">
-                {/* Section 1: Employee Activity */}
-                <section className="w-full">
-                    <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Employee Activity</h3>
-                    <div className="border border-border/50 rounded-2xl bg-card divide-y divide-border/50 w-full overflow-hidden shadow-sm">
-                        {[
-                            { id: "leads", title: "LEADS", desc: "Get notified immediately when a new lead is captured by an employee." },
-                            { id: "taps", title: "TAPS", desc: "Receive alerts when NFC cards are scanned or shared." },
-                            { id: "nfc_cards", title: "NFC CARDS", desc: "Status updates when cards are requested, activated, or deactivated." }
-                        ].map((v, i) => (
-                            <div key={i} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors w-full">
-                                <div className="space-y-1.5 pr-6 flex-1">
-                                    <Label className="text-[15px] font-bold tracking-widest text-foreground cursor-pointer block">{v.title}</Label>
-                                    <p className="text-[13px] text-muted-foreground leading-relaxed">{v.desc}</p>
-                                </div>
-                                <Switch 
-                                    checked={notifSettings[v.id] || false} 
-                                    onCheckedChange={(checked) => handleNotificationToggle(v.id, checked)}
-                                    className="data-[state=checked]:bg-primary shrink-0" 
+                                {/* Billing History Table */}
+                                <BillingDataTable
+                                    data={invoices}
+                                    onDelete={handleDeleteInvoice}
+                                    onStatusChange={handleUpdateInvoiceStatus}
                                 />
-                            </div>
-                        ))}
-                    </div>
-                </section>
+                            </section>
+                        </TabsContent>
+                    )}
 
-                {/* Section 2: Report */}
-                {role !== 'employee' && (
-                <section className="w-full">
-                    <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Report</h3>
-                    <div className="border border-border/50 rounded-2xl bg-card divide-y divide-border/50 w-full overflow-hidden shadow-sm">
-                        {[
-                            { id: "daily_pulse", title: "DAILY PULSE", desc: "A morning summary of the previous day's taps and lead capture metrics." },
-                            { id: "weekly_roundup", title: "WEEKLY ROUNDUP", desc: "A weekly rollup report with performance comparisons across departments." },
-                            { id: "monthly_digest", title: "MONTHLY DIGEST", desc: "A comprehensive monthly report detailing analytical growth and asset usage." }
-                        ].map((v, i) => (
-                            <div key={i} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors w-full">
-                                <div className="space-y-1.5 pr-6 flex-1">
-                                    <Label className="text-[15px] font-bold tracking-widest text-foreground cursor-pointer block">{v.title}</Label>
-                                    <p className="text-[13px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                    {/* ── SECURITY TAB ──────────────────────────────────────────────── */}
+                    <TabsContent value="security" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
+                        {/* Account Security Portfolio */}
+                        <section>
+                            <div className="flex items-start gap-4 mb-8">
+                                <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
+                                    <KeyRound className="w-[18px] h-[18px] text-primary" />
                                 </div>
-                                <Switch 
-                                    checked={notifSettings[v.id] || false} 
-                                    onCheckedChange={(checked) => handleNotificationToggle(v.id, checked)}
-                                    className="data-[state=checked]:bg-primary shrink-0" 
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </section>
-                )}
-
-                {/* Section 3: Payment and billing */}
-                {role !== 'employee' && (
-                <section className="w-full">
-                    <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Payment & Billing</h3>
-                    <div className="border border-border/50 rounded-2xl bg-card divide-y divide-border/50 w-full overflow-hidden shadow-sm">
-                        {[
-                            { id: "invoices_receipts", title: "INVOICES & RECEIPTS", desc: "Receive immediate copies of your invoices when payments are processed." },
-                            { id: "upcoming_bills", title: "UPCOMING BILLS", desc: "When you need to be reminded of upcoming invoice renewals or late bills." }
-                        ].map((v, i) => (
-                            <div key={i} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors w-full">
-                                <div className="space-y-1.5 pr-6 flex-1">
-                                    <Label className="text-[15px] font-bold tracking-widest text-foreground cursor-pointer block">{v.title}</Label>
-                                    <p className="text-[13px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                                <div className="space-y-1 mt-0.5">
+                                    <h2 className="text-lg font-bold tracking-tight">Account Security Portfolio</h2>
+                                    <p className="text-sm text-muted-foreground">Update your administrative access credentials and manage secure session keys.</p>
                                 </div>
-                                <Switch 
-                                    checked={notifSettings[v.id] || false} 
-                                    onCheckedChange={(checked) => handleNotificationToggle(v.id, checked)}
-                                    className="data-[state=checked]:bg-primary shrink-0" 
-                                />
                             </div>
-                        ))}
-                    </div>
-                </section>
-                )}
 
-                {/* Section 4: Email Delivery Configuration
+                            <div className="space-y-6">
+                                <div className="border border-border/40 bg-card rounded-2xl overflow-hidden">
+                                    <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-3 bg-muted/50 rounded-xl shrink-0 mt-0.5 sm:mt-0">
+                                                <Lock className="w-5 h-5 text-muted-foreground" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="font-bold tracking-tight">Account Password</h3>
+                                                <p className="text-xs text-muted-foreground font-medium">
+                                                    Last changed{' '}
+                                                    <span className="font-semibold text-foreground/80">
+                                                        {passwordLastChanged
+                                                            ? format(new Date(passwordLastChanged), 'MMM d, yyyy')
+                                                            : 'Not available'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="secondary"
+                                            className="h-9 font-semibold text-xs px-5 shadow-sm w-full sm:w-auto"
+                                            onClick={async () => {
+                                                await supabase.auth.signOut()
+                                                await fetch('/api/auth/logout', { method: 'POST' })
+                                                window.location.href = 'https://www.frixn.in/forgot-password?source=change-password'
+                                            }}
+                                        >
+                                            Change Password
+                                        </Button>
+                                    </div>
+                                    <div className="px-6 py-3.5 bg-amber-500/5 dark:bg-amber-500/10 border-t border-amber-500/10 flex items-start gap-3">
+                                        <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                                        <p className="text-[11px] text-amber-800 dark:text-amber-200/80 font-medium leading-relaxed">
+                                            For security reasons, resetting your password will instantly terminate all active administrative sessions across all devices.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <Separator className="opacity-50" />
+
+                        {/* 2FA Section */}
+                        <section>
+                            <div className="flex items-start gap-4 mb-8">
+                                <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
+                                    <ShieldAlert className="w-[18px] h-[18px] text-rose-500" />
+                                </div>
+                                <div className="space-y-1 mt-0.5">
+                                    <h2 className="text-lg font-bold tracking-tight">Two-factor authentication (2FA)</h2>
+                                    <p className="text-sm text-muted-foreground">Keep your account secure by enabling 2FA via SMS or using OTP form authenticator app.</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* SMS 2FA */}
+                                <div className="border border-border/40 bg-muted/5 rounded-2xl flex flex-row items-center p-5 gap-4">
+                                    <div className="p-2.5 bg-muted/50 rounded-xl shrink-0">
+                                        <MessageSquare className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                    <div className="flex-1 space-y-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-sm font-semibold tracking-tight">Text message (SMS)</h3>
+                                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">Coming Soon</Badge>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground leading-relaxed">Receive a one-time passcode via SMS each time you log in.</p>
+                                    </div>
+                                    <div className="shrink-0 opacity-30">
+                                        <Switch checked={false} disabled />
+                                    </div>
+                                </div>
+
+                                {/* TOTP 2FA */}
+                                <div className="border border-border/40 bg-muted/5 rounded-2xl flex flex-row items-center p-5 gap-4">
+                                    <div className="p-2.5 bg-muted/50 rounded-xl shrink-0">
+                                        <ShieldCheck className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                    <div className="flex-1 space-y-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-sm font-semibold tracking-tight">Authenticator app (TOTP)</h3>
+                                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">Coming Soon</Badge>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground leading-relaxed">Use an app to receive a temporary one-time passcode each time you log in.</p>
+                                    </div>
+                                    <div className="shrink-0 opacity-30">
+                                        <Switch checked={false} disabled />
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                    </TabsContent>
+
+                    {/* ── APPEARANCE TAB ────────────────────────────────────────────── */}
+                    <TabsContent value="appearance" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <section>
+                            <div className="flex items-start gap-4 mb-8">
+                                <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
+                                    <Palette className="w-[18px] h-[18px] text-primary" />
+                                </div>
+                                <div className="space-y-1 mt-0.5">
+                                    <h2 className="text-lg font-bold tracking-tight">Interface Preferences</h2>
+                                    <p className="text-sm text-muted-foreground">Customize how Tap Connect looks on your administrative devices.</p>
+                                </div>
+                            </div>
+
+                            <div className="divide-y divide-border/50">
+                                {/* Row 1: Theme */}
+                                <div className="py-8 first:pt-0 last:pb-0">
+                                    <div className="space-y-1 mb-6">
+                                        <Label className="text-base font-bold text-foreground/90">Theme</Label>
+                                        <p className="text-sm text-muted-foreground">Select your default interface theme</p>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-6">
+                                        {/* Dark */}
+                                        <div className="group cursor-pointer flex flex-col items-center gap-3" onClick={() => setTheme('dark')}>
+                                            <div className={cn("w-40 h-24 rounded-xl border-2 overflow-hidden transition-all", theme === 'dark' ? "border-primary shadow-sm" : "border-transparent bg-muted/20 hover:border-border/60")}>
+                                                <div className="w-full h-full bg-slate-950 flex flex-col">
+                                                    <div className="h-5 w-full border-b border-white/10 flex items-center px-2 gap-1.5 shrink-0">
+                                                        <div className="w-6 h-1.5 rounded-full bg-white/20"></div>
+                                                        <div className="w-10 h-1.5 rounded-full bg-white/10 ml-auto mr-1"></div>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                                                    </div>
+                                                    <div className="flex-1 p-2 flex gap-2">
+                                                        <div className="w-8 h-full rounded-md bg-white/5"></div>
+                                                        <div className="flex-1 space-y-1.5">
+                                                            <div className="w-full h-9 rounded-md bg-white/10"></div>
+                                                            <div className="w-3/4 h-2.5 rounded-md bg-white/5"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className={cn("text-xs font-semibold", theme === 'dark' ? "text-primary" : "text-muted-foreground group-hover:text-foreground/80")}>Dark</span>
+                                        </div>
+
+                                        {/* System */}
+                                        <div className="group cursor-pointer flex flex-col items-center gap-3" onClick={() => setTheme('system')}>
+                                            <div className={cn("w-40 h-24 rounded-xl border-2 overflow-hidden transition-all flex", theme === 'system' ? "border-primary shadow-sm" : "border-transparent bg-muted/20 hover:border-border/60")}>
+                                                <div className="w-1/2 h-full bg-slate-100 flex flex-col border-r border-border/80">
+                                                    <div className="h-5 w-full border-b border-black/5 flex items-center px-2 gap-1 shrink-0">
+                                                        <div className="w-5 h-1.5 rounded-full bg-black/10"></div>
+                                                    </div>
+                                                    <div className="flex-1 p-2 flex flex-col gap-1.5">
+                                                        <div className="w-full h-7 rounded-md bg-white shadow-sm"></div>
+                                                        <div className="w-2/3 h-2 rounded-md bg-black/5"></div>
+                                                    </div>
+                                                </div>
+                                                <div className="w-1/2 h-full bg-slate-950 flex flex-col">
+                                                    <div className="h-5 w-full border-b border-white/10 flex items-center justify-end px-1.5 gap-1.5 shrink-0">
+                                                        <div className="w-6 h-1.5 rounded-full bg-white/10 mr-1"></div>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                                                    </div>
+                                                    <div className="flex-1 p-2 flex gap-1.5">
+                                                        <div className="w-6 h-full rounded-md bg-white/5"></div>
+                                                        <div className="flex-1 h-7 rounded-md bg-white/10"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className={cn("text-xs font-semibold", theme === 'system' ? "text-foreground" : "text-muted-foreground group-hover:text-foreground/80")}>System</span>
+                                        </div>
+
+                                        {/* Light */}
+                                        <div className="group cursor-pointer flex flex-col items-center gap-3" onClick={() => setTheme('light')}>
+                                            <div className={cn("w-40 h-24 rounded-xl border-2 overflow-hidden transition-all", theme === 'light' ? "border-primary shadow-sm" : "border-transparent bg-muted/20 hover:border-border/60")}>
+                                                <div className="w-full h-full bg-slate-100 flex flex-col">
+                                                    <div className="h-5 w-full border-b border-black/5 flex items-center px-2 gap-1.5 shrink-0">
+                                                        <div className="w-6 h-1.5 rounded-full bg-black/10"></div>
+                                                        <div className="w-10 h-1.5 rounded-full bg-black/5 ml-auto mr-1"></div>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                                                    </div>
+                                                    <div className="flex-1 p-2 flex gap-2">
+                                                        <div className="w-8 h-full rounded-md bg-white border border-black/5"></div>
+                                                        <div className="flex-1 space-y-1.5">
+                                                            <div className="w-full h-9 rounded-md bg-white border border-black/5 shadow-sm"></div>
+                                                            <div className="w-3/4 h-2.5 rounded-md bg-black/5"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className={cn("text-xs font-semibold", theme === 'light' ? "text-primary" : "text-muted-foreground group-hover:text-foreground/80")}>Light</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Row 2: Accent Color */}
+                                <div className="py-8">
+                                    <div className="space-y-1 mb-6">
+                                        <Label className="text-base font-bold text-foreground/90">Accent Color</Label>
+                                        <p className="text-sm text-muted-foreground">Highlight color for main objects, e.g. buttons</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        {['#FF3D00', '#2563EB', '#06B6D4', '#10B981', '#8B5CF6', '#F59E0B'].map(color => (
+                                            <button
+                                                key={color}
+                                                onClick={() => setAppAccent(color)}
+                                                className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-all", appAccent === color ? "ring-[2.5px] ring-offset-[3px] ring-offset-background scale-110 shadow-sm" : "hover:scale-105 shadow-sm")}
+                                                style={{ backgroundColor: color, '--tw-ring-color': color } as React.CSSProperties}
+                                            >
+                                                {appAccent === color && <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Row 3: Chart Palette Theme */}
+                                <div className="py-8">
+                                    <div className="space-y-1 mb-6">
+                                        <Label className="text-base font-bold text-foreground/90">Data Visualization Colors</Label>
+                                        <p className="text-sm text-muted-foreground">Select a dynamic color palette mapping across all progress bars, statistics, and live charts</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+                                        {[
+                                            { id: 'signal', name: 'Signal Orange', colors: ['#FF3D00', '#FF6D3A', '#FF8C5A', '#FFB38A', '#FFCBA8'] },
+                                            { id: 'ocean', name: 'Ocean Blue', colors: ['#2563EB', '#60A5FA', '#1D4ED8', '#93C5FD', '#3B82F6'] },
+                                            { id: 'sunset', name: 'Vibrant Sunset', colors: ['#F43F5E', '#FB923C', '#DB2777', '#FBBF24', '#E11D48'] },
+                                            { id: 'emerald', name: 'Emerald Forest', colors: ['#10B981', '#34D399', '#059669', '#6EE7B7', '#047857'] },
+                                            { id: 'neon', name: 'Neon Cyberpunk', colors: ['#8B5CF6', '#C084FC', '#7C3AED', '#E879F9', '#6D28D9'] }
+                                        ].map(theme => (
+                                            <div
+                                                key={theme.id}
+                                                onClick={() => setAppChartTheme(theme.id)}
+                                                className={cn("cursor-pointer rounded-2xl border-2 p-5 transition-all hover:border-border", appChartTheme === theme.id ? "border-primary bg-primary/5 shadow-sm" : "border-border/40 bg-muted/20")}
+                                            >
+                                                <span className={cn("text-[15px] font-bold block mb-4", appChartTheme === theme.id ? "text-primary" : "text-foreground")}>{theme.name}</span>
+                                                <div className="flex w-full h-10 overflow-hidden rounded-lg shadow-inner">
+                                                    {theme.colors.map((c, i) => (
+                                                        <div key={i} className="flex-1 h-full" style={{ backgroundColor: c }}></div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Row 4: Font Style */}
+                                <div className="py-8">
+                                    <div className="space-y-1 mb-6">
+                                        <Label className="text-base font-bold text-foreground/90">Font style</Label>
+                                        <p className="text-sm text-muted-foreground">Font style for text and headings</p>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-4">
+                                        {[{ name: 'Inter', family: 'var(--font-inter)' }, { name: 'Jakarta', family: 'var(--font-jakarta)' }, { name: 'Outfit', family: 'var(--font-outfit)' }, { name: 'DM Sans', family: 'var(--font-dmsans)' }, { name: 'Sora', family: 'var(--font-sora)' }].map(f => (
+                                            <button
+                                                key={f.name}
+                                                title={f.name}
+                                                onClick={() => setAppFont(f.name)}
+                                                style={{ fontFamily: f.family }}
+                                                className={cn("h-14 px-5 rounded-xl border-2 flex flex-col items-center justify-center transition-all", appFont === f.name ? "border-primary text-primary shadow-sm bg-primary/5" : "border-border/60 text-foreground/80 hover:bg-muted/50 hover:border-border")}
+                                            >
+                                                <span className="text-lg font-bold leading-none">Aa</span>
+                                                <span className="text-[9px] mt-1.5 uppercase tracking-widest font-bold opacity-60 leading-none">{f.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </TabsContent>
+
+                    {/* ── NOTIFICATIONS TAB ─────────────────────────────────────────── */}
+                    <TabsContent value="notification" className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500 pb-10 w-full">
+                        <div className="flex items-start gap-4 mb-8 border-b border-border/40 pb-6 w-full">
+                            <div className="p-2.5 bg-primary/10 rounded-xl ring-1 ring-primary/20 shrink-0">
+                                <Bell className="w-[18px] h-[18px] text-primary" />
+                            </div>
+                            <div className="space-y-1.5 mt-0.5">
+                                <h2 className="text-xl font-bold tracking-tight">Notification Preferences</h2>
+                                <p className="text-sm text-muted-foreground">Choose what updates you want to receive and manage your communication flow.</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-10 w-full">
+                            {/* Section 1: Employee Activity */}
+                            <section className="w-full">
+                                <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Employee Activity</h3>
+                                <div className="border border-border/50 rounded-2xl bg-card divide-y divide-border/50 w-full overflow-hidden shadow-sm">
+                                    {[
+                                        { id: "leads", title: "LEADS", desc: "Get notified immediately when a new lead is captured by an employee." },
+                                        { id: "taps", title: "TAPS", desc: "Receive alerts when NFC cards are scanned or shared." },
+                                        { id: "nfc_cards", title: "NFC CARDS", desc: "Status updates when cards are requested, activated, or deactivated." }
+                                    ].map((v, i) => (
+                                        <div key={i} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors w-full">
+                                            <div className="space-y-1.5 pr-6 flex-1">
+                                                <Label className="text-[15px] font-bold tracking-widest text-foreground cursor-pointer block">{v.title}</Label>
+                                                <p className="text-[13px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                                            </div>
+                                            <Switch
+                                                checked={notifSettings[v.id] || false}
+                                                onCheckedChange={(checked) => handleNotificationToggle(v.id, checked)}
+                                                className="data-[state=checked]:bg-primary shrink-0"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* Section 2: Report */}
+                            {role !== 'employee' && (
+                                <section className="w-full">
+                                    <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Report</h3>
+                                    <div className="border border-border/50 rounded-2xl bg-card divide-y divide-border/50 w-full overflow-hidden shadow-sm">
+                                        {[
+                                            { id: "daily_pulse", title: "DAILY PULSE", desc: "A morning summary of the previous day's taps and lead capture metrics." },
+                                            { id: "weekly_roundup", title: "WEEKLY ROUNDUP", desc: "A weekly rollup report with performance comparisons across departments." },
+                                            { id: "monthly_digest", title: "MONTHLY DIGEST", desc: "A comprehensive monthly report detailing analytical growth and asset usage." }
+                                        ].map((v, i) => (
+                                            <div key={i} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors w-full">
+                                                <div className="space-y-1.5 pr-6 flex-1">
+                                                    <Label className="text-[15px] font-bold tracking-widest text-foreground cursor-pointer block">{v.title}</Label>
+                                                    <p className="text-[13px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                                                </div>
+                                                <Switch
+                                                    checked={notifSettings[v.id] || false}
+                                                    onCheckedChange={(checked) => handleNotificationToggle(v.id, checked)}
+                                                    className="data-[state=checked]:bg-primary shrink-0"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Section 3: Payment and billing */}
+                            {role !== 'employee' && (
+                                <section className="w-full">
+                                    <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Payment & Billing</h3>
+                                    <div className="border border-border/50 rounded-2xl bg-card divide-y divide-border/50 w-full overflow-hidden shadow-sm">
+                                        {[
+                                            { id: "invoices_receipts", title: "INVOICES & RECEIPTS", desc: "Receive immediate copies of your invoices when payments are processed." },
+                                            { id: "upcoming_bills", title: "UPCOMING BILLS", desc: "When you need to be reminded of upcoming invoice renewals or late bills." }
+                                        ].map((v, i) => (
+                                            <div key={i} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors w-full">
+                                                <div className="space-y-1.5 pr-6 flex-1">
+                                                    <Label className="text-[15px] font-bold tracking-widest text-foreground cursor-pointer block">{v.title}</Label>
+                                                    <p className="text-[13px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                                                </div>
+                                                <Switch
+                                                    checked={notifSettings[v.id] || false}
+                                                    onCheckedChange={(checked) => handleNotificationToggle(v.id, checked)}
+                                                    className="data-[state=checked]:bg-primary shrink-0"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Section 4: Email Delivery Configuration
                 <section className="w-full">
                     <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Delivery Channels</h3>
                     <div className="border border-border/50 rounded-2xl bg-card w-full overflow-hidden shadow-sm flex flex-col xl:flex-row">
@@ -1417,10 +1417,10 @@ export default function SettingsPage() {
                     </div>
                 </section>
                 */ }
-            </div>
-          </TabsContent>
+                        </div>
+                    </TabsContent>
 
-          {/* ── AI LABS TAB ───────────────────────────────────────────────── 
+                    {/* ── AI LABS TAB ───────────────────────────────────────────────── 
           <TabsContent value="ai" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
             <section>
                 <div className="flex items-start gap-4 mb-8">
@@ -1594,7 +1594,7 @@ export default function SettingsPage() {
           </TabsContent>
           */ }
 
-          {/* ── AUDIT LOG TAB ───────────────────────────────────────────────
+                    {/* ── AUDIT LOG TAB ───────────────────────────────────────────────
           <TabsContent value="audit" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
             <section>
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
@@ -1613,8 +1613,8 @@ export default function SettingsPage() {
             </section>
           </TabsContent>
           */}
+                </div>
+            </Tabs>
         </div>
-      </Tabs>
-    </div>
-  )
+    )
 }
