@@ -82,7 +82,7 @@ export default function OrganizationDetailsPage() {
   const [pdfName, setPdfName] = React.useState("")
   const [newInvoice, setNewInvoice] = React.useState({
     invoice_number: "",
-    plan: "basic",
+    plan: "starter",
     payment_method: "",
     status: "pending"
   })
@@ -218,7 +218,7 @@ export default function OrganizationDetailsPage() {
       setIsAddInvoiceOpen(false)
       setNewInvoice({
         invoice_number: "",
-        plan: "basic",
+        plan: "starter",
         payment_method: "",
         status: "pending"
       })
@@ -380,7 +380,7 @@ export default function OrganizationDetailsPage() {
               })}
           </InfoField>
           <InfoField label="Plan Tier">
-              <span className="uppercase tracking-widest font-bold">₹499 Plan</span>
+              <span className="uppercase tracking-widest font-bold">Starter</span>
           </InfoField>
           <InfoField label="Max Employees">
               {org.max_employees} seats
@@ -425,7 +425,7 @@ export default function OrganizationDetailsPage() {
                   <SelectValue placeholder="Select Plan" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="starter">₹499 Plan</SelectItem>
+                  <SelectItem value="starter">Starter</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -580,7 +580,7 @@ export default function OrganizationDetailsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="uppercase tracking-widest text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-muted/60 border border-border/50">
-                        {bill.plan || 'N/A'}
+                        {bill.plan === 'starter' ? 'Starter' : bill.plan || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-muted-foreground/90 font-medium">
@@ -711,7 +711,7 @@ export default function OrganizationDetailsPage() {
                       <SelectValue placeholder="Select Plan" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="basic">₹499 Plan</SelectItem>
+                      <SelectItem value="starter">Starter</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -28,7 +28,7 @@ function StatusBadge({ status }: { status: string }) {
 function PlanBadge({ plan }: { plan: string }) {
   return (
     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-[#FF3D00] dark:bg-[#FF3D00]/10 dark:text-[#FF3D00]">
-      ₹499 Plan
+      Starter
     </span>
   )
 }

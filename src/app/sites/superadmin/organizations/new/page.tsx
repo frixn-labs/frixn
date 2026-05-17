@@ -384,7 +384,7 @@ export default function NewOrganizationPage() {
                       <SelectValue placeholder="Select Plan" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="starter">₹499 Plan</SelectItem>
+                      <SelectItem value="starter">Starter</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>

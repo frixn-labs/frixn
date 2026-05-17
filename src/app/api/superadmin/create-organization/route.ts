@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
     if (orgError) {
       // Rollback: delete the auth user we just created
       await supabaseAuth.auth.admin.deleteUser(uid)
+      console.error('[create-org] Step 2 DB error:', orgError)
       return NextResponse.json({ error: `DB error: ${orgError.message}` }, { status: 400 })
     }
 
@@ -95,9 +96,11 @@ export async function POST(req: NextRequest) {
       // Rollback: delete the organization and the auth user
       await supabaseData.from('organizations').delete().eq('id', uid)
       await supabaseAuth.auth.admin.deleteUser(uid)
+      console.error('[create-org] Step 3 notification settings error:', notifError)
       return NextResponse.json({ error: `Notification Settings DB error: ${notifError.message}` }, { status: 400 })
     }
 
+    console.log('[create-org] Success: org created with id', uid)
     return NextResponse.json({ success: true, org })
 
   } catch (err: any) {

@@ -142,7 +142,7 @@ export function BillingDataTable({
         return (
           <div className="flex items-center gap-2 border border-border/60 bg-background w-fit px-2.5 py-1 rounded-[6px] shadow-sm">
             <div className="w-1.5 h-1.5 rounded-full bg-[#FF3D00] shadow-[0_0_8px_rgba(255,61,0,0.8)]"></div>
-            <span className="text-xs font-semibold tracking-tight">₹499 Plan</span>
+            <span className="text-xs font-semibold tracking-tight">Starter</span>
           </div>
         )
       },
