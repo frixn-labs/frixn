@@ -18,6 +18,7 @@ import { supabase } from "@/lib/supabase"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion, AnimatePresence } from "framer-motion"
 import { format } from "date-fns"
+import { useRole } from "@/components/role-provider"
 
 export type LeadData = {
   id: string
@@ -300,12 +301,21 @@ export function LeadsDataTable({ slug }: { slug: string }) {
   const [activeTab, setActiveTab] = React.useState("all")
   const [page, setPage] = React.useState(0)
   const PAGE_SIZE = 12
+  const { role, orgId: sessionUserOrOrgId } = useRole()
 
   const fetchData = React.useCallback(async () => {
     const { data: org } = await supabase.from('organizations').select('id').eq('slug', slug).single()
     if (org) {
       setOrgId(org.id)
-      const { data: leads } = await supabase.from('leads').select(`*, employees (name)`).eq('org_id', org.id).order('captured_at', { ascending: false })
+      let query = supabase.from('leads').select(`*, employees (name)`)
+      
+      if (role === 'employee') {
+         query = query.eq('employee_id', sessionUserOrOrgId)
+      } else {
+         query = query.eq('org_id', org.id)
+      }
+      
+      const { data: leads } = await query.order('captured_at', { ascending: false })
       if (leads) { _leadDataCache[slug] = leads as any; setData(leads as any) }
     }
     setLoading(false)
@@ -315,9 +325,10 @@ export function LeadsDataTable({ slug }: { slug: string }) {
 
   React.useEffect(() => {
     if (!orgId) return
-    const ch = supabase.channel(`leads:${orgId}`).on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'leads', filter: `org_id=eq.${orgId}` }, fetchData).subscribe()
+    const filterPrefix = role === 'employee' ? `employee_id=eq.${sessionUserOrOrgId}` : `org_id=eq.${orgId}`
+    const ch = supabase.channel(`leads:${orgId}`).on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'leads', filter: filterPrefix }, fetchData).subscribe()
     return () => { supabase.removeChannel(ch) }
-  }, [orgId, fetchData])
+  }, [orgId, fetchData, role, sessionUserOrOrgId])
 
   const handleUpdateStatus = async (id: string, s: string) => {
     setData(prev => prev.map(p => p.id === id ? { ...p, status: s } : p))
@@ -390,7 +401,7 @@ export function LeadsDataTable({ slug }: { slug: string }) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={v => setActiveTab(v)} className="w-full pt-4">
-        <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-0 gap-4 flex-wrap">
+        <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-0 gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap">
           {TABS.map(({ key, label, countCls }) => (
             <TabsTrigger key={key} value={key} className="pb-3 text-sm flex items-center gap-2 shrink-0">
               {label}

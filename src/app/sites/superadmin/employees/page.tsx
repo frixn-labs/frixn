@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase"
 import { Users, Plus, Search, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
 // ─── Avatar helper ──────────────────────────────────────────────────────────
@@ -95,14 +96,18 @@ export default function EmployeesPage() {
           <Input value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
             placeholder="Search by name, email, code…" className="pl-9 h-10 text-sm" />
         </div>
-        <select
+        <Select
           value={orgFilter}
-          onChange={e => { setOrgFilter(e.target.value); setPage(1) }}
-          className="h-10 text-sm px-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-[#FF3D00]/20 min-w-[200px]"
+          onValueChange={v => { setOrgFilter(v === "all" ? "" : v); setPage(1) }}
         >
-          <option value="">All Organizations</option>
-          {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
-        </select>
+          <SelectTrigger className="w-full sm:w-[200px] h-10 rounded-xl">
+            <SelectValue placeholder="All Organizations" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Organizations</SelectItem>
+            {orgs.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import ProfileClient from './components/ProfileClient'
 import DeactivatedView from './components/DeactivatedView'
 import { ShieldAlert, Mail } from 'lucide-react'
+import { OrgStatusGate } from '@/components/org-status-gate'
 
 export default async function EmployeeProfile({
   params,
@@ -18,8 +19,23 @@ export default async function EmployeeProfile({
     .eq('slug', slug)
     .single()
 
-  if (!org || (org.status !== 'active' && org.status !== 'setup')) {
+  if (!org) {
     return notFound()
+  }
+
+  // Fetch initial employee count for progress tracker in setup gate
+  let employeeCount = 0
+  if (org.status !== 'active') {
+    const { count } = await supabase
+      .from('employees')
+      .select('*', { count: 'exact', head: true })
+      .eq('org_id', org.id)
+    employeeCount = count || 0
+
+    // If org is not active, immediately render the status gate and halt further processing
+    return (
+      <OrgStatusGate initialOrg={org} initialEmployeeCount={employeeCount} slug={slug} />
+    )
   }
 
   // 2. Fetch Employee — try by UUID (id) first, then by employee_code
@@ -63,7 +79,13 @@ export default async function EmployeeProfile({
   const isDeactivated = !employee.is_active || allCardsDeactivated
 
   if (isDeactivated) {
-    return <DeactivatedView org={org} />
+    return (
+      <>
+        {/* Mount OrgStatusGate to listen for realtime status changes even on deactivated profiles */}
+        <OrgStatusGate initialOrg={org} initialEmployeeCount={0} slug={slug} />
+        <DeactivatedView org={org} />
+      </>
+    )
   }
 
   // Locked state: If all active cards are locked, or if no active cards exist to unlock it
@@ -97,14 +119,19 @@ export default async function EmployeeProfile({
     .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0))
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-start overflow-x-hidden">
-      <ProfileClient
-        employee={employee}
-        org={org}
-        links={sortedLinks}
-        isLocked={isLocked}
-        activeCardId={activeCardId}
-      />
-    </div>
+    <>
+      {/* Always mount OrgStatusGate so it can block the page or listen for realtime status changes */}
+      <OrgStatusGate initialOrg={org} initialEmployeeCount={employeeCount} slug={slug} />
+      
+      <div className="min-h-screen bg-background flex flex-col items-center justify-start overflow-x-hidden">
+        <ProfileClient
+          employee={employee}
+          org={org}
+          links={sortedLinks}
+          isLocked={isLocked}
+          activeCardId={activeCardId}
+        />
+      </div>
+    </>
   )
 }

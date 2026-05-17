@@ -12,6 +12,8 @@ import { useParams } from 'next/navigation'
 import { supabase } from "@/lib/supabase"
 import { TypewriterSummary } from "@/components/typewriter-summary"
 import { useAISettings } from "@/hooks/use-ai-settings"
+import { useRole } from "@/components/role-provider"
+import { useRouter } from "next/navigation"
 
 const AI_TEXT = "Currently analyzing your workforce structure spanning multiple departments. We have detected steady growth in commercial sales acquisitions. The engagement metrics indicate outstanding card usage rates across all active employees."
 
@@ -21,8 +23,17 @@ export default function EmployeesPage() {
   const [orgId, setOrgId] = useState<string | null>(null)
   const [locallyDismissed, setLocallyDismissed] = useState(false)
   const { settings: aiSettings, loading: aiLoading } = useAISettings(orgId)
+  const { role, orgId: sessionUserOrOrgId } = useRole()
+  const router = useRouter()
 
   useEffect(() => {
+    if (role === 'employee' && sessionUserOrOrgId) {
+      router.replace(`/sites/${slug}/admin/employees/${sessionUserOrOrgId}`)
+    }
+  }, [role, sessionUserOrOrgId, slug, router])
+
+  useEffect(() => {
+    if (role === 'employee') return;
     const fetchOrg = async () => {
       const { data } = await supabase.from('organizations').select('id').eq('slug', slug).single()
       if (data) setOrgId(data.id)
@@ -31,6 +42,10 @@ export default function EmployeesPage() {
   }, [slug])
 
   const showAiSummary = aiSettings?.employees_enabled && !locallyDismissed
+
+  if (role === 'employee') {
+    return null; // Render nothing while redirecting
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -63,14 +78,18 @@ export default function EmployeesPage() {
       <Tabs defaultValue="employees" className="w-full">
         <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-6">
           <TabsTrigger value="employees" className="pb-3 text-sm">Employees</TabsTrigger>
-          <TabsTrigger value="departments" className="pb-3 text-sm">Departments</TabsTrigger>
+          {role !== 'employee' && (
+            <TabsTrigger value="departments" className="pb-3 text-sm">Departments</TabsTrigger>
+          )}
         </TabsList>
         <TabsContent value="employees">
            <EmployeeDataTable slug={slug} />
         </TabsContent>
-        <TabsContent value="departments">
-           <DepartmentDataTable slug={slug} />
-        </TabsContent>
+        {role !== 'employee' && (
+          <TabsContent value="departments">
+             <DepartmentDataTable slug={slug} />
+          </TabsContent>
+        )}
       </Tabs>
       
     </div>

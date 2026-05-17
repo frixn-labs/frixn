@@ -26,14 +26,9 @@ function StatusBadge({ status }: { status: string }) {
 
 // ─── Plan badge helper ──────────────────────────────────────────────────────
 function PlanBadge({ plan }: { plan: string }) {
-  const map: Record<string, string> = {
-    starter:    "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
-    growth:     "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-    enterprise: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
-  }
   return (
-    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider", map[plan] ?? "bg-muted text-muted-foreground")}>
-      {plan}
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-[#FF3D00] dark:bg-[#FF3D00]/10 dark:text-[#FF3D00]">
+      ₹499 Plan
     </span>
   )
 }
@@ -118,7 +113,7 @@ export default function OrganizationsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                {["Organization", "Slug / URL", "Admin Contact", "Plan", "Status", "Employees", "Created", ""].map(h => (
+                {["Organization", "Slug / URL", "Admin Contact", "Status", "Employees", "Created"].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -140,7 +135,11 @@ export default function OrganizationsPage() {
                   </td>
                 </tr>
               ) : orgs.map(org => (
-                <tr key={org.id} className="border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors">
+                <tr 
+                  key={org.id} 
+                  onClick={() => router.push(`/sites/superadmin/organizations/${org.id}`)}
+                  className="border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors cursor-pointer"
+                >
                   {/* Name + logo */}
                   <td className="px-4 py-3 min-w-[160px]">
                     <div className="flex items-center gap-3">
@@ -164,8 +163,6 @@ export default function OrganizationsPage() {
                     <p className="font-semibold text-xs">{org.admin_name || '—'}</p>
                     <p className="text-[11px] text-muted-foreground">{org.admin_email}</p>
                   </td>
-                  {/* Plan */}
-                  <td className="px-4 py-3"><PlanBadge plan={org.plan} /></td>
                   {/* Status */}
                   <td className="px-4 py-3"><StatusBadge status={org.status} /></td>
                   {/* Max employees */}
@@ -175,17 +172,6 @@ export default function OrganizationsPage() {
                   {/* Created */}
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                     {org.created_at ? new Date(org.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
-                  </td>
-                  {/* Actions */}
-                  <td className="px-4 py-3">
-                    <a
-                      href={`/sites/${org.slug}/admin/dashboard`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#FF3D00] hover:underline whitespace-nowrap"
-                    >
-                      View <ExternalLink className="w-3 h-3" />
-                    </a>
                   </td>
                 </tr>
               ))}

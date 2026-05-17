@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers'
 
-export async function setSession(orgSlug: string, orgId: string) {
+export async function setSession(orgSlug: string, orgId: string, role: string = 'org_admin') {
   const cookieStore = await cookies()
   
   // 1. Store slug-specific session
-  cookieStore.set(`tapconnect_session_${orgSlug}`, JSON.stringify({ orgId, orgSlug }), {
+  cookieStore.set(`tapconnect_session_${orgSlug}`, JSON.stringify({ orgId, orgSlug, role }), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

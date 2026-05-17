@@ -60,6 +60,7 @@ import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { useRole } from "@/components/role-provider"
 
 
 function AnimatedSearchBox({ value, onChange }: { value: string, onChange: (v: string) => void }) {
@@ -136,6 +137,7 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const router = useRouter()
+  const { role, orgId: sessionUserOrOrgId } = useRole()
 
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -166,15 +168,21 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
       setOrgId(orgData.id)
       
       // 2. Fetch Employees with joined Departments & Cards
-      const { data: empData, error } = await supabase
+      let query = supabase
         .from('employees')
         .select(`
           *,
           departments (name),
           nfc_cards (card_code, status)
         `)
-        .eq('org_id', orgData.id)
-        .order('employee_code', { ascending: true })
+        
+      if (role === 'employee') {
+         query = query.eq('id', sessionUserOrOrgId)
+      } else {
+         query = query.eq('org_id', orgData.id)
+      }
+      
+      const { data: empData, error } = await query.order('employee_code', { ascending: true })
       
       if (empData) {
          _empDataCache[slug] = empData as any
@@ -441,17 +449,19 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
         const emp = row.original
         return (
           <div className="flex justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation()
-                setSelectedEmployeeForDelete(emp)
-              }}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {role !== 'employee' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedEmployeeForDelete(emp)
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -552,12 +562,13 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
                 })}
             </DropdownMenuContent>
             </DropdownMenu>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                    <Button>
-                        <Plus className="w-4 h-4 mr-2" /> Add Employee
-                    </Button>
-                </DialogTrigger>
+            {role !== 'employee' && (
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                      <Button>
+                          <Plus className="w-4 h-4 mr-2" /> Add Employee
+                      </Button>
+                  </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold tracking-tight">Add New Employee</DialogTitle>
@@ -676,6 +687,7 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
                     </form>
                 </DialogContent>
             </Dialog>
+            )}
         </div>
       </div>
       <div className="rounded-md border bg-card">

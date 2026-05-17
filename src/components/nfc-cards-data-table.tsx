@@ -43,6 +43,7 @@ import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
 import { motion, AnimatePresence } from "framer-motion"
 import { format } from "date-fns"
+import { useRole } from "@/components/role-provider"
 
 function AnimatedSearchBox({ value, onChange }: { value: string, onChange: (v: string) => void }) {
   const [focused, setFocused] = React.useState(false)
@@ -124,6 +125,7 @@ export function NfcCardsDataTable({ slug }: { slug: string }) {
   const [orgColors, setOrgColors] = React.useState({ brand_color: '#007AFF', accent_color: '#007AFF' })
   const [loading, setLoading] = React.useState(!_cardDataCache[slug])
   const router = useRouter()
+  const { role, orgId: sessionUserOrOrgId } = useRole()
 
   const [deactivateCardId, setDeactivateCardId] = React.useState<string | null>(null)
   const [deactivateReason, setDeactivateReason] = React.useState('')
@@ -152,11 +154,17 @@ export function NfcCardsDataTable({ slug }: { slug: string }) {
          accent_color: orgData.accent_color || '#007AFF' 
       })
       
-      const { data: cardData } = await supabase
+      let query = supabase
         .from('nfc_cards')
         .select(`*, employees (id, name, email, photo_url, taps (id)), card_taps:taps (id)`)
-        .eq('org_id', orgData.id)
-        .order('created_at', { ascending: false })
+        
+      if (role === 'employee') {
+         query = query.eq('employee_id', sessionUserOrOrgId)
+      } else {
+         query = query.eq('org_id', orgData.id)
+      }
+      
+      const { data: cardData } = await query.order('created_at', { ascending: false })
       
       if (cardData) {
          _cardDataCache[slug] = cardData as any

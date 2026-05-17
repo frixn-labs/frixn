@@ -24,9 +24,9 @@ export async function POST(req: NextRequest) {
     } = body
 
     // ── Validate required fields ─────────────────────────────────────────────
-    if (!name?.trim())          return NextResponse.json({ error: 'Organization name is required.' }, { status: 400 })
-    if (!slug?.trim())          return NextResponse.json({ error: 'Slug is required.' }, { status: 400 })
-    if (!admin_email?.trim())   return NextResponse.json({ error: 'Admin email is required.' }, { status: 400 })
+    if (!name?.trim()) return NextResponse.json({ error: 'Organization name is required.' }, { status: 400 })
+    if (!slug?.trim()) return NextResponse.json({ error: 'Slug is required.' }, { status: 400 })
+    if (!admin_email?.trim()) return NextResponse.json({ error: 'Admin email is required.' }, { status: 400 })
     if (!admin_password?.trim()) return NextResponse.json({ error: 'Admin password is required (min 8 chars).' }, { status: 400 })
     if (admin_password.length < 8) return NextResponse.json({ error: 'Admin password must be at least 8 characters.' }, { status: 400 })
 
@@ -72,6 +72,30 @@ export async function POST(req: NextRequest) {
       // Rollback: delete the auth user we just created
       await supabaseAuth.auth.admin.deleteUser(uid)
       return NextResponse.json({ error: `DB error: ${orgError.message}` }, { status: 400 })
+    }
+
+    // ── Step 3: Insert default notification settings for organization ────────
+    const { error: notifError } = await supabaseData
+      .from('notification_settings')
+      .insert([{
+        org_id: uid,
+        employee_id: null,
+        leads: true,
+        taps: true,
+        nfc_cards: true,
+        daily_pulse: true,
+        weekly_roundup: true,
+        monthly_digest: true,
+        invoices_receipts: true,
+        upcoming_bills: true,
+        additional_recipients: [admin_email.trim().toLowerCase()]
+      }])
+
+    if (notifError) {
+      // Rollback: delete the organization and the auth user
+      await supabaseData.from('organizations').delete().eq('id', uid)
+      await supabaseAuth.auth.admin.deleteUser(uid)
+      return NextResponse.json({ error: `Notification Settings DB error: ${notifError.message}` }, { status: 400 })
     }
 
     return NextResponse.json({ success: true, org })

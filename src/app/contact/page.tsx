@@ -10,11 +10,48 @@ import { ThemeToggle } from "@/components/ThemeToggle"
 
 export default function ContactPage() {
   const [loading, setLoading] = React.useState(false)
+  const [status, setStatus] = React.useState<"idle" | "success" | "error">("idle")
+  const [errorMessage, setErrorMessage] = React.useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = React.useState({
+    fullName: "",
+    phone: "",
+    email: "",
+    organization: "",
+    teamSize: ""
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => setLoading(false), 2000)
+    setStatus("idle")
+    setErrorMessage("")
+
+    try {
+      const response = await fetch("https://server.frixn.in/api/email/sales", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit request");
+      }
+
+      setStatus("success")
+      setFormData({ fullName: "", phone: "", email: "", organization: "", teamSize: "" })
+    } catch (err: any) {
+      setStatus("error")
+      setErrorMessage(err.message || "An unexpected error occurred")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -65,7 +102,7 @@ export default function ContactPage() {
       </section>
 
       {/* Right Section: Core Form */}
-      <section className="lg:w-1/2 w-full flex flex-col p-4 lg:p-6 bg-background relative z-20 min-h-screen lg:min-h-0 overflow-y-auto overflow-x-hidden pt-12 lg:pt-6">
+      <section className="lg:w-1/2 w-full flex flex-col p-4 lg:p-6 bg-background relative z-20 min-h-screen lg:min-h-0 overflow-y-auto overflow-x-hidden">
 
         {/* Mobile Logo */}
         <div className="lg:hidden flex justify-start mb-6">
@@ -90,6 +127,18 @@ export default function ContactPage() {
               </p>
             </div>
 
+            {status === "success" && (
+              <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm font-medium">
+                Request submitted successfully! Our team will contact you shortly.
+              </div>
+            )}
+
+            {status === "error" && (
+              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium">
+                {errorMessage}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
 
               <div className="grid grid-cols-2 gap-4">
@@ -97,6 +146,9 @@ export default function ContactPage() {
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80 ml-1">Full Name</label>
                   <div className="relative group">
                     <Input
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
                       placeholder="John Doe"
                       required
                       className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
@@ -110,6 +162,9 @@ export default function ContactPage() {
                   <div className="relative group">
                     <Input
                       type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
                       placeholder="+91 98765 43210"
                       required
                       className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
@@ -124,6 +179,9 @@ export default function ContactPage() {
                 <div className="relative group">
                   <Input
                     type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                     placeholder="name@company.com"
                     required
                     className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
@@ -137,6 +195,9 @@ export default function ContactPage() {
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80 ml-1">Organization</label>
                   <div className="relative group">
                     <Input
+                      name="organization"
+                      value={formData.organization}
+                      onChange={handleChange}
                       placeholder="Company Inc."
                       required
                       className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"
@@ -149,6 +210,9 @@ export default function ContactPage() {
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80 ml-1">Team Size</label>
                   <div className="relative group">
                     <Input
+                      name="teamSize"
+                      value={formData.teamSize}
+                      onChange={handleChange}
                       placeholder="e.g. 50-100"
                       required
                       className="pl-10 h-11 rounded-xl bg-muted/40 border-border/60 focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium"

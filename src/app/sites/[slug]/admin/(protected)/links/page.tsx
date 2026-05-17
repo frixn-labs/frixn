@@ -12,6 +12,7 @@ import { LinkProvisionDialog } from "@/components/link-provision-dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { TypewriterSummary } from "@/components/typewriter-summary"
 import { useAISettings } from "@/hooks/use-ai-settings"
+import { useRole } from "@/components/role-provider"
 
 const AI_TEXT = "Currently analyzing your digital landscape. You have a healthy mix of social and professional endpoints. Your contact-based links are optimized for mobile delivery, ensuring seamless vCard downloads and high conversion rates across all provisioned NFC assets."
 
@@ -37,6 +38,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
     const [deletingId, setDeletingId] = React.useState<string | null>(null)
     const [locallyDismissed, setLocallyDismissed] = React.useState(false)
     const { settings: aiSettings } = useAISettings(orgId)
+    const { role, orgId: sessionUserOrOrgId } = useRole()
 
     const [dialogOpen, setDialogOpen] = React.useState(false)
     const [editingLink, setEditingLink] = React.useState<CardLink | undefined>()
@@ -75,11 +77,17 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
         if (orgData) {
             setOrgId(orgData.id)
             fetchClickData(orgData.id)
-            const { data } = await supabase
+            
+            let query = supabase
                 .from('card_links')
                 .select('*')
                 .eq('org_id', orgData.id)
-                .order('display_order', { ascending: true })
+                
+            if (role === 'employee') {
+                query = query.contains('assigned_to', [sessionUserOrOrgId])
+            }
+                
+            const { data } = await query.order('display_order', { ascending: true })
             if (data) setLinks(data)
 
             const { data: prodData } = await supabase
@@ -352,9 +360,11 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                         <p className="text-sm text-muted-foreground">Configure social, internal, and dynamic vCard assets.</p>
                     </div>
                 </div>
+                {role !== 'employee' && (
                     <Button onClick={() => { setEditingLink(undefined); setDialogOpen(true) }}>
-                    <Plus className="w-4 h-4 mr-2" /> Add Link
-                </Button>
+                        <Plus className="w-4 h-4 mr-2" /> Add Link
+                    </Button>
+                )}
             </div>
 
             {/* AI Summary */}
@@ -421,9 +431,11 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                     <p className="text-muted-foreground text-sm max-w-[400px] text-center mb-6">
                         Create digital endpoints to bind to your NFC hardware.
                     </p>
-                    <Button onClick={() => { setEditingLink(undefined); setDialogOpen(true) }}>
-                        <Plus className="w-4 h-4 mr-2" /> Create First Link
-                    </Button>
+                    {role !== 'employee' && (
+                        <Button onClick={() => { setEditingLink(undefined); setDialogOpen(true) }}>
+                            <Plus className="w-4 h-4 mr-2" /> Create First Link
+                        </Button>
+                    )}
                 </div>
             )}
 
@@ -504,28 +516,32 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                                         <div className="w-px h-5 bg-border" />
 
                                         {/* Edit */}
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="w-8 h-8 opacity-40 hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-all"
-                                            onClick={() => { setEditingLink(link); setDialogOpen(true) }}
-                                        >
-                                            <Edit className="w-4 h-4" />
-                                        </Button>
+                                        {role !== 'employee' && (
+                                            <>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="w-8 h-8 opacity-40 hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-all"
+                                                    onClick={() => { setEditingLink(link); setDialogOpen(true) }}
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
 
-                                        {/* Delete */}
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="w-8 h-8 opacity-40 hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
-                                            onClick={() => handleDelete(link.id)}
-                                            disabled={deletingId === link.id}
-                                        >
-                                            {deletingId === link.id
-                                                ? <Loader2 className="w-4 h-4 animate-spin" />
-                                                : <Trash className="w-4 h-4" />
-                                            }
-                                        </Button>
+                                                {/* Delete */}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="w-8 h-8 opacity-40 hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
+                                                    onClick={() => handleDelete(link.id)}
+                                                    disabled={deletingId === link.id}
+                                                >
+                                                    {deletingId === link.id
+                                                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                        : <Trash className="w-4 h-4" />
+                                                    }
+                                                </Button>
+                                            </>
+                                        )}
                                     </div>
                                 </Reorder.Item>
                             ))}
@@ -535,7 +551,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
             )}
 
             {/* Products list */}
-            {!loading && (
+            {!loading && role !== 'employee' && (
                 <div className="bg-card border rounded-xl overflow-hidden shadow-sm mt-8">
                     <div className="px-6 py-4 flex items-center justify-between border-b bg-muted/20">
                         <div className="flex items-center gap-2">
@@ -599,7 +615,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
             )}
 
             {/* Provision / Edit dialog */}
-            {orgId && (
+            {orgId && role !== 'employee' && (
                 <LinkProvisionDialog
                     open={dialogOpen}
                     onOpenChange={setDialogOpen}

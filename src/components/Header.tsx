@@ -44,7 +44,7 @@ export default function Header({ hideNavLinks = false }: HeaderProps) {
         {/* Actions */}
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <Link href="/login" className="hidden md:block text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/login" className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
             Login
           </Link>
           <Link href="/contact" className="hidden md:block bg-[#FF3D00] text-white hover:bg-[#FF3D00] px-5 py-1.5 text-[13px] font-bold rounded-full text-center">

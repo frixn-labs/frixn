@@ -10,6 +10,8 @@ import { useParams } from 'next/navigation'
 import { supabase } from "@/lib/supabase"
 import { TypewriterSummary } from "@/components/typewriter-summary"
 import { useAISettings } from "@/hooks/use-ai-settings"
+import { useRole } from "@/components/role-provider"
+import { useRouter } from "next/navigation"
 
 const AI_TEXT = "Currently analyzing your NFC fleet distribution and hardware metrics. We have detected a stable assignment rate across new employee on-boarding. The engagement metrics indicate outstanding physical card usage with negligible revocation trends."
 
@@ -19,16 +21,48 @@ export default function CardsPage() {
   const [orgId, setOrgId] = useState<string | null>(null)
   const [locallyDismissed, setLocallyDismissed] = useState(false)
   const { settings: aiSettings } = useAISettings(orgId)
+  const { role, orgId: sessionUserOrOrgId } = useRole()
+  const router = useRouter()
+  const [redirecting, setRedirecting] = useState(false)
+  const [noCard, setNoCard] = useState(false)
 
   useEffect(() => {
+    if (role === 'employee' && sessionUserOrOrgId) {
+      setRedirecting(true)
+      const fetchCard = async () => {
+        const { data, error } = await supabase.from('nfc_cards').select('id').eq('employee_id', sessionUserOrOrgId).limit(1).maybeSingle()
+        if (data) {
+          router.replace(`/sites/${slug}/admin/cards/${data.id}`)
+        } else {
+          setNoCard(true)
+          setRedirecting(false)
+        }
+      }
+      fetchCard()
+    }
+  }, [role, sessionUserOrOrgId, slug, router])
+
+  useEffect(() => {
+    if (role === 'employee') return;
     const fetchOrg = async () => {
       const { data } = await supabase.from('organizations').select('id').eq('slug', slug).single()
       if (data) setOrgId(data.id)
     }
     fetchOrg()
-  }, [slug])
+  }, [slug, role])
 
   const showAiSummary = aiSettings?.nfc_cards_enabled && !locallyDismissed
+
+  if (role === 'employee') {
+    if (redirecting) return null;
+    if (noCard) return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-in fade-in">
+        <CreditCard className="w-16 h-16 text-muted-foreground/30 mb-4" />
+        <h2 className="text-xl font-bold">No Card Assigned</h2>
+        <p className="text-muted-foreground mt-2">You currently do not have any NFC card assigned to your profile.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">

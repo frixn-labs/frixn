@@ -3,10 +3,12 @@
 import * as React from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { supabase } from "@/lib/supabase"
-import { Edit, ArrowLeft, Search, MoreVertical, Briefcase, Mail, Phone, Calendar, MapPin, MousePointerClick, UserPlus, Zap, ExternalLink, Globe, Link as LinkIcon, Contact, FileText } from "lucide-react"
+import { Edit, ArrowLeft, Search, MoreVertical, Briefcase, Mail, Phone, Calendar, MapPin, MousePointerClick, UserPlus, Zap, ExternalLink, Globe, Link as LinkIcon, Contact, FileText, Save, X, Loader2, Building2, Camera } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { addDays, format } from "date-fns"
@@ -14,6 +16,7 @@ import { type DateRange } from "react-day-picker"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
+import { useRole } from "@/components/role-provider"
 
 let cachedEmployeeList: EmployeeListData[] | null = null;
 let cachedSlug: string | null = null;
@@ -31,6 +34,7 @@ type EmployeeDetailsData = EmployeeListData & {
     email: string
     phone: string | null
     created_at: string
+    dept_id?: string
     nfc_cards: { card_code: string; card_url: string; status: string }[] | null
     departments: { name: string } | null
 }
@@ -43,6 +47,7 @@ export default function EmployeeDetailPage() {
 
     const [employeeList, setEmployeeList] = React.useState<EmployeeListData[]>([])
     const [searchQuery, setSearchQuery] = React.useState("")
+    const { role } = useRole()
 
     const [employee, setEmployee] = React.useState<EmployeeDetailsData | null>(null)
     const [tapCount, setTapCount] = React.useState<number>(0)
@@ -61,9 +66,77 @@ export default function EmployeeDetailPage() {
     const [activityFeed, setActivityFeed] = React.useState<any[]>([])
     const [loadingAnalytics, setLoadingAnalytics] = React.useState(false)
 
+    // Edit states
+    const [departmentsList, setDepartmentsList] = React.useState<{id: string, name: string}[]>([])
+    const [isEditingWorkDetails, setIsEditingWorkDetails] = React.useState(false)
+    const [workDetailsForm, setWorkDetailsForm] = React.useState({ phone: '', email: '', designation: '', dept_id: '' })
+    const [savingWorkDetails, setSavingWorkDetails] = React.useState(false)
+
+    // Photo upload states
+    const [uploadingPhoto, setUploadingPhoto] = React.useState(false)
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file || !employee) return
+
+        if (!file.type.startsWith("image/")) {
+            alert("Please upload an image file.")
+            return
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            alert("Image must be under 2MB.")
+            return
+        }
+
+        setUploadingPhoto(true)
+        const ext = file.name.split(".").pop()
+        const folder = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-")
+        const fileName = (employee.email || employee.id).toLowerCase().replace(/[^a-z0-9@.-]/g, "-")
+        const path = `${folder}/${fileName}.${ext}`
+
+        const { error: uploadError } = await supabase.storage
+            .from("tapconnect")
+            .upload(path, file, { upsert: true, contentType: file.type })
+
+        if (uploadError) {
+            alert(`Upload failed: ${uploadError.message}`)
+            setUploadingPhoto(false)
+            return
+        }
+
+        const { data: urlData } = supabase.storage.from("tapconnect").getPublicUrl(path)
+        // Append timestamp to bust browser cache
+        const newPhotoUrl = `${urlData.publicUrl}?t=${Date.now()}`
+
+        const { error: updateError } = await supabase
+            .from('employees')
+            .update({ photo_url: newPhotoUrl })
+            .eq('id', employee.id)
+
+        if (updateError) {
+            alert(`Failed to update profile photo: ${updateError.message}`)
+        } else {
+            setEmployee({ ...employee, photo_url: newPhotoUrl })
+            if (cachedEmployeeList) {
+                const idx = cachedEmployeeList.findIndex(e => e.id === employee.id)
+                if (idx !== -1) {
+                    cachedEmployeeList[idx].photo_url = newPhotoUrl
+                    setEmployeeList([...cachedEmployeeList])
+                }
+            }
+        }
+        setUploadingPhoto(false)
+    }
+
     // Fetch Left Sidebar List
     React.useEffect(() => {
         async function loadDirectory() {
+            if (role === 'employee') {
+                setLoadingList(false)
+                return
+            }
+
             if (cachedSlug === slug && cachedEmployeeList) {
                 setEmployeeList(cachedEmployeeList)
                 setLoadingList(false)
@@ -98,7 +171,7 @@ export default function EmployeeDetailPage() {
             const { data: empData } = await supabase
                 .from('employees')
                 .select(`
-          id, name, designation, photo_url, employee_code, email, phone, created_at,
+          id, name, designation, photo_url, employee_code, email, phone, created_at, dept_id,
           departments(name),
           nfc_cards(card_code, card_url, status)
         `)
@@ -107,6 +180,12 @@ export default function EmployeeDetailPage() {
 
             if (empData) {
                 setEmployee(empData as any)
+                setWorkDetailsForm({
+                    phone: empData.phone || '',
+                    email: empData.email || '',
+                    designation: empData.designation || '',
+                    dept_id: empData.dept_id || ''
+                })
                 // Fetch org_id from the employee's org for links query
                 const { data: orgData } = await supabase
                     .from('organizations')
@@ -124,6 +203,10 @@ export default function EmployeeDetailPage() {
                         .eq('is_active', true)
                         .order('display_order', { ascending: true })
                     setLinks(linksData || [])
+
+                    // Fetch departments
+                    const { data: deps } = await supabase.from('departments').select('id, name').eq('org_id', orgData.id).order('name')
+                    setDepartmentsList(deps || [])
                 }
             }
 
@@ -219,6 +302,36 @@ export default function EmployeeDetailPage() {
             // Rollback
             setLinks(prev => prev.map(l => l.id === link.id ? link : l))
         }
+    }
+
+    const handleSaveWorkDetails = async () => {
+        setSavingWorkDetails(true)
+        const { error } = await supabase
+            .from('employees')
+            .update({
+                phone: workDetailsForm.phone,
+                email: workDetailsForm.email,
+                designation: workDetailsForm.designation,
+                dept_id: workDetailsForm.dept_id || null
+            })
+            .eq('id', employeeId)
+
+        if (!error) {
+            const newDep = departmentsList.find(d => d.id === workDetailsForm.dept_id)
+            setEmployee(prev => prev ? { 
+                ...prev, 
+                phone: workDetailsForm.phone,
+                email: workDetailsForm.email,
+                designation: workDetailsForm.designation,
+                dept_id: workDetailsForm.dept_id,
+                departments: newDep ? { name: newDep.name } : prev.departments
+            } : null)
+            setIsEditingWorkDetails(false)
+        } else {
+            console.error(error)
+            alert('Failed to save details')
+        }
+        setSavingWorkDetails(false)
     }
 
     const getPlatformIcon = (platform: string) => {
@@ -362,13 +475,36 @@ export default function EmployeeDetailPage() {
                 {/* Header Identity block */}
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b pb-8">
                     <div className="p-1">
-                        {employee.photo_url ? (
-                            <img src={employee.photo_url} alt={employee.name} className="w-24 h-24 rounded-full object-cover shadow-sm ring-1 ring-border ring-offset-2 ring-offset-background" />
-                        ) : (
-                            <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-3xl ring-1 ring-border ring-offset-2 ring-offset-background">
-                                {employee.name.substring(0, 2).toUpperCase()}
-                            </div>
-                        )}
+                        <div 
+                            className="relative group cursor-pointer w-24 h-24 rounded-full"
+                            onClick={() => !uploadingPhoto && fileInputRef.current?.click()}
+                        >
+                            {uploadingPhoto ? (
+                                <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center ring-1 ring-border ring-offset-2 ring-offset-background">
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#FF3D00]" />
+                                </div>
+                            ) : employee.photo_url ? (
+                                <img src={employee.photo_url} alt={employee.name} className="w-24 h-24 rounded-full object-cover shadow-sm ring-1 ring-border ring-offset-2 ring-offset-background" />
+                            ) : (
+                                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-3xl ring-1 ring-border ring-offset-2 ring-offset-background">
+                                    {employee.name.substring(0, 2).toUpperCase()}
+                                </div>
+                            )}
+                            
+                            {!uploadingPhoto && (
+                                <div className="absolute inset-0 bg-background/60 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                    <Camera className="w-6 h-6 text-foreground mb-1" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-foreground">Change</span>
+                                </div>
+                            )}
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                onChange={handlePhotoUpload} 
+                                className="hidden" 
+                                accept="image/*"
+                            />
+                        </div>
                     </div>
                     <div className="flex flex-col items-center sm:items-start mt-2">
                         <div className="flex items-center gap-3">
@@ -467,29 +603,88 @@ export default function EmployeeDetailPage() {
                             <h3 className="text-base font-bold tracking-tight">Work Details</h3>
                             {cardStatus === 'active' && <Badge className="bg-emerald-500 hover:bg-emerald-600 shadow-none">Active</Badge>}
                         </div>
-                        <span className="text-sm font-medium text-muted-foreground hidden sm:block">EMP {employee.employee_code || '—'}</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-muted-foreground hidden sm:block mr-2">EMP {employee.employee_code || '—'}</span>
+                            {!isEditingWorkDetails ? (
+                                <Button variant="outline" size="sm" onClick={() => setIsEditingWorkDetails(true)}>
+                                    <Edit className="w-4 h-4 mr-1.5" /> Edit
+                                </Button>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <Button variant="ghost" size="sm" onClick={() => {
+                                        setIsEditingWorkDetails(false);
+                                        setWorkDetailsForm({
+                                            phone: employee.phone || '',
+                                            email: employee.email || '',
+                                            designation: employee.designation || '',
+                                            dept_id: employee.dept_id || ''
+                                        })
+                                    }}>
+                                        <X className="w-4 h-4" />
+                                    </Button>
+                                    <Button variant="default" size="sm" onClick={handleSaveWorkDetails} disabled={savingWorkDetails}>
+                                        {savingWorkDetails ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+                                        Save
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 p-6 md:p-8">
                         <div className="flex flex-col">
-                            <span className="text-xs text-muted-foreground font-medium mb-1">Company Department</span>
-                            <span className="text-sm font-medium text-foreground">{employee.departments?.name || 'Management'}</span>
+                            <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><Building2 className="w-3 h-3" /> Department</span>
+                            {isEditingWorkDetails ? (
+                                <Select value={workDetailsForm.dept_id} onValueChange={(val) => setWorkDetailsForm({...workDetailsForm, dept_id: val})}>
+                                    <SelectTrigger className="h-8 mt-1">
+                                        <SelectValue placeholder="Select Department" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {departmentsList.map(dep => (
+                                            <SelectItem key={dep.id} value={dep.id}>{dep.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">{employee.departments?.name || '—'}</span>
+                            )}
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> Date Joined</span>
-                            <span className="text-sm font-medium text-foreground">{expString}</span>
+                            <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><Briefcase className="w-3 h-3" /> Designation</span>
+                            {isEditingWorkDetails ? (
+                                <Input 
+                                    value={workDetailsForm.designation} 
+                                    onChange={(e) => setWorkDetailsForm({...workDetailsForm, designation: e.target.value})}
+                                    className="h-8 mt-1"
+                                />
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">{employee.designation || '—'}</span>
+                            )}
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><Mail className="w-3 h-3" /> Email Address</span>
+                            {isEditingWorkDetails ? (
+                                <Input 
+                                    value={workDetailsForm.email} 
+                                    onChange={(e) => setWorkDetailsForm({...workDetailsForm, email: e.target.value})}
+                                    className="h-8 mt-1"
+                                    type="email"
+                                />
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">{employee.email || '—'}</span>
+                            )}
                         </div>
                         <div className="flex flex-col">
                             <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><Phone className="w-3 h-3" /> Phone Number</span>
-                            <span className="text-sm font-medium text-foreground">{employee.phone || '—'}</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Base Location</span>
-                            <span className="text-sm font-medium text-foreground">HQ</span>
-                        </div>
-                        <div className="flex flex-col md:col-span-2 border-t pt-5 mt-2">
-                            <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><Mail className="w-3 h-3" /> Email Address</span>
-                            <span className="text-sm font-medium text-foreground">{employee.email || '—'}</span>
+                            {isEditingWorkDetails ? (
+                                <Input 
+                                    value={workDetailsForm.phone} 
+                                    onChange={(e) => setWorkDetailsForm({...workDetailsForm, phone: e.target.value})}
+                                    className="h-8 mt-1"
+                                />
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">{employee.phone || '—'}</span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -539,6 +734,7 @@ export default function EmployeeDetailPage() {
                                                         </span>
                                                         <Switch
                                                             checked={isAssigned}
+                                                            disabled={role === 'employee'}
                                                             onCheckedChange={() => handleToggleLink(link)}
                                                             className="data-[state=checked]:bg-emerald-500"
                                                         />
@@ -641,9 +837,10 @@ export default function EmployeeDetailPage() {
         <div className="flex flex-col lg:flex-row w-full h-[calc(100vh-8rem)] pb-4">
 
             {/* LEFT SIDEBAR - EMPLOYEE DIRECTORY */}
-            <div className="w-full lg:w-[350px] shrink-0 lg:border-r border-border flex flex-col h-[300px] lg:h-full pr-0 lg:pr-6">
+            {role !== 'employee' && (
+                <div className="w-full lg:w-[350px] shrink-0 lg:border-r border-border flex flex-col h-[300px] lg:h-full pr-0 lg:pr-6">
 
-                <div className="pb-4 border-b border-border/50 mb-2">
+                    <div className="pb-4 border-b border-border/50 mb-2">
                     <div className="relative">
                         <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                         <input
@@ -699,6 +896,7 @@ export default function EmployeeDetailPage() {
                     )}
                 </div>
             </div>
+            )}
 
             {/* RIGHT SIDE - DETAIL VIEW CONTAINER */}
             <div className="flex-1 flex flex-col overflow-hidden pl-0 lg:pl-6 pt-4 lg:pt-0">

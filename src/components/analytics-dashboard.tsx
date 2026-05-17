@@ -65,6 +65,7 @@ import {
 } from "@/components/ui/chart"
 import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
+import { useRole } from "@/components/role-provider"
 
 const chartConfig = {
   iOS: { label: "iOS", color: "var(--chart-1)" },
@@ -171,6 +172,7 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
     to: new Date(),
   })
 
+  const { role, orgId: sessionUserOrOrgId } = useRole()
   const [loading, setLoading] = React.useState(true)
   const [orgId, setOrgId] = React.useState<string | null>(null)
   const [cachedOrgDate, setCachedOrgDate] = React.useState<Date | null>(null)
@@ -216,10 +218,24 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
     const endISO = endOfDay(date.to ?? date.from).toISOString()
 
     try {
+      let tapsQuery = supabase.from("taps").select("*").gte("tapped_at", startISO).lte("tapped_at", endISO)
+      let leadsQuery = supabase.from("leads").select("*").gte("captured_at", startISO).lte("captured_at", endISO)
+      let clicksQuery = supabase.from("card_link_clicks").select("*").gte("clicked_at", startISO).lte("clicked_at", endISO)
+
+      if (role === 'employee') {
+         tapsQuery = tapsQuery.eq("employee_id", sessionUserOrOrgId)
+         leadsQuery = leadsQuery.eq("employee_id", sessionUserOrOrgId)
+         clicksQuery = clicksQuery.eq("employee_id", sessionUserOrOrgId)
+      } else {
+         tapsQuery = tapsQuery.eq("org_id", orgId)
+         leadsQuery = leadsQuery.eq("org_id", orgId)
+         clicksQuery = clicksQuery.eq("org_id", orgId)
+      }
+
       const [_taps, _leads, _clicks] = await Promise.all([
-        supabase.from("taps").select("*").eq("org_id", orgId).gte("tapped_at", startISO).lte("tapped_at", endISO),
-        supabase.from("leads").select("*").eq("org_id", orgId).gte("captured_at", startISO).lte("captured_at", endISO),
-        supabase.from("card_link_clicks").select("*").eq("org_id", orgId).gte("clicked_at", startISO).lte("clicked_at", endISO),
+        tapsQuery,
+        leadsQuery,
+        clicksQuery
       ])
 
       setTaps(_taps.data ?? [])
@@ -242,21 +258,22 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
   // ── realtime ──────────────────────────────────────────────────────────────
   React.useEffect(() => {
     if (!orgId) return
+    const filterPrefix = role === 'employee' ? `employee_id=eq.${sessionUserOrOrgId}` : `org_id=eq.${orgId}`
     const r1 = supabase.channel(`taps-an:${orgId}`)
       .on("postgres_changes", { event: "INSERT", schema: "tapconnect", table: "taps" }, fetchRangeData)
       .subscribe()
     const r2 = supabase.channel(`leads-an:${orgId}`)
-      .on("postgres_changes", { event: "*", schema: "tapconnect", table: "leads", filter: `org_id=eq.${orgId}` }, fetchRangeData)
+      .on("postgres_changes", { event: "*", schema: "tapconnect", table: "leads", filter: filterPrefix }, fetchRangeData)
       .subscribe()
     const r3 = supabase.channel(`clicks-an:${orgId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "tapconnect", table: "card_link_clicks", filter: `org_id=eq.${orgId}` }, fetchRangeData)
+      .on("postgres_changes", { event: "INSERT", schema: "tapconnect", table: "card_link_clicks", filter: filterPrefix }, fetchRangeData)
       .subscribe()
     return () => {
       supabase.removeChannel(r1)
       supabase.removeChannel(r2)
       supabase.removeChannel(r3)
     }
-  }, [orgId, fetchRangeData])
+  }, [orgId, fetchRangeData, role, sessionUserOrOrgId])
 
   // ── derived metrics ───────────────────────────────────────────────────────
   const daysDiff = date?.to && date?.from
@@ -267,9 +284,9 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
   const conversionRate = taps.length > 0 ? Math.round((leads.length / taps.length) * 100) : 0
   const engagementRate = taps.length > 0 ? Math.round((linkClicks.length / taps.length) * 100) : 0
 
-  // top employee
+  // top employee (by leads)
   const empCounts: Record<string, number> = {}
-  taps.forEach(t => { empCounts[t.employee_id] = (empCounts[t.employee_id] ?? 0) + 1 })
+  leads.forEach(l => { empCounts[l.employee_id] = (empCounts[l.employee_id] ?? 0) + 1 })
   const sortedEmps = Object.entries(empCounts).sort((a, b) => b[1] - a[1])
   const topEmpData = sortedEmps[0]
     ? { name: employeesMap[sortedEmps[0][0]]?.name ?? "Unknown", count: sortedEmps[0][1] }
@@ -358,7 +375,7 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard title="AVG TAPS/DAY" value={avgTapsDay} subtitle="+12% week-over-week" trend="up" icon={Activity} delay={0.1} loading={loading} />
         <MetricCard title="CONVERSION RATE" value={`${conversionRate}%`} subtitle="+8% this month" trend="up" icon={Sparkles} delay={0.2} loading={loading} />
-        <MetricCard title="TOP EMPLOYEE" value={topEmpData?.name.split(" ")[0] ?? "-"} subtitle={topEmpData ? `${topEmpData.count} taps` : "No activity"} trend="up" icon={Users} delay={0.3} loading={loading} />
+        <MetricCard title="TOP EMPLOYEE" value={topEmpData?.name.split(" ")[0] ?? "-"} subtitle={topEmpData ? `${topEmpData.count} leads` : "No activity"} trend="up" icon={Users} delay={0.3} loading={loading} />
         <MetricCard title="ENGAGEMENT" value={`${engagementRate}%`} subtitle="+5% vs last week" trend="up" icon={MousePointerClick} delay={0.4} loading={loading} />
       </div>
 
@@ -447,114 +464,116 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
           )}
         </motion.div>
 
-        {/* Top Performers */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="bg-card border border-border/50 rounded-xl p-6 shadow-sm flex flex-col"
-        >
-          <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-primary" /> Top Performers
-          </h3>
-          <div className="flex-1 space-y-3 overflow-y-auto pr-1">
-            {sortedEmps.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No tap data in window.</p>
-            ) : (
-              sortedEmps.slice(0, 5).map(([id, count], i) => {
-                const emp = employeesMap[id]
-                const initials = emp?.name
-                  ? emp.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
-                  : "?"
-                // Cycle through blue shades for avatar backgrounds
-                const avatarColors = [
-                  "bg-chart-1", "bg-chart-2", "bg-chart-3", "bg-chart-4", "bg-chart-5"
-                ]
-                const avatarBg = avatarColors[i % avatarColors.length]
-
-                // Rank color treatment
-                let rankColor = "text-muted-foreground font-semibold"
-                if (i === 0) rankColor = "text-yellow-500 font-bold"
-                else if (i === 1) rankColor = "text-slate-400 font-bold"
-                else if (i === 2) rankColor = "text-amber-600 font-bold"
-
-                return (
-                  <div key={id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-transparent hover:border-border transition-all group">
-                    <div className="flex items-center gap-4">
-                      {/* Rank Number */}
-                      <span className={`w-4 text-center text-sm ${rankColor}`}>
-                        {i + 1}
-                      </span>
-                      {/* Avatar */}
-                      <div className={`relative w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden ${emp?.avatar_url ? '' : avatarBg}`}>
-                        {emp?.avatar_url ? (
-                          <img src={emp.avatar_url} alt={emp.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span>{initials}</span>
-                        )}
+        {role !== 'employee' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="bg-card border border-border/50 rounded-xl p-6 shadow-sm flex flex-col"
+          >
+            <h3 className="text-base font-bold mb-4 flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-primary" /> Top Performers
+            </h3>
+            <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+              {sortedEmps.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">No lead data in window.</p>
+              ) : (
+                sortedEmps.slice(0, 5).map(([id, count], i) => {
+                  const emp = employeesMap[id]
+                  const initials = emp?.name
+                    ? emp.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+                    : "?"
+                  // Cycle through blue shades for avatar backgrounds
+                  const avatarColors = [
+                    "bg-chart-1", "bg-chart-2", "bg-chart-3", "bg-chart-4", "bg-chart-5"
+                  ]
+                  const avatarBg = avatarColors[i % avatarColors.length]
+  
+                  // Rank color treatment
+                  let rankColor = "text-muted-foreground font-semibold"
+                  if (i === 0) rankColor = "text-yellow-500 font-bold"
+                  else if (i === 1) rankColor = "text-slate-400 font-bold"
+                  else if (i === 2) rankColor = "text-amber-600 font-bold"
+  
+                  return (
+                    <div key={id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-transparent hover:border-border transition-all group">
+                      <div className="flex items-center gap-4">
+                        {/* Rank Number */}
+                        <span className={`w-4 text-center text-sm ${rankColor}`}>
+                          {i + 1}
+                        </span>
+                        {/* Avatar */}
+                        <div className={`relative w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden ${emp?.avatar_url ? '' : avatarBg}`}>
+                          {emp?.avatar_url ? (
+                            <img src={emp.avatar_url} alt={emp.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span>{initials}</span>
+                          )}
+                        </div>
+                        <p className="text-sm font-semibold">{emp?.name ?? "Unknown"}</p>
                       </div>
-                      <p className="text-sm font-semibold">{emp?.name ?? "Unknown"}</p>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">{count}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Leads</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold">{count}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Taps</p>
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
-        </motion.div>
+                  )
+                })
+              )}
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Row 3 (NEW): Departments + Leads */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Department Performance - Horizontal Ranking Bars */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-          className="bg-card border border-border/50 rounded-xl p-6 shadow-sm flex flex-col justify-between"
-        >
-          <h3 className="text-base font-bold mb-6 flex items-center gap-2">
-            <Briefcase className="w-4 h-4 text-primary" /> Department Performance
-          </h3>
-          <div className="flex-1 flex flex-col justify-center space-y-5">
-            {(() => {
-              const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
-              const totalDeptTaps = deptDistribution.length > 0 ? deptDistribution.reduce((acc, curr) => acc + curr[1], 0) : 0;
-              const hasData = deptDistribution.length > 0;
-
-              if (!hasData) {
-                return <div className="text-sm font-medium text-muted-foreground bg-muted/20 p-8 rounded-xl border border-dashed border-border/50 text-center flex flex-col items-center justify-center gap-2"><Briefcase className="w-6 h-6 opacity-30" /> No department data</div>;
-              }
-
-              return deptDistribution.map(([dept, count], idx) => {
-                const percent = Math.round((count / totalDeptTaps) * 100);
-                return (
-                  <div key={idx} className="space-y-2 group">
-                    <div className="flex justify-between items-end text-sm">
-                       <span className="font-semibold text-foreground capitalize tracking-tight">{dept}</span>
-                       <div className="flex items-center gap-3">
-                         <span className="font-bold">{count} <span className="text-[9px] font-bold text-muted-foreground tracking-widest uppercase ml-0.5">TAPS</span></span>
-                         <span className="w-9 font-medium text-[11px] text-muted-foreground bg-muted/50 text-center py-0.5 rounded transition-colors group-hover:bg-muted">{percent}%</span>
-                       </div>
+        {role !== 'employee' && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="bg-card border border-border/50 rounded-xl p-6 shadow-sm flex flex-col justify-between"
+          >
+            <h3 className="text-base font-bold mb-6 flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-primary" /> Department Performance
+            </h3>
+            <div className="flex-1 flex flex-col justify-center space-y-5">
+              {(() => {
+                const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+                const totalDeptTaps = deptDistribution.length > 0 ? deptDistribution.reduce((acc, curr) => acc + curr[1], 0) : 0;
+                const hasData = deptDistribution.length > 0;
+  
+                if (!hasData) {
+                  return <div className="text-sm font-medium text-muted-foreground bg-muted/20 p-8 rounded-xl border border-dashed border-border/50 text-center flex flex-col items-center justify-center gap-2"><Briefcase className="w-6 h-6 opacity-30" /> No department data</div>;
+                }
+  
+                return deptDistribution.map(([dept, count], idx) => {
+                  const percent = Math.round((count / totalDeptTaps) * 100);
+                  return (
+                    <div key={idx} className="space-y-2 group">
+                      <div className="flex justify-between items-end text-sm">
+                         <span className="font-semibold text-foreground capitalize tracking-tight">{dept}</span>
+                         <div className="flex items-center gap-3">
+                           <span className="font-bold">{count} <span className="text-[9px] font-bold text-muted-foreground tracking-widest uppercase ml-0.5">TAPS</span></span>
+                           <span className="w-9 font-medium text-[11px] text-muted-foreground bg-muted/50 text-center py-0.5 rounded transition-colors group-hover:bg-muted">{percent}%</span>
+                         </div>
+                      </div>
+                      <div className="h-2 w-full bg-muted/40 rounded-full overflow-hidden shadow-inner">
+                         <motion.div 
+                           initial={{ width: 0 }}
+                           animate={{ width: `${percent}%` }}
+                           transition={{ duration: 1, ease: "easeOut", delay: idx * 0.1 }}
+                           className="h-full rounded-full transition-all"
+                           style={{ backgroundColor: COLORS[idx % COLORS.length] }}
+                         />
+                      </div>
                     </div>
-                    <div className="h-2 w-full bg-muted/40 rounded-full overflow-hidden shadow-inner">
-                       <motion.div 
-                         initial={{ width: 0 }}
-                         animate={{ width: `${percent}%` }}
-                         transition={{ duration: 1, ease: "easeOut", delay: idx * 0.1 }}
-                         className="h-full rounded-full transition-all"
-                         style={{ backgroundColor: COLORS[idx % COLORS.length] }}
-                       />
-                    </div>
-                  </div>
-                )
-              });
-            })()}
-          </div>
-        </motion.div>
+                  )
+                });
+              })()}
+            </div>
+          </motion.div>
+        )}
 
         {/* Leads Analytics - Pipeline Funnel */}
         <motion.div

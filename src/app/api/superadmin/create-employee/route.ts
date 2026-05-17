@@ -23,11 +23,11 @@ export async function POST(req: NextRequest) {
     } = body
 
     // ── Validate required fields ─────────────────────────────────────────────
-    if (!org_id)                return NextResponse.json({ error: 'Organization is required.' }, { status: 400 })
-    if (!name?.trim())          return NextResponse.json({ error: 'Employee name is required.' }, { status: 400 })
-    if (!email?.trim())         return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
-    if (!password?.trim())      return NextResponse.json({ error: 'Password is required (min 8 chars).' }, { status: 400 })
-    if (password.length < 8)    return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 })
+    if (!org_id) return NextResponse.json({ error: 'Organization is required.' }, { status: 400 })
+    if (!name?.trim()) return NextResponse.json({ error: 'Employee name is required.' }, { status: 400 })
+    if (!email?.trim()) return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
+    if (!password?.trim()) return NextResponse.json({ error: 'Password is required (min 8 chars).' }, { status: 400 })
+    if (password.length < 8) return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 })
 
     // ── Step 1: Create Supabase auth user ────────────────────────────────────
     const { data: authUser, error: authError } = await supabaseAuth.auth.admin.createUser({
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     // ── Step 3: Provision NFC Card ───────────────────────────────────────────
     // Generate random alphanumeric UID (e.g. B7C90D6E8F2A77)
-    const cardUid = Array.from({ length: 14 }, () => 
+    const cardUid = Array.from({ length: 14 }, () =>
       '0123456789ABCDEF'[Math.floor(Math.random() * 16)]
     ).join('')
 
@@ -101,6 +101,31 @@ export async function POST(req: NextRequest) {
       await supabaseData.from('employees').delete().eq('id', uid)
       await supabaseAuth.auth.admin.deleteUser(uid)
       return NextResponse.json({ error: `NFC Card error: ${cardError.message}` }, { status: 400 })
+    }
+
+    // ── Step 4: Insert default notification settings for employee ────────────
+    const { error: notifError } = await supabaseData
+      .from('notification_settings')
+      .insert([{
+        org_id: null,
+        employee_id: uid,
+        leads: true,
+        taps: true,
+        nfc_cards: true,
+        daily_pulse: false,
+        weekly_roundup: false,
+        monthly_digest: false,
+        invoices_receipts: false,
+        upcoming_bills: false,
+        additional_recipients: [email.trim().toLowerCase()]
+      }])
+
+    if (notifError) {
+      // Rollback: delete nfc_cards, employees, and auth user
+      await supabaseData.from('nfc_cards').delete().eq('employee_id', uid)
+      await supabaseData.from('employees').delete().eq('id', uid)
+      await supabaseAuth.auth.admin.deleteUser(uid)
+      return NextResponse.json({ error: `Notification Settings DB error: ${notifError.message}` }, { status: 400 })
     }
 
     return NextResponse.json({ success: true, employee })

@@ -77,9 +77,9 @@ function AnimatedSearchBox({ value, onChange }: { value: string; onChange: (v: s
 
 // ─── Fallback data (shown when no real invoices exist) ────────────────────────
 const FALLBACK_INVOICES = [
-  { id: "1", invoice_number: "INV-2026-SETUP", period_end: "2026-03-10", plan: "basic", payment_method: "Mastercard •••• 4242", status: "paid" },
-  { id: "2", invoice_number: "INV-2026-0012", period_end: "2026-03-31", plan: "basic", payment_method: "Visa •••• 1234", status: "paid" },
-  { id: "3", invoice_number: "INV-2026-0010", period_end: "2026-02-28", plan: "basic", payment_method: "Mastercard •••• 4242", status: "pending" },
+  { id: "1", invoice_number: "INV-2026-SETUP", created_at: "2026-03-10T12:00:00Z", plan: "basic", payment_method: "Mastercard •••• 4242", status: "paid", invoice_link: null },
+  { id: "2", invoice_number: "INV-2026-0012", created_at: "2026-03-31T12:00:00Z", plan: "basic", payment_method: "Visa •••• 1234", status: "paid", invoice_link: null },
+  { id: "3", invoice_number: "INV-2026-0010", created_at: "2026-02-28T12:00:00Z", plan: "basic", payment_method: "Mastercard •••• 4242", status: "pending", invoice_link: null },
 ]
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -112,8 +112,8 @@ export function BillingDataTable({
       cell: ({ row }) => {
         return (
           <div className="flex items-center gap-3 py-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <FileText className="w-4 h-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-[#FF3D00]/10 flex items-center justify-center shrink-0">
+              <FileText className="w-4 h-4 text-[#FF3D00]" />
             </div>
             <div className="flex flex-col">
               <span className="font-medium">{row.getValue("invoice_number")}</span>
@@ -123,7 +123,7 @@ export function BillingDataTable({
       },
     },
     {
-      accessorKey: "period_end",
+      accessorKey: "created_at",
       header: ({ column }) => (
         <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           Billing Date
@@ -131,7 +131,7 @@ export function BillingDataTable({
         </Button>
       ),
       cell: ({ row }) => {
-        const dateVal = row.getValue("period_end") as string
+        const dateVal = row.getValue("created_at") as string
         return <div className="text-muted-foreground">{dateVal ? format(new Date(dateVal), "MMM d, yyyy") : "—"}</div>
       },
     },
@@ -139,11 +139,10 @@ export function BillingDataTable({
       accessorKey: "plan",
       header: "Plan",
       cell: ({ row }) => {
-        const plan = (row.getValue("plan") as string) || "basic"
         return (
           <div className="flex items-center gap-2 border border-border/60 bg-background w-fit px-2.5 py-1 rounded-[6px] shadow-sm">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-            <span className="text-xs font-semibold tracking-tight capitalize">{plan}</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-[#FF3D00] shadow-[0_0_8px_rgba(255,61,0,0.8)]"></div>
+            <span className="text-xs font-semibold tracking-tight">₹499 Plan</span>
           </div>
         )
       },
@@ -182,15 +181,29 @@ export function BillingDataTable({
       header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => (
         <div className="flex justify-end gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            title="Download Invoice"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Download className="w-4 h-4" />
-          </Button>
+          {row.original.invoice_link ? (
+            <a
+              href={row.original.invoice_link}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center h-8 w-8 text-muted-foreground hover:text-[#FF3D00] hover:bg-[#FF3D00]/10 rounded-md transition-colors"
+              title="Download/Open Invoice"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Download className="w-4 h-4" />
+            </a>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground/30 cursor-not-allowed"
+              title="No PDF uploaded"
+              disabled
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"

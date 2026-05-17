@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
 // ── Logo Upload Box ──────────────────────────────────────────────────────────
@@ -131,16 +132,6 @@ function Field({ label, required, children }: { label: string; required?: boolea
   )
 }
 
-// ── Styled select ────────────────────────────────────────────────────────────
-function Select({ value, onChange, children }: { value: string; onChange: (v: string) => void; children: React.ReactNode }) {
-  return (
-    <select value={value} onChange={e => onChange(e.target.value)}
-      className="w-full h-10 text-sm px-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-[#FF3D00]/20 focus:border-[#FF3D00]/40 transition-all">
-      {children}
-    </select>
-  )
-}
-
 // ── Color picker row ─────────────────────────────────────────────────────────
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
@@ -195,9 +186,9 @@ export default function NewOrganizationPage() {
     setError("")
 
     // Client-side validation
-    if (!form.name.trim())          return setError("Organization name is required.")
-    if (!form.slug.trim())          return setError("Slug is required.")
-    if (!form.admin_email.trim())   return setError("Admin email is required.")
+    if (!form.name.trim()) return setError("Organization name is required.")
+    if (!form.slug.trim()) return setError("Slug is required.")
+    if (!form.admin_email.trim()) return setError("Admin email is required.")
     if (!form.admin_password.trim()) return setError("Admin password is required.")
     if (form.admin_password.length < 8) return setError("Admin password must be at least 8 characters.")
 
@@ -244,7 +235,24 @@ export default function NewOrganizationPage() {
         body: JSON.stringify({ email: form.admin_email.trim() }),
       })
       const data = await res.json()
-      if (res.ok) setResetLink(data.link)
+      if (res.ok) {
+        setResetLink(data.link)
+
+        // Trigger onboarding email via Node server
+        try {
+          await fetch("https://server.frixn.in/api/email/onboarding", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              FullName: form.admin_name.trim() || "Organization Admin",
+              Email: form.admin_email.trim(),
+              OnboardingLink: data.link
+            })
+          })
+        } catch (emailErr) {
+          console.error("Failed to send onboarding email:", emailErr)
+        }
+      }
       else setError(data.error ?? "Failed to generate link")
     } catch (err: any) {
       setError("Failed to generate link")
@@ -371,18 +379,26 @@ export default function NewOrganizationPage() {
               <SectionHeader>Plan & Limits</SectionHeader>
               <div className="space-y-4">
                 <Field label="Plan">
-                  <Select value={form.plan} onChange={v => set("plan", v)}>
-                    <option value="starter">Starter</option>
-                    <option value="growth">Growth</option>
-                    <option value="enterprise">Enterprise</option>
+                  <Select value={form.plan} onValueChange={v => set("plan", v)}>
+                    <SelectTrigger className="w-full h-10 rounded-xl">
+                      <SelectValue placeholder="Select Plan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="starter">₹499 Plan</SelectItem>
+                    </SelectContent>
                   </Select>
                 </Field>
                 <Field label="Status">
-                  <Select value={form.status} onChange={v => set("status", v)}>
-                    <option value="setup">Setup</option>
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="overdue">Overdue</option>
+                  <Select value={form.status} onValueChange={v => set("status", v)}>
+                    <SelectTrigger className="w-full h-10 rounded-xl">
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="setup">Setup</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="suspended">Suspended</SelectItem>
+                      <SelectItem value="overdue">Overdue</SelectItem>
+                    </SelectContent>
                   </Select>
                 </Field>
                 <Field label="Max Employees">
@@ -414,56 +430,56 @@ export default function NewOrganizationPage() {
             <div className="bg-card border border-border rounded-2xl p-6 space-y-3">
               {success && !resetLink && (
                 <div className="space-y-3 pt-4 border-t border-border animate-in slide-in-from-bottom-2 duration-300">
-                    <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600">
-                        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                        <div>
-                            <p className="text-xs font-black uppercase tracking-widest leading-none mb-1">Organization Created</p>
-                            <p className="text-xs font-semibold opacity-90 leading-tight">The organization and admin account are ready. Generate a reset link to let the owner set their own password.</p>
-                        </div>
+                  <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest leading-none mb-1">Organization Created</p>
+                      <p className="text-xs font-semibold opacity-90 leading-tight">The organization and admin account are ready. Generate a reset link to let the owner set their own password.</p>
                     </div>
-                    
-                    <Button
-                        type="button"
-                        onClick={handleGenerateLink}
-                        disabled={generatingLink}
-                        className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/10"
-                    >
-                        {generatingLink ? (
-                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
-                        ) : (
-                            <>Generate Admin Reset Link</>
-                        )}
-                    </Button>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={handleGenerateLink}
+                    disabled={generatingLink}
+                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/10"
+                  >
+                    {generatingLink ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
+                    ) : (
+                      <>Generate Admin Reset Link</>
+                    )}
+                  </Button>
                 </div>
               )}
 
               {resetLink && (
                 <div className="space-y-4 pt-4 border-t border-border animate-in zoom-in-95 duration-300">
-                    <div className="bg-muted px-4 py-3 rounded-xl border border-border relative group">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5">Admin Setup Link</p>
-                        <p className="text-[10px] font-mono break-all text-foreground pr-8 leading-relaxed">
-                            {resetLink}
-                        </p>
-                        <button 
-                            type="button"
-                            onClick={handleCopy}
-                            className="absolute right-3 bottom-3 p-1.5 rounded-lg bg-background border border-border hover:border-emerald-500 hover:text-emerald-500 transition-all shadow-sm"
-                        >
-                            {copying ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
-                        </button>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 text-orange-600 border border-orange-500/10">
-                        <AlertCircle className="w-3 h-3 shrink-0" />
-                        <p className="text-[10px] font-bold">Copy this link and send it to the organization owner.</p>
-                    </div>
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => router.push("/sites/superadmin/organizations")}
-                        className="w-full h-10 rounded-xl font-bold"
+                  <div className="bg-muted px-4 py-3 rounded-xl border border-border relative group">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5">Admin Setup Link</p>
+                    <p className="text-[10px] font-mono break-all text-foreground pr-8 leading-relaxed">
+                      {resetLink}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="absolute right-3 bottom-3 p-1.5 rounded-lg bg-background border border-border hover:border-emerald-500 hover:text-emerald-500 transition-all shadow-sm"
                     >
-                        Return to Dashboard
-                    </Button>
+                      {copying ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 text-orange-600 border border-orange-500/10">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <p className="text-[10px] font-bold">Copy this link and send it to the organization owner.</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => router.push("/sites/superadmin/organizations")}
+                    className="w-full h-10 rounded-xl font-bold"
+                  >
+                    Return to Dashboard
+                  </Button>
                 </div>
               )}
 

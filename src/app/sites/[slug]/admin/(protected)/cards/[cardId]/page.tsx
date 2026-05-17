@@ -26,6 +26,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { DateRange } from "react-day-picker"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns"
@@ -74,6 +83,10 @@ export default function CardDetailPage() {
   const [loading, setLoading] = React.useState(true)
   const [locking, setLocking] = React.useState(false)
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
+  
+  const [revokeDialogOpen, setRevokeDialogOpen] = React.useState(false)
+  const [revokeReason, setRevokeReason] = React.useState("")
+  const [revoking, setRevoking] = React.useState(false)
 
   const fetchCardData = React.useCallback(async () => {
     if (!cardId) return
@@ -170,6 +183,33 @@ export default function CardDetailPage() {
     setLocking(false)
   }
 
+  const handleRevokeCard = async () => {
+    if (!card || revoking) return
+    if (!revokeReason.trim()) {
+      alert("Please provide a reason for revoking the card.")
+      return
+    }
+
+    setRevoking(true)
+    const { error } = await supabase
+      .from('nfc_cards')
+      .update({ 
+        status: 'deactivated',
+        deactivated_at: new Date().toISOString(),
+        deactivation_reason: revokeReason.trim()
+      })
+      .eq('id', card.id)
+
+    if (error) {
+      console.error('Error revoking card:', error)
+      alert("Failed to revoke card.")
+    } else {
+      setRevokeDialogOpen(false)
+      setRevokeReason("")
+    }
+    setRevoking(false)
+  }
+
   const filteredTaps = taps.filter(tap => {
     if (!dateRange?.from) return true
     
@@ -258,6 +298,15 @@ export default function CardDetailPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {card.status !== 'deactivated' && (
+            <Button 
+              variant="outline" 
+              className="h-11 px-6 rounded-xl font-bold transition-all border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+              onClick={() => setRevokeDialogOpen(true)}
+            >
+              Revoke NFC Card
+            </Button>
+          )}
           <Button 
             variant={card.is_locked ? "default" : "outline"}
             className={cn("h-11 px-6 rounded-xl font-bold transition-all", card.is_locked ? "bg-rose-600 hover:bg-rose-700 text-white" : "")}
@@ -508,6 +557,38 @@ export default function CardDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Revoke Card Dialog */}
+      <Dialog open={revokeDialogOpen} onOpenChange={setRevokeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-rose-600">Revoke NFC Card</DialogTitle>
+            <DialogDescription>
+              Please clearly state the reason for deactivating this card. This will restrict its physical capabilities immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Textarea
+              placeholder="E.g., Lost card, Employee leaving, Damaged..."
+              value={revokeReason}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRevokeReason(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRevokeDialogOpen(false)} disabled={revoking}>Cancel</Button>
+            <Button 
+              variant="destructive" 
+              className="bg-rose-600 hover:bg-rose-700 text-white"
+              onClick={handleRevokeCard} 
+              disabled={revoking || !revokeReason.trim()}
+            >
+              {revoking ? <Zap className="w-4 h-4 mr-2 animate-spin" /> : null}
+              {revoking ? "Revoking..." : "Confirm Revocation"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

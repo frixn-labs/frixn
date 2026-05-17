@@ -42,9 +42,10 @@ export function OrgStatusGate({ initialOrg, initialEmployeeCount, slug }: OrgSta
           filter: `id=eq.${org.id}`
         },
         (payload) => {
-          setOrg(payload.new)
-          // If status becomes active, trigger a page refresh to unlock layout
-          if (payload.new.status === 'active') {
+          // If status changes to anything different, trigger a page refresh 
+          // to properly lock/unlock the Server Component layout
+          if (payload.new.status !== org.status) {
+            setOrg(payload.new)
             setIsRefreshing(true)
             window.location.reload()
           }

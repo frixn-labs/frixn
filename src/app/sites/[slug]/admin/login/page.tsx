@@ -46,7 +46,7 @@ export default function AdminLogin() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orgId: org.id, orgSlug: slug })
+        body: JSON.stringify({ orgId: org.id, orgSlug: slug, role: 'org_admin' })
       })
 
       if (res.ok) {

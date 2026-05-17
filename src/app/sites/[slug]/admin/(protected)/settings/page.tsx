@@ -23,6 +23,8 @@ import {
   Camera,
   ExternalLink,
   CalendarDays,
+  Users,
+  IndianRupee,
   Monitor,
   MonitorSmartphone,
   MapPin,
@@ -55,6 +57,7 @@ import { supabase } from "@/lib/supabase"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import { useRole } from "@/components/role-provider"
 
 // Mock data for Audit Logs
 const MOCK_LOGS = [
@@ -80,6 +83,7 @@ export default function SettingsPage() {
   const params = useParams()
   const slug = params.slug as string
   const { theme, setTheme } = useTheme()
+  const { role, orgId } = useRole()
 
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
@@ -90,11 +94,18 @@ export default function SettingsPage() {
     healthStatus: 'Checking...'
   })
   
-  const [authSessions, setAuthSessions] = React.useState<any[]>([])
-  const [loadingSessions, setLoadingSessions] = React.useState(true)
-  
   const [invoices, setInvoices] = React.useState<any[]>([])
   const [loadingInvoices, setLoadingInvoices] = React.useState(true)
+  const [passwordLastChanged, setPasswordLastChanged] = React.useState<string | null>(null)
+  
+  // Fetch the real password-last-changed timestamp from Supabase auth user
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.updated_at) {
+        setPasswordLastChanged(data.user.updated_at)
+      }
+    })
+  }, [])
   
   const [appAccent, setAppAccent] = React.useState('#FF3D00')
   const [appChartTheme, setAppChartTheme] = React.useState('signal')
@@ -203,7 +214,7 @@ export default function SettingsPage() {
       const { count, error: countError } = await supabase
         .from('employees')
         .select('*', { count: 'exact', head: true })
-        .eq('organization_id', org.id)
+        .eq('org_id', org.id)
       
       setStats({
         employeeCount: count || 0,
@@ -215,26 +226,6 @@ export default function SettingsPage() {
 
     // Load Connected Devices / Sessions
     if (org?.id) {
-      setLoadingSessions(true)
-      try {
-        const { data, error } = await supabase
-          .from('auth_logs')
-          .select('*')
-          .eq('org_id', org.id)
-          .order('created_at', { ascending: false })
-          .limit(5)
-        
-        if (!error && data) {
-          setAuthSessions(data)
-        } else {
-          setAuthSessions([])
-        }
-      } catch (err) {
-        setAuthSessions([])
-      } finally {
-        setLoadingSessions(false)
-      }
-
       setLoadingInvoices(true)
       try {
         const { data: invData, error: invError } = await supabase
@@ -282,16 +273,20 @@ export default function SettingsPage() {
         const { data: notifData, error: notifError } = await supabase
           .from('notification_settings')
           .select('*')
-          .eq('org_id', org.id)
+          .eq(role === 'employee' ? 'employee_id' : 'org_id', role === 'employee' ? orgId : org.id)
           .maybeSingle()
 
         if (notifData) {
             setNotifSettings(notifData)
             if (notifData.additional_recipients) setExtraEmails(notifData.additional_recipients)
         } else if (!notifError) {
+            const insertPayload = role === 'employee'
+              ? { employee_id: orgId, org_id: null }
+              : { org_id: org.id }
+            
             const { data: newNotif } = await supabase
                .from('notification_settings')
-               .insert([{ org_id: org.id }])
+               .insert([insertPayload])
                .select()
                .single()
             if (newNotif) setNotifSettings(newNotif)
@@ -309,7 +304,7 @@ export default function SettingsPage() {
             event: 'UPDATE',
             schema: 'tapconnect',
             table: 'notification_settings',
-            filter: `org_id=eq.${org.id}`,
+            filter: role === 'employee' ? `employee_id=eq.${orgId}` : `org_id=eq.${org.id}`,
           },
           (payload) => {
              setNotifSettings((prev: any) => ({ ...prev, ...payload.new }))
@@ -354,10 +349,9 @@ export default function SettingsPage() {
         supabase.removeChannel(notifChannel)
       }
     } else {
-      setLoadingSessions(false)
       setLoadingInvoices(false)
     }
-  }, [slug])
+  }, [slug, role, orgId])
 
   React.useEffect(() => {
     fetchOrgData()
@@ -488,14 +482,41 @@ export default function SettingsPage() {
 
   const handleNotificationToggle = async (key: string, value: boolean) => {
      if (!notifSettings.id) return
-     setNotifSettings((prev: any) => ({ ...prev, [key]: value }))
-     await supabase.from('notification_settings').update({ [key]: value }).eq('id', notifSettings.id)
+     const updated = {
+       ...notifSettings,
+       [key]: value,
+       updated_at: new Date().toISOString()
+     }
+     setNotifSettings(updated)
+     await supabase
+       .from('notification_settings')
+       .update({
+         org_id: role === 'employee' ? null : (orgData?.id || null),
+         leads: updated.leads,
+         taps: updated.taps,
+         nfc_cards: updated.nfc_cards,
+         daily_pulse: updated.daily_pulse,
+         weekly_roundup: updated.weekly_roundup,
+         monthly_digest: updated.monthly_digest,
+         invoices_receipts: updated.invoices_receipts,
+         accounting_updates: updated.accounting_updates,
+         upcoming_bills: updated.upcoming_bills,
+         updated_at: updated.updated_at
+       })
+       .eq('id', notifSettings.id)
   }
 
   const handleUpdateExtraEmails = async (newEmails: string[]) => {
       setExtraEmails(newEmails);
       if (!notifSettings.id) return;
-      await supabase.from('notification_settings').update({ additional_recipients: newEmails }).eq('id', notifSettings.id)
+      await supabase
+        .from('notification_settings')
+        .update({ 
+          org_id: role === 'employee' ? null : (orgData?.id || null),
+          additional_recipients: newEmails,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', notifSettings.id)
   }
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -551,22 +572,30 @@ export default function SettingsPage() {
               <Settings className="w-7 h-7 text-primary" strokeWidth={1.5} />
           </div>
           <div>
-              <h1 className="text-2xl font-bold tracking-tight">Organization Settings</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {role === 'employee' ? 'My Settings' : 'Organization Settings'}
+              </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Configure your organization's environment, administrative profile, and security.
+                {role === 'employee' 
+                  ? 'Configure your personal preferences, security, and AI settings.' 
+                  : 'Configure your organization\'s environment, administrative profile, and security.'}
               </p>
           </div>
         </div>
       </div>
 
-      <Tabs defaultValue="profile" className="w-full">
-        <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-8">
-          <TabsTrigger value="profile" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
-            Profile
-          </TabsTrigger>
-          <TabsTrigger value="billing" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
-            Billing
-          </TabsTrigger>
+      <Tabs defaultValue={role === 'employee' ? 'security' : 'profile'} className="w-full">
+        <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-8 overflow-x-auto overflow-y-hidden whitespace-nowrap">
+          {role !== 'employee' && (
+            <TabsTrigger value="profile" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+              Profile
+            </TabsTrigger>
+          )}
+          {role !== 'employee' && (
+            <TabsTrigger value="billing" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+              Billing
+            </TabsTrigger>
+          )}
           <TabsTrigger value="security" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
             Security
           </TabsTrigger>
@@ -576,12 +605,14 @@ export default function SettingsPage() {
           <TabsTrigger value="notification" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
             Notifications
           </TabsTrigger>
-          <TabsTrigger value="ai" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+          {/* <TabsTrigger value="ai" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
             AI Labs
-          </TabsTrigger>
-          <TabsTrigger value="audit" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
-            Audit Logs
-          </TabsTrigger>
+          </TabsTrigger> */}
+          {/* {role !== 'employee' && (
+            <TabsTrigger value="audit" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+              Audit Logs
+            </TabsTrigger>
+          )} */}
         </TabsList>
 
         <div className="mt-2 min-h-[500px]">
@@ -750,84 +781,162 @@ export default function SettingsPage() {
           </TabsContent>
 
           {/* ── BILLING TAB ──────────────────────────────────────────────── */}
-          <TabsContent value="billing" className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
-            <section>
-                <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2.5 bg-primary/10 rounded-xl ring-1 ring-primary/20 shrink-0">
-                        <CreditCard className="w-[18px] h-[18px] text-primary" />
-                    </div>
-                    <div className="space-y-1 mt-0.5">
-                        <h2 className="text-lg font-bold tracking-tight">Subscription & Billing</h2>
-                        <p className="text-sm text-muted-foreground">Manage your current plan, upgrade options, and invoicing history.</p>
-                    </div>
-                </div>
+          {role !== 'employee' && (
+            <TabsContent value="billing" className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
+              <section>
+                  {/*
+                  <div className="flex items-start gap-4 mb-8">
+                      <div className="p-2.5 bg-primary/10 rounded-xl ring-1 ring-primary/20 shrink-0">
+                          <CreditCard className="w-[18px] h-[18px] text-primary" />
+                      </div>
+                      <div className="space-y-1 mt-0.5">
+                          <h2 className="text-lg font-bold tracking-tight">Subscription & Billing</h2>
+                          <p className="text-sm text-muted-foreground">Manage your current plan, upgrade options, and invoicing history.</p>
+                      </div>
+                  </div>
 
-                {/* Plans Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-                    {/* Basic Plan */}
-                    <div className={cn("border rounded-2xl p-7 relative overflow-hidden flex flex-col justify-between transition-all", (invoices[0]?.plan !== 'premium') ? "border-primary/40 bg-primary/5" : "border-border/50 bg-card")}>
-                        {(invoices[0]?.plan !== 'premium') && (
-                            <div className="absolute top-0 right-6 py-1 px-3.5 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest rounded-b-lg">Current Plan</div>
-                        )}
-                        <div>
-                            <div className="space-y-1.5 mb-6 mt-1">
-                                <h3 className="text-xl font-bold tracking-tight">Basic</h3>
-                                <p className="text-sm text-muted-foreground">Perfect for small teams getting started.</p>
-                            </div>
-                            <div className="flex items-end gap-1.5 mb-6">
-                                <span className="text-4xl font-black tracking-tight">₹5,000</span>
-                                <span className="text-sm font-medium text-muted-foreground mb-1">/&nbsp;month</span>
-                            </div>
-                        </div>
-                        <Button 
-                            variant={(invoices[0]?.plan !== 'premium') ? "outline" : "default"} 
-                            className="w-full h-10 font-semibold text-sm" 
-                            disabled={(invoices[0]?.plan !== 'premium' || saving)}
-                            onClick={() => handlePlanChange('basic')}
-                        >
-                            {(invoices[0]?.plan !== 'premium') ? "Your Current Plan" : "Downgrade to Basic"}
-                        </Button>
-                    </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                      <div className={cn("border rounded-2xl p-7 relative overflow-hidden flex flex-col justify-between transition-all", (invoices[0]?.plan !== 'premium') ? "border-primary/40 bg-primary/5" : "border-border/50 bg-card")}>
+                          {(invoices[0]?.plan !== 'premium') && (
+                              <div className="absolute top-0 right-6 py-1 px-3.5 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest rounded-b-lg">Current Plan</div>
+                          )}
+                          <div>
+                              <div className="space-y-1.5 mb-6 mt-1">
+                                  <h3 className="text-xl font-bold tracking-tight">Basic</h3>
+                                  <p className="text-sm text-muted-foreground">Perfect for small teams getting started.</p>
+                              </div>
+                              <div className="flex items-end gap-1.5 mb-6">
+                                  <span className="text-4xl font-black tracking-tight">₹5,000</span>
+                                  <span className="text-sm font-medium text-muted-foreground mb-1">/&nbsp;month</span>
+                              </div>
+                          </div>
+                          <Button 
+                              variant={(invoices[0]?.plan !== 'premium') ? "outline" : "default"} 
+                              className="w-full h-10 font-semibold text-sm" 
+                              disabled={(invoices[0]?.plan !== 'premium' || saving)}
+                              onClick={() => handlePlanChange('basic')}
+                          >
+                              {(invoices[0]?.plan !== 'premium') ? "Your Current Plan" : "Downgrade to Basic"}
+                          </Button>
+                      </div>
 
-                    {/* Premium Plan */}
-                    <div className={cn("border rounded-2xl p-7 relative overflow-hidden flex flex-col justify-between transition-all", (invoices[0]?.plan === 'premium') ? "border-primary/40 bg-primary/5" : "border-border/50 bg-card")}>
-                        {/* Most Popular badge */}
-                        {(invoices[0]?.plan !== 'premium') && (
-                            <div className="absolute top-0 right-6 py-1 px-3.5 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-b-lg">Most Popular</div>
-                        )}
-                        {(invoices[0]?.plan === 'premium') && (
-                            <div className="absolute top-0 right-6 py-1 px-3.5 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest rounded-b-lg">Current Plan</div>
-                        )}
-                        <div>
-                            <div className="space-y-1.5 mb-6 mt-1">
-                                <h3 className="text-xl font-bold tracking-tight">Premium</h3>
-                                <p className="text-sm text-muted-foreground">Built for large-scale organizations.</p>
-                            </div>
-                            <div className="flex items-end gap-1.5 mb-1">
-                                <span className="text-4xl font-black tracking-tight">₹60,000</span>
-                                <span className="text-sm font-medium text-muted-foreground mb-1">/&nbsp;year</span>
-                            </div>
-                            <p className="text-xs text-emerald-600 font-semibold mb-6">₹5,000/mo — save 2 months vs. monthly billing</p>
-                        </div>
-                        <Button 
-                            variant={(invoices[0]?.plan === 'premium') ? "outline" : "default"} 
-                            className="w-full h-10 font-semibold text-sm" 
-                            disabled={(invoices[0]?.plan === 'premium' || saving)}
-                            onClick={() => handlePlanChange('premium')}
-                        >
-                            {(invoices[0]?.plan === 'premium') ? "Your Current Plan" : "Upgrade to Premium"}
-                        </Button>
-                    </div>
-                </div>
+                      <div className={cn("border rounded-2xl p-7 relative overflow-hidden flex flex-col justify-between transition-all", (invoices[0]?.plan === 'premium') ? "border-primary/40 bg-primary/5" : "border-border/50 bg-card")}>
+                          {(invoices[0]?.plan !== 'premium') && (
+                              <div className="absolute top-0 right-6 py-1 px-3.5 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-b-lg">Most Popular</div>
+                          )}
+                          {(invoices[0]?.plan === 'premium') && (
+                              <div className="absolute top-0 right-6 py-1 px-3.5 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest rounded-b-lg">Current Plan</div>
+                          )}
+                          <div>
+                              <div className="space-y-1.5 mb-6 mt-1">
+                                  <h3 className="text-xl font-bold tracking-tight">Premium</h3>
+                                  <p className="text-sm text-muted-foreground">Built for large-scale organizations.</p>
+                              </div>
+                              <div className="flex items-end gap-1.5 mb-1">
+                                  <span className="text-4xl font-black tracking-tight">₹60,000</span>
+                                  <span className="text-sm font-medium text-muted-foreground mb-1">/&nbsp;year</span>
+                              </div>
+                              <p className="text-xs text-emerald-600 font-semibold mb-6">₹5,000/mo — save 2 months vs. monthly billing</p>
+                          </div>
+                          <Button 
+                              variant={(invoices[0]?.plan === 'premium') ? "outline" : "default"} 
+                              className="w-full h-10 font-semibold text-sm" 
+                              disabled={(invoices[0]?.plan === 'premium' || saving)}
+                              onClick={() => handlePlanChange('premium')}
+                          >
+                              {(invoices[0]?.plan === 'premium') ? "Your Current Plan" : "Upgrade to Premium"}
+                          </Button>
+                      </div>
+                  </div>
+                  */}
 
-                {/* Billing History Table */}
-                <BillingDataTable 
-                    data={invoices} 
-                    onDelete={handleDeleteInvoice}
-                    onStatusChange={handleUpdateInvoiceStatus}
-                />
-            </section>
-          </TabsContent>
+                  {/* Next Billing Cycle Summary Card */}
+                  {(() => {
+                      let nextBillingDate = "—"
+                      if (invoices && invoices.length > 0 && invoices[0]?.created_at) {
+                          try {
+                              const latestDate = new Date(invoices[0].created_at)
+                              latestDate.setMonth(latestDate.getMonth() + 1)
+                              nextBillingDate = latestDate.toLocaleDateString('en-IN', {
+                                  day: '2-digit', month: 'long', year: 'numeric'
+                              })
+                          } catch (e) {
+                              nextBillingDate = "—"
+                          }
+                      } else {
+                          try {
+                              const defaultDate = new Date()
+                              defaultDate.setMonth(defaultDate.getMonth() + 1)
+                              nextBillingDate = defaultDate.toLocaleDateString('en-IN', {
+                                  day: '2-digit', month: 'long', year: 'numeric'
+                              })
+                          } catch (e) {
+                              nextBillingDate = "—"
+                          }
+                      }
+                      
+                      const seatCount = stats?.employeeCount || 0
+                      const nextAmount = seatCount * 499
+
+                      return (
+                          <div className="mb-8 bg-card border border-border/80 rounded-2xl p-6 shadow-sm overflow-hidden relative">
+                              {/* Sleek subtle background gradient orb */}
+                              <div className="absolute -right-20 -bottom-20 w-60 h-60 bg-[#FF3D00]/5 rounded-full blur-3xl pointer-events-none" />
+                              
+                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pb-3 border-b border-border/50 mb-5">
+                                  Upcoming Subscription Cycle
+                              </p>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                                  {/* Next Billing Date */}
+                                  <div className="flex items-center gap-4">
+                                      <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+                                          <CalendarDays className="w-5 h-5 text-[#FF3D00]" />
+                                      </div>
+                                      <div className="space-y-0.5">
+                                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Next Billing Date</p>
+                                          <p className="text-sm font-black text-foreground">{nextBillingDate}</p>
+                                      </div>
+                                  </div>
+
+                                  {/* Active Seats (Count) */}
+                                  <div className="flex items-center gap-4 border-t md:border-t-0 md:border-x border-border/50 pt-4 md:pt-0 md:px-6">
+                                      <div className="w-10 h-10 rounded-xl bg-[#FF3D00]/10 flex items-center justify-center shrink-0">
+                                          <Users className="w-5 h-5 text-[#FF3D00]" />
+                                      </div>
+                                      <div className="space-y-0.5">
+                                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Active Seats (Employees)</p>
+                                          <p className="text-sm font-black text-foreground">{seatCount} active {seatCount === 1 ? 'seat' : 'seats'}</p>
+                                      </div>
+                                  </div>
+
+                                  {/* Projected Invoice Amount */}
+                                  <div className="flex items-center gap-4 border-t md:border-t-0 pt-4 md:pt-0">
+                                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                                          <IndianRupee className="w-5 h-5 text-emerald-500" />
+                                      </div>
+                                      <div className="space-y-0.5">
+                                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Projected Invoice Amount</p>
+                                          <div className="flex items-baseline gap-1">
+                                              <p className="text-base font-black text-emerald-600">₹{nextAmount.toLocaleString('en-IN')}</p>
+                                              <span className="text-[10px] font-medium text-muted-foreground">/ month</span>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      )
+                  })()}
+
+                  {/* Billing History Table */}
+                  <BillingDataTable 
+                      data={invoices} 
+                      onDelete={handleDeleteInvoice}
+                      onStatusChange={handleUpdateInvoiceStatus}
+                  />
+              </section>
+            </TabsContent>
+          )}
 
           {/* ── SECURITY TAB ──────────────────────────────────────────────── */}
           <TabsContent value="security" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -852,10 +961,27 @@ export default function SettingsPage() {
                                  </div>
                                  <div className="space-y-1">
                                      <h3 className="font-bold tracking-tight">Account Password</h3>
-                                     <p className="text-xs text-muted-foreground font-medium">Last changed <span className="font-semibold text-foreground/80">Jan 14, 2026</span></p>
+                                     <p className="text-xs text-muted-foreground font-medium">
+                                       Last changed{' '}
+                                       <span className="font-semibold text-foreground/80">
+                                         {passwordLastChanged
+                                           ? format(new Date(passwordLastChanged), 'MMM d, yyyy')
+                                           : 'Not available'}
+                                       </span>
+                                     </p>
                                  </div>
                              </div>
-                             <Button variant="secondary" className="h-9 font-semibold text-xs px-5 shadow-sm w-full sm:w-auto">Change Password</Button>
+                             <Button
+                               variant="secondary"
+                               className="h-9 font-semibold text-xs px-5 shadow-sm w-full sm:w-auto"
+                               onClick={async () => {
+                                 await supabase.auth.signOut()
+                                 await fetch('/api/auth/logout', { method: 'POST' })
+                                 window.location.href = 'http://localhost:3000/forgot-password?source=change-password'
+                               }}
+                             >
+                               Change Password
+                             </Button>
                         </div>
                         <div className="px-6 py-3.5 bg-amber-500/5 dark:bg-amber-500/10 border-t border-amber-500/10 flex items-start gap-3">
                             <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
@@ -918,65 +1044,6 @@ export default function SettingsPage() {
                 </div>
             </section>
 
-            <Separator className="opacity-50 my-10" />
-
-            {/* Browsers and devices */}
-            <section>
-                <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2.5 bg-muted/40 rounded-xl border border-border/40 shrink-0">
-                        <MonitorSmartphone className="w-[18px] h-[18px] text-primary" />
-                    </div>
-                    <div className="space-y-1 mt-0.5">
-                        <h2 className="text-lg font-bold tracking-tight">Browsers and devices</h2>
-                        <p className="text-sm text-muted-foreground">These browsers and devices are currently signed in to your account. Remove any unauthorized devices.</p>
-                    </div>
-                </div>
-
-                <div className="border border-border/40 bg-card rounded-2xl overflow-hidden">
-                    {loadingSessions ? (
-                        <div className="p-10 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
-                    ) : authSessions.length > 0 ? (
-                        <div className="divide-y divide-border/40">
-                        {authSessions.map((session, idx) => (
-                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 hover:bg-muted/10 transition-colors gap-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-9 h-9 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">
-                                       <Monitor className="w-4 h-4 text-muted-foreground/80" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-semibold">{session.browser || 'Unknown Browser'}</p>
-                                        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                                            <MapPin className="w-3 h-3" />
-                                            {session.location || 'Unknown Location'}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4 pl-13 sm:pl-0">
-                                    <span className="text-xs font-medium text-muted-foreground">
-                                        {session.is_current ? (
-                                            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">Current session</Badge>
-                                        ) : (
-                                            session.created_at ? format(new Date(session.created_at), 'MMM d, yyyy') : 'Unknown date'
-                                        )}
-                                    </span>
-                                    {!session.is_current && (
-                                        <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 font-semibold">Remove</Button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center p-10 gap-3">
-                            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-2">
-                                <ShieldCheckIcon className="w-6 h-6 text-primary" />
-                            </div>
-                            <p className="text-sm font-semibold">No active sessions found.</p>
-                            <p className="text-xs text-muted-foreground text-center max-w-[360px]">No remote authentication signatures or login devices were detected for this account.</p>
-                        </div>
-                    )}
-                </div>
-            </section>
           </TabsContent>
 
           {/* ── APPEARANCE TAB ────────────────────────────────────────────── */}
@@ -1186,6 +1253,7 @@ export default function SettingsPage() {
                 </section>
 
                 {/* Section 2: Report */}
+                {role !== 'employee' && (
                 <section className="w-full">
                     <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Report</h3>
                     <div className="border border-border/50 rounded-2xl bg-card divide-y divide-border/50 w-full overflow-hidden shadow-sm">
@@ -1208,14 +1276,15 @@ export default function SettingsPage() {
                         ))}
                     </div>
                 </section>
+                )}
 
                 {/* Section 3: Payment and billing */}
+                {role !== 'employee' && (
                 <section className="w-full">
                     <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Payment & Billing</h3>
                     <div className="border border-border/50 rounded-2xl bg-card divide-y divide-border/50 w-full overflow-hidden shadow-sm">
                         {[
                             { id: "invoices_receipts", title: "INVOICES & RECEIPTS", desc: "Receive immediate copies of your invoices when payments are processed." },
-                            { id: "accounting_updates", title: "ACCOUNTING UPDATES", desc: "When accounting and bookkeeping transactions need your attention." },
                             { id: "upcoming_bills", title: "UPCOMING BILLS", desc: "When you need to be reminded of upcoming invoice renewals or late bills." }
                         ].map((v, i) => (
                             <div key={i} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors w-full">
@@ -1232,13 +1301,14 @@ export default function SettingsPage() {
                         ))}
                     </div>
                 </section>
+                )}
 
-                {/* Section 4: Email Delivery Configuration */}
+                {/* Section 4: Email Delivery Configuration
                 <section className="w-full">
                     <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Delivery Channels</h3>
                     <div className="border border-border/50 rounded-2xl bg-card w-full overflow-hidden shadow-sm flex flex-col xl:flex-row">
                         
-                        {/* Primary Admin Block */}
+                        
                         <div className="p-6 border-b xl:border-b-0 xl:border-r border-border/50 bg-muted/10 flex-1 flex flex-col justify-start">
                             <div className="space-y-1.5 mb-8">
                                 <Label className="text-[15px] font-bold tracking-widest text-foreground block">PRIMARY ADMIN</Label>
@@ -1254,7 +1324,7 @@ export default function SettingsPage() {
                                 <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-none shadow-none text-[10px] uppercase font-bold tracking-wider shrink-0">Active</Badge>
                             </div>
 
-                            {/* Dynamic Space Filler */}
+                            
                             {extraEmails.length > 0 && (
                                 <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl animate-in fade-in zoom-in-95 duration-500">
                                     <div className="flex items-start gap-3">
@@ -1268,7 +1338,7 @@ export default function SettingsPage() {
                             )}
                         </div>
 
-                        {/* Additional Recipients Block */}
+                        
                         <div className="p-6 flex-1 flex flex-col justify-between">
                             <div>
                                 <div className="flex items-start justify-between mb-6">
@@ -1346,10 +1416,11 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 </section>
+                */ }
             </div>
           </TabsContent>
 
-          {/* ── AI LABS TAB ───────────────────────────────────────────────── */}
+          {/* ── AI LABS TAB ───────────────────────────────────────────────── 
           <TabsContent value="ai" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
             <section>
                 <div className="flex items-start gap-4 mb-8">
@@ -1363,7 +1434,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Module Toggles */}
+                    
                     {[
                         { id: 'employees_enabled', label: 'Employee Summaries', desc: 'AI-generated snapshots of employee activity and performance.', icon: User },
                         { id: 'nfc_cards_enabled', label: 'NFC Card Intelligence', desc: 'Deep analysis of card tap patterns and location heatmaps.', icon: MonitorSmartphone },
@@ -1393,7 +1464,7 @@ export default function SettingsPage() {
 
                 <Separator className="my-12 opacity-50" />
 
-                {/* Prompt Management */}
+                
                 <div className="space-y-8">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                         <div className="space-y-1">
@@ -1416,7 +1487,7 @@ export default function SettingsPage() {
                         </Button>
                     </div>
 
-                    {/* New Prompt Input */}
+                    
                     {isAddingPrompt && (
                         <div className="p-5 border border-primary/20 bg-primary/5 rounded-2xl animate-in zoom-in-95 duration-300 space-y-4">
                             <div className="space-y-2">
@@ -1521,8 +1592,9 @@ export default function SettingsPage() {
                 </div>
             </section>
           </TabsContent>
+          */ }
 
-          {/* ── AUDIT LOG TAB ─────────────────────────────────────────────── */}
+          {/* ── AUDIT LOG TAB ───────────────────────────────────────────────
           <TabsContent value="audit" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">
             <section>
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
@@ -1540,6 +1612,7 @@ export default function SettingsPage() {
                 <AuditDataTable data={MOCK_LOGS} />
             </section>
           </TabsContent>
+          */}
         </div>
       </Tabs>
     </div>

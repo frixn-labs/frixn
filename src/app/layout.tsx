@@ -33,7 +33,7 @@ export default function RootLayout({
       <head>
         <script
           id="theme-init"
-          key="theme-init"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               try {

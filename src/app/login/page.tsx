@@ -99,7 +99,7 @@ export default function LoginPage() {
         await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orgId: org.id, orgSlug: org.slug })
+          body: JSON.stringify({ orgId: org.id, orgSlug: org.slug, role: 'org_admin' })
         })
         
         setResolvedRole('org_admin')
@@ -131,7 +131,7 @@ export default function LoginPage() {
         await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orgId: employee.id, orgSlug: empOrg.slug })
+          body: JSON.stringify({ orgId: employee.id, orgSlug: empOrg.slug, role: 'employee' })
         })
 
         setResolvedRole('employee')
@@ -243,7 +243,7 @@ export default function LoginPage() {
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/80">
                     Password
                   </label>
-                  <Link href="#" className="text-[10px] font-bold uppercase tracking-wider text-[#FF3D00] hover:text-[#FF3D00]/80 transition-colors">
+                  <Link href="/forgot-password" className="text-[10px] font-bold uppercase tracking-wider text-[#FF3D00] hover:text-[#FF3D00]/80 transition-colors">
                     Forgot Password?
                   </Link>
                 </div>

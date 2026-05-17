@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { AdminBreadcrumb } from '@/components/admin-breadcrumb'
 import { OrgStatusGate } from '@/components/org-status-gate'
 import { AIAssistantProvider } from '@/components/ai-assistant-provider'
+import { RoleProvider } from '@/components/role-provider'
 import { cookies } from 'next/headers'
 import { getSession, clearSession } from '@/lib/auth'
 
@@ -67,10 +68,11 @@ export default async function AdminLayout({
   const isActive = org.status === 'active'
 
   return (
-    <AIAssistantProvider initialAiUsage={aiUsage} orgId={org.id}>
-      <div className="font-sans antialiased text-[0.95rem]">
-        {/* If not active, show the status gate (Setup/Suspended/Overdue) */}
-        {!isActive && <OrgStatusGate initialOrg={org} initialEmployeeCount={employeeCount || 0} slug={slug} />}
+    <RoleProvider session={session}>
+      <AIAssistantProvider initialAiUsage={aiUsage} orgId={org.id}>
+        <div className="font-sans antialiased text-[0.95rem]">
+        {/* Always mount OrgStatusGate so it can listen for realtime status changes (it hides itself when active) */}
+        <OrgStatusGate initialOrg={org} initialEmployeeCount={employeeCount || 0} slug={slug} />
         
         {/* 
             If active, show the normal layout. 
@@ -122,5 +124,6 @@ export default async function AdminLayout({
         </div>
       </div>
     </AIAssistantProvider>
+    </RoleProvider>
   )
 }

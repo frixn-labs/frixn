@@ -3,10 +3,10 @@ import { setSession } from '@/lib/auth'
 
 export async function POST(request: Request) {
   try {
-    const { orgId, orgSlug } = await request.json()
+    const { orgId, orgSlug, role } = await request.json()
     
     // Set the cookie via the server component utility
-    await setSession(orgSlug, orgId)
+    await setSession(orgSlug, orgId, role)
     
     return NextResponse.json({ success: true })
   } catch (error) {

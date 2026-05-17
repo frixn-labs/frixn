@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { exportToCsv } from '@/lib/utils'
+import { useRole } from '@/components/role-provider'
 
 function getMonthStart() {
   const d = new Date()
@@ -31,6 +32,7 @@ export default function DashboardHome() {
   const params = useParams()
   const slug = params.slug as string
   const router = useRouter()
+  const { role, orgId: sessionUserOrOrgId } = useRole()
 
   const [loading, setLoading] = useState(true)
   const [orgId, setOrgId] = useState<string | null>(null)
@@ -44,7 +46,7 @@ export default function DashboardHome() {
   // ── Table state ───────────────────────────────────────────────────────────
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortKey, setSortKey] = useState<'name' | 'designation' | 'taps'>('taps')
+  const [sortKey, setSortKey] = useState<'name' | 'designation' | 'taps' | 'leads'>('leads')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const ITEMS_PER_PAGE = 6
 
@@ -56,6 +58,14 @@ export default function DashboardHome() {
     try {
       const monthStart = getMonthStart()
 
+      // Use org-wide filters for leaderboard, tap feeds, etc.
+      const orgFilter = `org_id.eq.${resolvedId}`
+      
+      // Individual filters for the 3 specific metric cards
+      const individualCardFilter = role === 'employee' ? `employee_id.eq.${sessionUserOrOrgId}` : `org_id.eq.${resolvedId}`
+      const individualTapFilter = role === 'employee' ? `employee_id.eq.${sessionUserOrOrgId}` : `org_id.eq.${resolvedId}`
+      const individualLeadFilter = role === 'employee' ? `employee_id.eq.${sessionUserOrOrgId}` : `org_id.eq.${resolvedId}`
+
       const [
         { count: empCount },
         { count: cardCount },
@@ -65,17 +75,18 @@ export default function DashboardHome() {
         { data: tapsData },
         { data: recentTapsData },
         { data: allMonthTaps },
+        { data: leadsData },
       ] = await Promise.all([
-        supabase.from('employees').select('id', { count: 'exact', head: true }).eq('org_id', resolvedId).eq('is_active', true),
-        supabase.from('nfc_cards').select('id', { count: 'exact', head: true }).eq('org_id', resolvedId).eq('status', 'active'),
-        supabase.from('taps').select('id', { count: 'exact', head: true }).eq('org_id', resolvedId).gte('tapped_at', monthStart),
-        supabase.from('leads').select('id', { count: 'exact', head: true }).eq('org_id', resolvedId),
-        supabase.from('employees').select('id, name, designation, dept_id, photo_url, departments(name)').eq('org_id', resolvedId).eq('is_active', true),
-        supabase.from('taps').select('employee_id').eq('org_id', resolvedId).gte('tapped_at', monthStart),
-        supabase.from('taps').select('id, tapped_at, city, os, employees(name, photo_url)').eq('org_id', resolvedId).order('tapped_at', { ascending: false }).limit(5),
-        supabase.from('taps').select('tapped_at').eq('org_id', resolvedId).gte('tapped_at', monthStart),
+        supabase.from('employees').select('id', { count: 'exact', head: true }).or(orgFilter).eq('is_active', true),
+        supabase.from('nfc_cards').select('id', { count: 'exact', head: true }).or(individualCardFilter).eq('status', 'active'),
+        supabase.from('taps').select('id', { count: 'exact', head: true }).or(individualTapFilter).gte('tapped_at', monthStart),
+        supabase.from('leads').select('id', { count: 'exact', head: true }).or(individualLeadFilter),
+        supabase.from('employees').select('id, name, designation, dept_id, photo_url, departments(name)').or(orgFilter).eq('is_active', true),
+        supabase.from('taps').select('employee_id').or(orgFilter).gte('tapped_at', monthStart),
+        supabase.from('taps').select('id, tapped_at, city, os, employees(name, photo_url)').or(orgFilter).order('tapped_at', { ascending: false }).limit(5),
+        supabase.from('taps').select('tapped_at').or(orgFilter).gte('tapped_at', monthStart),
+        supabase.from('leads').select('employee_id').or(orgFilter).gte('captured_at', monthStart),
       ])
-
       setStats({
         employees: empCount ?? 0,
         activeCards: cardCount ?? 0,
@@ -83,17 +94,20 @@ export default function DashboardHome() {
         leadsCaptured: leadCount ?? 0,
       })
 
-      // Taps-per-employee map
+      // Taps and Leads per employee maps
       const tapsMap: Record<string, number> = {}
       tapsData?.forEach(t => { if (t.employee_id) tapsMap[t.employee_id] = (tapsMap[t.employee_id] || 0) + 1 })
+      const leadsMap: Record<string, number> = {}
+      leadsData?.forEach(l => { if (l.employee_id) leadsMap[l.employee_id] = (leadsMap[l.employee_id] || 0) + 1 })
 
       // Enrich employees
       const enriched = (employees ?? []).map((emp: any) => ({
         ...emp,
         dept_name: emp.departments?.name ?? 'Unassigned',
         taps: tapsMap[emp.id] || 0,
+        leads: leadsMap[emp.id] || 0,
       }))
-      setTopPerformers([...enriched].sort((a, b) => b.taps - a.taps))
+      setTopPerformers([...enriched].sort((a, b) => b.leads - a.leads))
 
       // Department breakdown
       const deptMap: Record<string, { name: string; taps: number }> = {}
@@ -137,25 +151,28 @@ export default function DashboardHome() {
   // ── Real-time subscriptions ───────────────────────────────────────────────
   useEffect(() => {
     if (!orgId) return
+    const filterPrefix = `org_id=eq.${orgId}`
+    const empFilterStr = `org_id=eq.${orgId}`
+    
     const channels = [
       supabase.channel(`dash-taps:${orgId}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'tapconnect', table: 'taps', filter: `org_id=eq.${orgId}` }, () => fetchAll())
+        .on('postgres_changes', { event: 'INSERT', schema: 'tapconnect', table: 'taps', filter: filterPrefix }, () => fetchAll())
         .subscribe(),
       supabase.channel(`dash-leads:${orgId}`)
-        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'leads', filter: `org_id=eq.${orgId}` }, () => fetchAll())
+        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'leads', filter: filterPrefix }, () => fetchAll())
         .subscribe(),
       supabase.channel(`dash-cards:${orgId}`)
-        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'nfc_cards', filter: `org_id=eq.${orgId}` }, () => fetchAll())
+        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'nfc_cards', filter: filterPrefix }, () => fetchAll())
         .subscribe(),
       supabase.channel(`dash-emps:${orgId}`)
-        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'employees', filter: `org_id=eq.${orgId}` }, () => fetchAll())
+        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'employees', filter: empFilterStr }, () => fetchAll())
         .subscribe(),
     ]
     return () => { channels.forEach(c => supabase.removeChannel(c)) }
-  }, [orgId, fetchAll])
+  }, [orgId, fetchAll, role, sessionUserOrOrgId])
 
   // ── Table logic ───────────────────────────────────────────────────────────
-  const handleSort = (key: 'name' | 'designation' | 'taps') => {
+  const handleSort = (key: 'name' | 'designation' | 'leads' | 'taps') => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortKey(key); setSortDir('desc') }
     setCurrentPage(1)
@@ -396,7 +413,7 @@ export default function DashboardHome() {
                 />
               </div>
               <Button variant="outline" size="sm" className="h-7 px-2 text-xs"
-                onClick={() => exportToCsv('performers.csv', sorted.map(d => ({ Name: d.name, Department: d.dept_name, Designation: d.designation, Taps: d.taps })))}>
+                onClick={() => exportToCsv('performers.csv', sorted.map(d => ({ Name: d.name, Department: d.dept_name, Designation: d.designation, Taps: d.taps, Leads: d.leads })))}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>
@@ -422,8 +439,11 @@ export default function DashboardHome() {
                     <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-bold text-muted-foreground cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('designation')}>
                       Role / Dept <SortIcon col="designation" />
                     </th>
-                    <th className="px-4 py-3 pr-6 text-right text-[10px] uppercase tracking-widest font-bold text-muted-foreground cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('taps')}>
+                    <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest font-bold text-muted-foreground cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('taps')}>
                       Taps <SortIcon col="taps" />
+                    </th>
+                    <th className="px-4 py-3 pr-6 text-right text-[10px] uppercase tracking-widest font-bold text-muted-foreground cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('leads')}>
+                      Leads <SortIcon col="leads" />
                     </th>
                   </tr>
                 </thead>
@@ -452,9 +472,13 @@ export default function DashboardHome() {
                           <p className="text-sm text-muted-foreground">{emp.designation || '—'}</p>
                           <p className="text-[10px] font-semibold text-primary/70 uppercase tracking-wide">{emp.dept_name}</p>
                         </td>
-                        <td className="px-4 py-3 pr-6 text-right">
+                        <td className="px-4 py-3 text-right">
                           <span className="font-bold text-sm">{emp.taps}</span>
                           <span className="text-[10px] text-muted-foreground ml-1">taps</span>
+                        </td>
+                        <td className="px-4 py-3 pr-6 text-right">
+                          <span className="font-bold text-sm">{emp.leads}</span>
+                          <span className="text-[10px] text-muted-foreground ml-1">leads</span>
                         </td>
                       </motion.tr>
                     )

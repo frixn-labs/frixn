@@ -430,10 +430,9 @@ END:VCARD`
         <div className="mt-8 md:mt-12 px-5 md:px-8 relative h-full w-full max-w-md md:max-w-2xl mx-auto">
           <Tabs defaultValue="reports" className="w-full">
 
-            <TabsList variant="line" className="mb-4 md:mb-8">
-              <TabsTrigger value="reports" className="text-xs md:text-sm">Forms</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs md:text-sm">Links</TabsTrigger>
-              <TabsTrigger value="overview" className="text-xs md:text-sm">Feeds</TabsTrigger>
+            <TabsList variant="line" className="mb-4 md:mb-8 grid w-full grid-cols-2">
+              <TabsTrigger value="reports" className="text-xs md:text-sm font-semibold">Forms</TabsTrigger>
+              <TabsTrigger value="analytics" className="text-xs md:text-sm font-semibold">Links</TabsTrigger>
             </TabsList>
 
             {/* Forms Tab */}
@@ -549,20 +548,7 @@ END:VCARD`
               )}
             </TabsContent>
 
-            {/* Feeds Tab */}
-            <TabsContent value="overview" className="m-0 focus-visible:outline-none focus:outline-none grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="w-full bg-card rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-border/50 cursor-pointer hover:shadow-md transition-shadow">
-                <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-amber-500 mb-2">Company Update</div>
-                <h3 className="font-bold text-lg md:text-xl text-foreground leading-snug mb-2">Latest property launches gracefully completed in {org.name}</h3>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-2">We are incredibly proud to announce the next phase of luxury developments bridging the entire sector towards perfection.</p>
-              </div>
 
-              <div className="w-full bg-card rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-border/50 cursor-pointer hover:shadow-md transition-shadow">
-                <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary mb-2">Event</div>
-                <h3 className="font-bold text-lg md:text-xl text-foreground leading-snug mb-2">Annual Keynote Presentation {new Date().getFullYear()}</h3>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-2">Join us across our headquarters to review exactly what the roadmap entitles for our clients everywhere.</p>
-              </div>
-            </TabsContent>
 
           </Tabs>
         </div>

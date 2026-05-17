@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
 // ── Section header ───────────────────────────────────────────────────────────
@@ -133,24 +134,13 @@ function PhotoUpload({
   )
 }
 
-// ── Styled select ────────────────────────────────────────────────────────────
-function Select({ value, onChange, children, placeholder }: { value: string; onChange: (v: string) => void; children: React.ReactNode, placeholder?: string }) {
-  return (
-    <select value={value} onChange={e => onChange(e.target.value)}
-      className="w-full h-10 text-sm px-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-[#FF3D00]/20 focus:border-[#FF3D00]/40 transition-all">
-      {placeholder && <option value="">{placeholder}</option>}
-      {children}
-    </select>
-  )
-}
-
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function NewEmployeePage() {
   const router = useRouter()
 
   const [orgs, setOrgs] = React.useState<{ id: string; name: string; slug: string }[]>([])
   const [loadingOrgs, setLoadingOrgs] = React.useState(true)
-  
+
   const [form, setForm] = React.useState({
     org_id: "",
     name: "",
@@ -162,7 +152,7 @@ export default function NewEmployeePage() {
     is_active: "true",
     photo_url: "",
   })
-  
+
   const [showPass, setShowPass] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState("")
@@ -188,11 +178,11 @@ export default function NewEmployeePage() {
     setError("")
 
     // Client-side validation
-    if (!form.org_id)               return setError("Please select an organization.")
-    if (!form.name.trim())          return setError("Employee name is required.")
-    if (!form.email.trim())         return setError("Email is required.")
-    if (!form.password.trim())      return setError("Initial password is required.")
-    if (form.password.length < 8)   return setError("Password must be at least 8 characters.")
+    if (!form.org_id) return setError("Please select an organization.")
+    if (!form.name.trim()) return setError("Employee name is required.")
+    if (!form.email.trim()) return setError("Email is required.")
+    if (!form.password.trim()) return setError("Initial password is required.")
+    if (form.password.length < 8) return setError("Password must be at least 8 characters.")
 
     setSaving(true)
     try {
@@ -233,7 +223,24 @@ export default function NewEmployeePage() {
         }),
       })
       const data = await res.json()
-      if (res.ok) setResetLink(data.link)
+      if (res.ok) {
+        setResetLink(data.link)
+
+        // Trigger onboarding email via Node server
+        try {
+          await fetch("https://server.frixn.in/api/email/onboarding", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              FullName: form.name.trim() || "Employee",
+              Email: form.email.trim(),
+              OnboardingLink: data.link
+            })
+          })
+        } catch (emailErr) {
+          console.error("Failed to send onboarding email:", emailErr)
+        }
+      }
       else setError(data.error ?? "Failed to generate link")
     } catch (err: any) {
       setError("Failed to generate link")
@@ -288,12 +295,16 @@ export default function NewEmployeePage() {
               <SectionHeader>Organization Assignment</SectionHeader>
               <Field label="Organization" required>
                 <div className="relative">
-                  <Select 
-                    value={form.org_id} 
-                    onChange={v => set("org_id", v)}
-                    placeholder={loadingOrgs ? "Loading organizations..." : "Select parent organization"}
+                  <Select
+                    value={form.org_id}
+                    onValueChange={v => set("org_id", v)}
                   >
-                    {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                    <SelectTrigger className="w-full h-10 rounded-xl">
+                      <SelectValue placeholder={loadingOrgs ? "Loading organizations..." : "Select parent organization"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {orgs.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                    </SelectContent>
                   </Select>
                   {!loadingOrgs && orgs.length === 0 && (
                     <p className="text-[11px] text-rose-500 mt-1">No organizations found. Please create one first.</p>
@@ -307,29 +318,29 @@ export default function NewEmployeePage() {
               <SectionHeader>Employee Record</SectionHeader>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="col-span-full">
-                    <Field label="Full Name" required>
-                        <Input
-                            value={form.name}
-                            onChange={e => set("name", e.target.value)}
-                            placeholder="e.g. Jane Smith"
-                            className="h-10 rounded-xl"
-                        />
-                    </Field>
+                  <Field label="Full Name" required>
+                    <Input
+                      value={form.name}
+                      onChange={e => set("name", e.target.value)}
+                      placeholder="e.g. Jane Smith"
+                      className="h-10 rounded-xl"
+                    />
+                  </Field>
                 </div>
                 <Field label="Designation">
-                  <Input 
-                    value={form.designation} 
-                    onChange={e => set("designation", e.target.value)} 
-                    placeholder="e.g. Product Manager" 
-                    className="h-10 rounded-xl" 
+                  <Input
+                    value={form.designation}
+                    onChange={e => set("designation", e.target.value)}
+                    placeholder="e.g. Product Manager"
+                    className="h-10 rounded-xl"
                   />
                 </Field>
                 <Field label="Employee Code">
-                  <Input 
-                    value={form.employee_code} 
-                    onChange={e => set("employee_code", e.target.value)} 
-                    placeholder="e.g. EMP-101" 
-                    className="h-10 rounded-xl font-mono text-sm" 
+                  <Input
+                    value={form.employee_code}
+                    onChange={e => set("employee_code", e.target.value)}
+                    placeholder="e.g. EMP-101"
+                    className="h-10 rounded-xl font-mono text-sm"
                   />
                 </Field>
               </div>
@@ -340,21 +351,21 @@ export default function NewEmployeePage() {
               <SectionHeader>Contact Information</SectionHeader>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Email Address" required>
-                  <Input 
-                    type="email" 
-                    value={form.email} 
-                    onChange={e => set("email", e.target.value)} 
-                    placeholder="jane@company.com" 
-                    className="h-10 rounded-xl" 
+                  <Input
+                    type="email"
+                    value={form.email}
+                    onChange={e => set("email", e.target.value)}
+                    placeholder="jane@company.com"
+                    className="h-10 rounded-xl"
                   />
                 </Field>
                 <Field label="Phone Number">
-                  <Input 
-                    type="tel" 
-                    value={form.phone} 
-                    onChange={e => set("phone", e.target.value)} 
-                    placeholder="+91 98765 43210" 
-                    className="h-10 rounded-xl" 
+                  <Input
+                    type="tel"
+                    value={form.phone}
+                    onChange={e => set("phone", e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="h-10 rounded-xl"
                   />
                 </Field>
               </div>
@@ -387,12 +398,12 @@ export default function NewEmployeePage() {
                 </Field>
 
                 <div className="pt-2">
-                    <PhotoUpload 
-                        orgSlug={selectedOrgSlug} 
-                        email={form.email} 
-                        value={form.photo_url} 
-                        onChange={v => set("photo_url", v)} 
-                    />
+                  <PhotoUpload
+                    orgSlug={selectedOrgSlug}
+                    email={form.email}
+                    value={form.photo_url}
+                    onChange={v => set("photo_url", v)}
+                  />
                 </div>
               </div>
             </div>
@@ -409,9 +420,9 @@ export default function NewEmployeePage() {
                     className={cn(
                       "flex-1 h-11 rounded-xl border-2 text-xs font-bold uppercase tracking-wider transition-all",
                       form.is_active === opt.v
-                        ? opt.theme === "emerald" 
-                            ? "border-emerald-500 bg-emerald-500/10 text-emerald-600" 
-                            : "border-rose-500 bg-rose-500/10 text-rose-600"
+                        ? opt.theme === "emerald"
+                          ? "border-emerald-500 bg-emerald-500/10 text-emerald-600"
+                          : "border-rose-500 bg-rose-500/10 text-rose-600"
                         : "border-border bg-muted/30 text-muted-foreground hover:border-border/80"
                     )}
                   >
@@ -425,56 +436,56 @@ export default function NewEmployeePage() {
             <div className="bg-card border border-border rounded-2xl p-6 space-y-3">
               {success && !resetLink && (
                 <div className="space-y-3 pt-4 border-t border-border animate-in slide-in-from-bottom-2 duration-300">
-                    <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600">
-                        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                        <div>
-                            <p className="text-xs font-black uppercase tracking-widest leading-none mb-1">Creation Success</p>
-                            <p className="text-xs font-semibold opacity-90 leading-tight">The account is ready. Send the reset link to the employee so they can set their own secret password.</p>
-                        </div>
+                  <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest leading-none mb-1">Creation Success</p>
+                      <p className="text-xs font-semibold opacity-90 leading-tight">The account is ready. Send the reset link to the employee so they can set their own secret password.</p>
                     </div>
-                    
-                    <Button
-                        type="button"
-                        onClick={handleGenerateLink}
-                        disabled={generatingLink}
-                        className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl"
-                    >
-                        {generatingLink ? (
-                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
-                        ) : (
-                            <>Generate Password Reset Link</>
-                        )}
-                    </Button>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={handleGenerateLink}
+                    disabled={generatingLink}
+                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl"
+                  >
+                    {generatingLink ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
+                    ) : (
+                      <>Generate Password Reset Link</>
+                    )}
+                  </Button>
                 </div>
               )}
 
               {resetLink && (
                 <div className="space-y-4 pt-4 border-t border-border animate-in zoom-in-95 duration-300">
-                    <div className="bg-muted px-4 py-3 rounded-xl border border-border relative group">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5">Employee Reset Link</p>
-                        <p className="text-[10px] font-mono break-all text-foreground pr-8 leading-relaxed">
-                            {resetLink}
-                        </p>
-                        <button 
-                            type="button"
-                            onClick={handleCopy}
-                            className="absolute right-3 bottom-3 p-1.5 rounded-lg bg-background border border-border hover:border-emerald-500 hover:text-emerald-500 transition-all shadow-sm"
-                        >
-                            {copying ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
-                        </button>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 text-orange-600 border border-orange-500/10">
-                        <AlertCircle className="w-3 h-3 shrink-0" />
-                        <p className="text-[10px] font-bold">This link is sensitive. Copy and send it directly to the employee.</p>
-                    </div>
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => router.push("/sites/superadmin/employees")}
-                        className="w-full h-10 rounded-xl font-bold"
+                  <div className="bg-muted px-4 py-3 rounded-xl border border-border relative group">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5">Employee Reset Link</p>
+                    <p className="text-[10px] font-mono break-all text-foreground pr-8 leading-relaxed">
+                      {resetLink}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="absolute right-3 bottom-3 p-1.5 rounded-lg bg-background border border-border hover:border-emerald-500 hover:text-emerald-500 transition-all shadow-sm"
                     >
-                        Return to List
-                    </Button>
+                      {copying ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 text-orange-600 border border-orange-500/10">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <p className="text-[10px] font-bold">This link is sensitive. Copy and send it directly to the employee.</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => router.push("/sites/superadmin/employees")}
+                    className="w-full h-10 rounded-xl font-bold"
+                  >
+                    Return to List
+                  </Button>
                 </div>
               )}
 
