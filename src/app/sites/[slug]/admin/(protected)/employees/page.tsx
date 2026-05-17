@@ -78,18 +78,14 @@ export default function EmployeesPage() {
       <Tabs defaultValue="employees" className="w-full">
         <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-6">
           <TabsTrigger value="employees" className="pb-3 text-sm">Employees</TabsTrigger>
-          {role !== 'employee' && (
-            <TabsTrigger value="departments" className="pb-3 text-sm">Departments</TabsTrigger>
-          )}
+          <TabsTrigger value="departments" className="pb-3 text-sm">Departments</TabsTrigger>
         </TabsList>
         <TabsContent value="employees">
            <EmployeeDataTable slug={slug} />
         </TabsContent>
-        {role !== 'employee' && (
-          <TabsContent value="departments">
-             <DepartmentDataTable slug={slug} />
-          </TabsContent>
-        )}
+        <TabsContent value="departments">
+           <DepartmentDataTable slug={slug} />
+        </TabsContent>
       </Tabs>
       
     </div>
