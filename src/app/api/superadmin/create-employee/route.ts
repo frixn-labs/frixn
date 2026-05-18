@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Notification Settings DB error: ${notifError.message}` }, { status: 400 })
     }
 
-    return NextResponse.json({ success: true, employee })
+    return NextResponse.json({ success: true, employee, cardUrl })
 
   } catch (err: any) {
     return NextResponse.json({ error: err.message ?? 'Unexpected error' }, { status: 500 })

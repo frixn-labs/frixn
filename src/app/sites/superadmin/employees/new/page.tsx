@@ -157,11 +157,13 @@ export default function NewEmployeePage() {
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState("")
   const [success, setSuccess] = React.useState(false)
+  const [cardUrl, setCardUrl] = React.useState("")
 
   // Reset Link Flow
   const [generatingLink, setGeneratingLink] = React.useState(false)
   const [resetLink, setResetLink] = React.useState("")
-  const [copying, setCopying] = React.useState(false)
+  const [copyingLink, setCopyingLink] = React.useState(false)
+  const [copyingCard, setCopyingCard] = React.useState(false)
 
   // Fetch orgs
   React.useEffect(() => {
@@ -201,9 +203,8 @@ export default function NewEmployeePage() {
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? "Failed to create employee."); return }
 
+      setCardUrl(data.cardUrl || "")
       setSuccess(true)
-      // We no longer redirect automatically, to allow generating the reset link
-      // setTimeout(() => router.push("/sites/superadmin/employees"), 1500)
     } catch (err: any) {
       setError(err.message ?? "Unexpected error occurred.")
     } finally {
@@ -249,10 +250,34 @@ export default function NewEmployeePage() {
     }
   }
 
-  const handleCopy = () => {
+  const handleCopyLink = () => {
     navigator.clipboard.writeText(resetLink)
-    setCopying(true)
-    setTimeout(() => setCopying(false), 2000)
+    setCopyingLink(true)
+    setTimeout(() => setCopyingLink(false), 2000)
+  }
+
+  const handleCopyCard = () => {
+    navigator.clipboard.writeText(cardUrl)
+    setCopyingCard(true)
+    setTimeout(() => setCopyingCard(false), 2000)
+  }
+
+  const handleResetForm = () => {
+    setForm({
+      org_id: "",
+      name: "",
+      designation: "",
+      employee_code: "",
+      email: "",
+      phone: "",
+      password: "",
+      is_active: "true",
+      photo_url: "",
+    })
+    setSuccess(false)
+    setResetLink("")
+    setCardUrl("")
+    setError("")
   }
 
   const selectedOrgSlug = orgs.find(o => o.id === form.org_id)?.slug || ""
@@ -284,240 +309,291 @@ export default function NewEmployeePage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-
-          {/* ── Left column: main details ──────────────────────────────── */}
-          <div className="xl:col-span-2 space-y-8">
-
-            {/* Organization Assignment */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Organization Assignment</SectionHeader>
-              <Field label="Organization" required>
-                <div className="relative">
-                  <Select
-                    value={form.org_id}
-                    onValueChange={v => set("org_id", v)}
-                  >
-                    <SelectTrigger className="w-full h-10 rounded-xl">
-                      <SelectValue placeholder={loadingOrgs ? "Loading organizations..." : "Select parent organization"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {orgs.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  {!loadingOrgs && orgs.length === 0 && (
-                    <p className="text-[11px] text-rose-500 mt-1">No organizations found. Please create one first.</p>
-                  )}
-                </div>
-              </Field>
-            </div>
-
-            {/* Employee Identity */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Employee Record</SectionHeader>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="col-span-full">
-                  <Field label="Full Name" required>
-                    <Input
-                      value={form.name}
-                      onChange={e => set("name", e.target.value)}
-                      placeholder="e.g. Jane Smith"
-                      className="h-10 rounded-xl"
-                    />
-                  </Field>
-                </div>
-                <Field label="Designation">
-                  <Input
-                    value={form.designation}
-                    onChange={e => set("designation", e.target.value)}
-                    placeholder="e.g. Product Manager"
-                    className="h-10 rounded-xl"
-                  />
-                </Field>
-                <Field label="Employee Code">
-                  <Input
-                    value={form.employee_code}
-                    onChange={e => set("employee_code", e.target.value)}
-                    placeholder="e.g. EMP-101"
-                    className="h-10 rounded-xl font-mono text-sm"
-                  />
-                </Field>
+      {success ? (
+        <div className="max-w-xl mx-auto space-y-6 animate-in zoom-in-95 duration-300 mt-4">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-border/50">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black tracking-tight">Employee Created</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Profile provisioned successfully. Share credentials below.</p>
               </div>
             </div>
 
-            {/* Contact Details */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Contact Information</SectionHeader>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Email Address" required>
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={e => set("email", e.target.value)}
-                    placeholder="jane@company.com"
-                    className="h-10 rounded-xl"
-                  />
-                </Field>
-                <Field label="Phone Number">
-                  <Input
-                    type="tel"
-                    value={form.phone}
-                    onChange={e => set("phone", e.target.value)}
-                    placeholder="+91 98765 43210"
-                    className="h-10 rounded-xl"
-                  />
-                </Field>
+            <div className="space-y-5">
+              {/* Credentials Section */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Email</p>
+                  <p className="text-sm font-semibold text-foreground truncate" title={form.email}>{form.email}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Initial Password</p>
+                  <p className="text-sm font-mono font-semibold text-foreground truncate">{form.password}</p>
+                </div>
               </div>
-            </div>
 
-          </div>
-
-          {/* ── Right column: status, security, actions ───────────────── */}
-          <div className="space-y-6">
-
-            {/* Account Security */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Security & Access</SectionHeader>
-              <div className="space-y-4">
-                <Field label="Initial Password" required>
-                  <div className="relative">
-                    <Input
-                      type={showPass ? "text" : "password"}
-                      value={form.password}
-                      onChange={e => set("password", e.target.value)}
-                      placeholder="Min 8 characters"
-                      className="h-10 rounded-xl pr-10"
-                    />
-                    <button type="button" onClick={() => setShowPass(s => !s)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors">
-                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+              {/* NFC Card Link Section */}
+              {cardUrl && (
+                <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/30 border border-border/50">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">NFC Card Link</p>
+                    <p className="text-xs font-mono truncate text-foreground">{cardUrl}</p>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">This will be the employee's initial login password.</p>
-                </Field>
-
-                <div className="pt-2">
-                  <PhotoUpload
-                    orgSlug={selectedOrgSlug}
-                    email={form.email}
-                    value={form.photo_url}
-                    onChange={v => set("photo_url", v)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Status */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Account Status</SectionHeader>
-              <div className="flex gap-2">
-                {[{ v: "true", label: "Active", theme: "emerald" }, { v: "false", label: "Inactive", theme: "rose" }].map(opt => (
-                  <button
-                    key={opt.v}
+                  <Button
                     type="button"
-                    onClick={() => set('is_active', opt.v)}
-                    className={cn(
-                      "flex-1 h-11 rounded-xl border-2 text-xs font-bold uppercase tracking-wider transition-all",
-                      form.is_active === opt.v
-                        ? opt.theme === "emerald"
-                          ? "border-emerald-500 bg-emerald-500/10 text-emerald-600"
-                          : "border-rose-500 bg-rose-500/10 text-rose-600"
-                        : "border-border bg-muted/30 text-muted-foreground hover:border-border/80"
-                    )}
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyCard}
+                    className="shrink-0 h-8 text-xs font-bold"
                   >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    {copyingCard ? <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> : <Hash className="w-3.5 h-3.5 mr-1.5" />}
+                    {copyingCard ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+              )}
 
-            {/* Submit */}
-            <div className="bg-card border border-border rounded-2xl p-6 space-y-3">
-              {success && !resetLink && (
-                <div className="space-y-3 pt-4 border-t border-border animate-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-widest leading-none mb-1">Creation Success</p>
-                      <p className="text-xs font-semibold opacity-90 leading-tight">The account is ready. Send the reset link to the employee so they can set their own secret password.</p>
-                    </div>
-                  </div>
-
+              {/* Setup Link Section */}
+              <div className="pt-2">
+                {!resetLink ? (
                   <Button
                     type="button"
                     onClick={handleGenerateLink}
                     disabled={generatingLink}
-                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl"
+                    className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 transition-all"
                   >
                     {generatingLink ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating & Sending...</>
                     ) : (
-                      <>Generate Password Reset Link</>
+                      <><Mail className="w-4 h-4 mr-2" />Generate Link & Email Setup</>
                     )}
                   </Button>
-                </div>
-              )}
-
-              {resetLink && (
-                <div className="space-y-4 pt-4 border-t border-border animate-in zoom-in-95 duration-300">
-                  <div className="bg-muted px-4 py-3 rounded-xl border border-border relative group">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5">Employee Reset Link</p>
-                    <p className="text-[10px] font-mono break-all text-foreground pr-8 leading-relaxed">
-                      {resetLink}
-                    </p>
-                    <button
+                ) : (
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 animate-in fade-in">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600/80 mb-1">Setup Link (Emailed)</p>
+                      <p className="text-xs font-mono truncate text-emerald-700 font-medium">{resetLink}</p>
+                    </div>
+                    <Button
                       type="button"
-                      onClick={handleCopy}
-                      className="absolute right-3 bottom-3 p-1.5 rounded-lg bg-background border border-border hover:border-emerald-500 hover:text-emerald-500 transition-all shadow-sm"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCopyLink}
+                      className="shrink-0 h-8 text-xs font-bold border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20"
                     >
-                      {copying ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
-                    </button>
+                      {copyingLink ? <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> : <Hash className="w-3.5 h-3.5 mr-1.5" />}
+                      {copyingLink ? "Copied" : "Copy"}
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 text-orange-600 border border-orange-500/10">
-                    <AlertCircle className="w-3 h-3 shrink-0" />
-                    <p className="text-[10px] font-bold">This link is sensitive. Copy and send it directly to the employee.</p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => router.push("/sites/superadmin/employees")}
-                    className="w-full h-10 rounded-xl font-bold"
-                  >
-                    Return to List
-                  </Button>
-                </div>
-              )}
-
-              {!success && (
-                <>
-                  <Button
-                    type="submit"
-                    disabled={saving}
-                    className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 disabled:opacity-70"
-                  >
-                    {saving ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Adding…</>
-                    ) : (
-                      <><Plus className="w-4 h-4 mr-2" />Add Employee</>
-                    )}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.push("/sites/superadmin/employees")}
-                    className="w-full h-10 rounded-xl"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
+                )}
+              </div>
             </div>
+          </div>
 
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/sites/superadmin/employees")}
+              className="flex-1 h-11 rounded-xl font-bold"
+            >
+              Return to Employees
+            </Button>
+            <Button
+              type="button"
+              onClick={handleResetForm}
+              className="flex-1 h-11 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90"
+            >
+              Add Another
+            </Button>
           </div>
         </div>
-      </form>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+  
+            {/* ── Left column: main details ──────────────────────────────── */}
+            <div className="xl:col-span-2 space-y-8">
+  
+              {/* Organization Assignment */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Organization Assignment</SectionHeader>
+                <Field label="Organization" required>
+                  <div className="relative">
+                    <Select
+                      value={form.org_id}
+                      onValueChange={v => set("org_id", v)}
+                    >
+                      <SelectTrigger className="w-full h-10 rounded-xl">
+                        <SelectValue placeholder={loadingOrgs ? "Loading organizations..." : "Select parent organization"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {orgs.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    {!loadingOrgs && orgs.length === 0 && (
+                      <p className="text-[11px] text-rose-500 mt-1">No organizations found. Please create one first.</p>
+                    )}
+                  </div>
+                </Field>
+              </div>
+  
+              {/* Employee Identity */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Employee Record</SectionHeader>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="col-span-full">
+                    <Field label="Full Name" required>
+                      <Input
+                        value={form.name}
+                        onChange={e => set("name", e.target.value)}
+                        placeholder="e.g. Jane Smith"
+                        className="h-10 rounded-xl"
+                      />
+                    </Field>
+                  </div>
+                  <Field label="Designation">
+                    <Input
+                      value={form.designation}
+                      onChange={e => set("designation", e.target.value)}
+                      placeholder="e.g. Product Manager"
+                      className="h-10 rounded-xl"
+                    />
+                  </Field>
+                  <Field label="Employee Code">
+                    <Input
+                      value={form.employee_code}
+                      onChange={e => set("employee_code", e.target.value)}
+                      placeholder="e.g. EMP-101"
+                      className="h-10 rounded-xl font-mono text-sm"
+                    />
+                  </Field>
+                </div>
+              </div>
+  
+              {/* Contact Details */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Contact Information</SectionHeader>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Email Address" required>
+                    <Input
+                      type="email"
+                      value={form.email}
+                      onChange={e => set("email", e.target.value)}
+                      placeholder="jane@company.com"
+                      className="h-10 rounded-xl"
+                    />
+                  </Field>
+                  <Field label="Phone Number">
+                    <Input
+                      type="tel"
+                      value={form.phone}
+                      onChange={e => set("phone", e.target.value)}
+                      placeholder="+91 98765 43210"
+                      className="h-10 rounded-xl"
+                    />
+                  </Field>
+                </div>
+              </div>
+  
+            </div>
+  
+            {/* ── Right column: status, security, actions ───────────────── */}
+            <div className="space-y-6">
+  
+              {/* Account Security */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Security & Access</SectionHeader>
+                <div className="space-y-4">
+                  <Field label="Initial Password" required>
+                    <div className="relative">
+                      <Input
+                        type={showPass ? "text" : "password"}
+                        value={form.password}
+                        onChange={e => set("password", e.target.value)}
+                        placeholder="Min 8 characters"
+                        className="h-10 rounded-xl pr-10"
+                      />
+                      <button type="button" onClick={() => setShowPass(s => !s)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors">
+                        {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">This will be the employee's initial login password.</p>
+                  </Field>
+  
+                  <div className="pt-2">
+                    <PhotoUpload
+                      orgSlug={selectedOrgSlug}
+                      email={form.email}
+                      value={form.photo_url}
+                      onChange={v => set("photo_url", v)}
+                    />
+                  </div>
+                </div>
+              </div>
+  
+              {/* Status */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Account Status</SectionHeader>
+                <div className="flex gap-2">
+                  {[{ v: "true", label: "Active", theme: "emerald" }, { v: "false", label: "Inactive", theme: "rose" }].map(opt => (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      onClick={() => set('is_active', opt.v)}
+                      className={cn(
+                        "flex-1 h-11 rounded-xl border-2 text-xs font-bold uppercase tracking-wider transition-all",
+                        form.is_active === opt.v
+                          ? opt.theme === "emerald"
+                            ? "border-emerald-500 bg-emerald-500/10 text-emerald-600"
+                            : "border-rose-500 bg-rose-500/10 text-rose-600"
+                          : "border-border bg-muted/30 text-muted-foreground hover:border-border/80"
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+  
+              {/* Submit */}
+              <div className="bg-card border border-border rounded-2xl p-6 space-y-3">
+                {error && (
+                  <div className="p-3 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <p className="text-xs font-medium">{error}</p>
+                  </div>
+                )}
+                
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 disabled:opacity-70"
+                >
+                  {saving ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Adding…</>
+                  ) : (
+                    <><Plus className="w-4 h-4 mr-2" />Add Employee</>
+                  )}
+                </Button>
+  
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push("/sites/superadmin/employees")}
+                  className="w-full h-10 rounded-xl"
+                >
+                  Cancel
+                </Button>
+              </div>
+  
+            </div>
+          </div>
+        </form>
+      )}
     </div>
   )
 }

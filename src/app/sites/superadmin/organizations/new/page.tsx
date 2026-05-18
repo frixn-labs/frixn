@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import {
   ArrowLeft, Building2, Upload, X, Loader2, CheckCircle2,
-  AlertCircle, ImageIcon, Eye, EyeOff, Hash
+  AlertCircle, ImageIcon, Eye, EyeOff, Hash, Mail
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -170,7 +170,7 @@ export default function NewOrganizationPage() {
   // Reset Link Flow
   const [generatingLink, setGeneratingLink] = React.useState(false)
   const [resetLink, setResetLink] = React.useState("")
-  const [copying, setCopying] = React.useState(false)
+  const [copyingLink, setCopyingLink] = React.useState(false)
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
@@ -261,10 +261,22 @@ export default function NewOrganizationPage() {
     }
   }
 
-  const handleCopy = () => {
+  const handleCopyLink = () => {
     navigator.clipboard.writeText(resetLink)
-    setCopying(true)
-    setTimeout(() => setCopying(false), 2000)
+    setCopyingLink(true)
+    setTimeout(() => setCopyingLink(false), 2000)
+  }
+
+  const handleResetForm = () => {
+    setForm({
+      name: "", slug: "", logo_url: "",
+      brand_color: "#1A3C6E", accent_color: "#E8A020",
+      plan: "starter", max_employees: "50", status: "setup",
+      admin_name: "", admin_email: "", admin_password: "", admin_phone: "",
+    })
+    setSuccess(false)
+    setResetLink("")
+    setError("")
   }
 
   return (
@@ -294,224 +306,267 @@ export default function NewOrganizationPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-
-          {/* ── Left column: main details ──────────────────────────────── */}
-          <div className="xl:col-span-2 space-y-8">
-
-            {/* Identity */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Organization Identity</SectionHeader>
-              <div className="space-y-4">
-                <Field label="Organization Name" required>
-                  <Input
-                    value={form.name}
-                    onChange={e => handleNameChange(e.target.value)}
-                    placeholder="Acme Corporation"
-                    className="h-10 rounded-xl"
-                  />
-                </Field>
-
-                <Field label="Slug — URL identifier" required>
-                  <div className="flex items-center">
-                    <span className="px-3 h-10 bg-muted border border-r-0 border-border rounded-l-xl text-xs text-muted-foreground flex items-center font-mono shrink-0">
-                      /sites/
-                    </span>
-                    <Input
-                      value={form.slug}
-                      onChange={e => set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                      placeholder="acme-corp"
-                      className="h-10 rounded-l-none rounded-r-xl font-mono text-sm"
-                    />
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    Dashboard URL: <span className="font-mono">frixn.app/sites/{form.slug || "your-slug"}/admin/dashboard</span>
-                  </p>
-                </Field>
-
-                <LogoUpload slug={form.slug} value={form.logo_url} onChange={v => set("logo_url", v)} />
+      {success ? (
+        <div className="max-w-xl mx-auto space-y-6 animate-in zoom-in-95 duration-300 mt-4">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-border/50">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black tracking-tight">Organization Created</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Tenant provisioned successfully. Share credentials below.</p>
               </div>
             </div>
 
-            {/* Admin Account */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Admin Account</SectionHeader>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Admin Full Name">
-                  <Input value={form.admin_name} onChange={e => set("admin_name", e.target.value)}
-                    placeholder="John Doe" className="h-10 rounded-xl" />
-                </Field>
-                <Field label="Admin Phone">
-                  <Input type="tel" value={form.admin_phone} onChange={e => set("admin_phone", e.target.value)}
-                    placeholder="+91 98765 43210" className="h-10 rounded-xl" />
-                </Field>
-                <Field label="Admin Email" required>
-                  <Input type="email" value={form.admin_email} onChange={e => set("admin_email", e.target.value)}
-                    placeholder="admin@acme.com" className="h-10 rounded-xl" />
-                </Field>
-                <Field label="Admin Password" required>
-                  <div className="relative">
-                    <Input
-                      type={showPass ? "text" : "password"}
-                      value={form.admin_password}
-                      onChange={e => set("admin_password", e.target.value)}
-                      placeholder="Min 8 characters"
-                      className="h-10 rounded-xl pr-10"
-                    />
-                    <button type="button" onClick={() => setShowPass(s => !s)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors">
-                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">Used to log in to the admin dashboard</p>
-                </Field>
-              </div>
-            </div>
-
-          </div>
-
-          {/* ── Right column: plan, colors, actions ────────────────────── */}
-          <div className="space-y-6">
-
-            {/* Plan & Status */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Plan & Limits</SectionHeader>
-              <div className="space-y-4">
-                <Field label="Plan">
-                  <Select value={form.plan} onValueChange={v => set("plan", v)}>
-                    <SelectTrigger className="w-full h-10 rounded-xl">
-                      <SelectValue placeholder="Select Plan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="starter">Starter</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Field label="Status">
-                  <Select value={form.status} onValueChange={v => set("status", v)}>
-                    <SelectTrigger className="w-full h-10 rounded-xl">
-                      <SelectValue placeholder="Select Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="setup">Setup</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="suspended">Suspended</SelectItem>
-                      <SelectItem value="overdue">Overdue</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Field label="Max Employees">
-                  <Input type="number" min="1" value={form.max_employees}
-                    onChange={e => set("max_employees", e.target.value)}
-                    className="h-10 rounded-xl" />
-                </Field>
-              </div>
-            </div>
-
-            {/* Brand Colors */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <SectionHeader>Brand Colors</SectionHeader>
-              <div className="space-y-4">
-                <ColorField label="Brand Color" value={form.brand_color} onChange={v => set("brand_color", v)} />
-                <ColorField label="Accent Color" value={form.accent_color} onChange={v => set("accent_color", v)} />
-                {/* Preview */}
-                <div className="mt-4 rounded-xl overflow-hidden">
-                  <div className="h-8" style={{ background: `linear-gradient(135deg, ${form.brand_color}, ${form.accent_color})` }} />
-                  <div className="h-2 flex">
-                    <div className="flex-1" style={{ backgroundColor: form.brand_color }} />
-                    <div className="flex-1" style={{ backgroundColor: form.accent_color }} />
-                  </div>
+            <div className="space-y-5">
+              {/* Org details */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Organization</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{form.name}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Dashboard URL</p>
+                  <p className="text-sm font-mono font-semibold text-foreground truncate">/sites/{form.slug}</p>
                 </div>
               </div>
-            </div>
 
-            {/* Submit */}
-            <div className="bg-card border border-border rounded-2xl p-6 space-y-3">
-              {success && !resetLink && (
-                <div className="space-y-3 pt-4 border-t border-border animate-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-widest leading-none mb-1">Organization Created</p>
-                      <p className="text-xs font-semibold opacity-90 leading-tight">The organization and admin account are ready. Generate a reset link to let the owner set their own password.</p>
-                    </div>
-                  </div>
+              {/* Credentials Section */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Admin Email</p>
+                  <p className="text-sm font-semibold text-foreground truncate" title={form.admin_email}>{form.admin_email}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Admin Password</p>
+                  <p className="text-sm font-mono font-semibold text-foreground truncate">{form.admin_password}</p>
+                </div>
+              </div>
 
+              {/* Setup Link Section */}
+              <div className="pt-2">
+                {!resetLink ? (
                   <Button
                     type="button"
                     onClick={handleGenerateLink}
                     disabled={generatingLink}
-                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/10"
+                    className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 transition-all"
                   >
                     {generatingLink ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating & Sending...</>
                     ) : (
-                      <>Generate Admin Reset Link</>
+                      <><Mail className="w-4 h-4 mr-2" />Generate Link & Email Setup</>
                     )}
                   </Button>
-                </div>
-              )}
-
-              {resetLink && (
-                <div className="space-y-4 pt-4 border-t border-border animate-in zoom-in-95 duration-300">
-                  <div className="bg-muted px-4 py-3 rounded-xl border border-border relative group">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5">Admin Setup Link</p>
-                    <p className="text-[10px] font-mono break-all text-foreground pr-8 leading-relaxed">
-                      {resetLink}
-                    </p>
-                    <button
+                ) : (
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 animate-in fade-in">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600/80 mb-1">Setup Link (Emailed)</p>
+                      <p className="text-xs font-mono truncate text-emerald-700 font-medium">{resetLink}</p>
+                    </div>
+                    <Button
                       type="button"
-                      onClick={handleCopy}
-                      className="absolute right-3 bottom-3 p-1.5 rounded-lg bg-background border border-border hover:border-emerald-500 hover:text-emerald-500 transition-all shadow-sm"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCopyLink}
+                      className="shrink-0 h-8 text-xs font-bold border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20"
                     >
-                      {copying ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
-                    </button>
+                      {copyingLink ? <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> : <Hash className="w-3.5 h-3.5 mr-1.5" />}
+                      {copyingLink ? "Copied" : "Copy"}
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 text-orange-600 border border-orange-500/10">
-                    <AlertCircle className="w-3 h-3 shrink-0" />
-                    <p className="text-[10px] font-bold">Copy this link and send it to the organization owner.</p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => router.push("/sites/superadmin/organizations")}
-                    className="w-full h-10 rounded-xl font-bold"
-                  >
-                    Return to Dashboard
-                  </Button>
-                </div>
-              )}
-
-              {!success && (
-                <>
-                  <Button
-                    type="submit"
-                    disabled={saving}
-                    className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 disabled:opacity-70"
-                  >
-                    {saving ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating…</>
-                    ) : (
-                      <><Building2 className="w-4 h-4 mr-2" />Create Organization</>
-                    )}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.push("/sites/superadmin/organizations")}
-                    className="w-full h-10 rounded-xl"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
+                )}
+              </div>
             </div>
+          </div>
 
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/sites/superadmin/organizations")}
+              className="flex-1 h-11 rounded-xl font-bold"
+            >
+              Return to Organizations
+            </Button>
+            <Button
+              type="button"
+              onClick={handleResetForm}
+              className="flex-1 h-11 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90"
+            >
+              Add Another
+            </Button>
           </div>
         </div>
-      </form>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+  
+            {/* ── Left column: main details ──────────────────────────────── */}
+            <div className="xl:col-span-2 space-y-8">
+  
+              {/* Identity */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Organization Identity</SectionHeader>
+                <div className="space-y-4">
+                  <Field label="Organization Name" required>
+                    <Input
+                      value={form.name}
+                      onChange={e => handleNameChange(e.target.value)}
+                      placeholder="Acme Corporation"
+                      className="h-10 rounded-xl"
+                    />
+                  </Field>
+  
+                  <Field label="Slug — URL identifier" required>
+                    <div className="flex items-center">
+                      <span className="px-3 h-10 bg-muted border border-r-0 border-border rounded-l-xl text-xs text-muted-foreground flex items-center font-mono shrink-0">
+                        /sites/
+                      </span>
+                      <Input
+                        value={form.slug}
+                        onChange={e => set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                        placeholder="acme-corp"
+                        className="h-10 rounded-l-none rounded-r-xl font-mono text-sm"
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Dashboard URL: <span className="font-mono">frixn.app/sites/{form.slug || "your-slug"}/admin/dashboard</span>
+                    </p>
+                  </Field>
+  
+                  <LogoUpload slug={form.slug} value={form.logo_url} onChange={v => set("logo_url", v)} />
+                </div>
+              </div>
+  
+              {/* Admin Account */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Admin Account</SectionHeader>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Admin Full Name">
+                    <Input value={form.admin_name} onChange={e => set("admin_name", e.target.value)}
+                      placeholder="John Doe" className="h-10 rounded-xl" />
+                  </Field>
+                  <Field label="Admin Phone">
+                    <Input type="tel" value={form.admin_phone} onChange={e => set("admin_phone", e.target.value)}
+                      placeholder="+91 98765 43210" className="h-10 rounded-xl" />
+                  </Field>
+                  <Field label="Admin Email" required>
+                    <Input type="email" value={form.admin_email} onChange={e => set("admin_email", e.target.value)}
+                      placeholder="admin@acme.com" className="h-10 rounded-xl" />
+                  </Field>
+                  <Field label="Admin Password" required>
+                    <div className="relative">
+                      <Input
+                        type={showPass ? "text" : "password"}
+                        value={form.admin_password}
+                        onChange={e => set("admin_password", e.target.value)}
+                        placeholder="Min 8 characters"
+                        className="h-10 rounded-xl pr-10"
+                      />
+                      <button type="button" onClick={() => setShowPass(s => !s)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors">
+                        {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">Used to log in to the admin dashboard</p>
+                  </Field>
+                </div>
+              </div>
+  
+            </div>
+  
+            {/* ── Right column: plan, colors, actions ────────────────────── */}
+            <div className="space-y-6">
+  
+              {/* Plan & Status */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Plan & Limits</SectionHeader>
+                <div className="space-y-4">
+                  <Field label="Plan">
+                    <Select value={form.plan} onValueChange={v => set("plan", v)}>
+                      <SelectTrigger className="w-full h-10 rounded-xl">
+                        <SelectValue placeholder="Select Plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="starter">Starter</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field label="Status">
+                    <Select value={form.status} onValueChange={v => set("status", v)}>
+                      <SelectTrigger className="w-full h-10 rounded-xl">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="setup">Setup</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="suspended">Suspended</SelectItem>
+                        <SelectItem value="overdue">Overdue</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field label="Max Employees">
+                    <Input type="number" min="1" value={form.max_employees}
+                      onChange={e => set("max_employees", e.target.value)}
+                      className="h-10 rounded-xl" />
+                  </Field>
+                </div>
+              </div>
+  
+              {/* Brand Colors */}
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <SectionHeader>Brand Colors</SectionHeader>
+                <div className="space-y-4">
+                  <ColorField label="Brand Color" value={form.brand_color} onChange={v => set("brand_color", v)} />
+                  <ColorField label="Accent Color" value={form.accent_color} onChange={v => set("accent_color", v)} />
+                  {/* Preview */}
+                  <div className="mt-4 rounded-xl overflow-hidden">
+                    <div className="h-8" style={{ background: `linear-gradient(135deg, ${form.brand_color}, ${form.accent_color})` }} />
+                    <div className="h-2 flex">
+                      <div className="flex-1" style={{ backgroundColor: form.brand_color }} />
+                      <div className="flex-1" style={{ backgroundColor: form.accent_color }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+              {/* Submit */}
+              <div className="bg-card border border-border rounded-2xl p-6 space-y-3">
+                {error && (
+                  <div className="p-3 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <p className="text-xs font-medium">{error}</p>
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 disabled:opacity-70"
+                >
+                  {saving ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating…</>
+                  ) : (
+                    <><Building2 className="w-4 h-4 mr-2" />Create Organization</>
+                  )}
+                </Button>
+  
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push("/sites/superadmin/organizations")}
+                  className="w-full h-10 rounded-xl"
+                >
+                  Cancel
+                </Button>
+              </div>
+  
+            </div>
+          </div>
+        </form>
+      )}
     </div>
   )
 }

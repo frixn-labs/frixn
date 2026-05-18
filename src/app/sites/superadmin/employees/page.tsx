@@ -138,7 +138,11 @@ export default function EmployeesPage() {
                   </td>
                 </tr>
               ) : employees.map(emp => (
-                <tr key={emp.id} className="border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors">
+                <tr 
+                  key={emp.id} 
+                  onClick={() => router.push(`/sites/superadmin/employees/${emp.id}`)}
+                  className="border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors cursor-pointer"
+                >
                   {/* Name + avatar */}
                   <td className="px-4 py-3 min-w-[160px]">
                     <div className="flex items-center gap-3">
