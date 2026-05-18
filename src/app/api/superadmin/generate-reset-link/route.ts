@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       type: 'recovery',
       email: email.trim().toLowerCase(),
       options: { 
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.frixn.in'}/reset-password` 
+        redirectTo: `https://www.frixn.in/reset-password` 
       }
     })
 
