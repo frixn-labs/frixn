@@ -83,7 +83,7 @@ export function EmployeeSlideOver({
   if (!open) return null;
 
   const card = employee?.nfc_cards?.[0]
-  const cardUrl = card?.card_code ? `envitra.in/c/${card.card_code}` : 'No card'
+  const cardUrl = card?.card_code ? `frixn.in/c/${card.card_code}` : 'No card'
   const cardStatus = card?.status || 'Blank'
 
   return (

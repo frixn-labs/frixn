@@ -162,7 +162,7 @@ export default function LoginPage() {
       <section className="relative hidden lg:flex lg:w-1/2 flex-col justify-between p-4 lg:p-6 overflow-hidden bg-[#0A0A0B]">
         <div
           className="absolute inset-0 z-0 opacity-40 bg-cover bg-center transition-transform duration-[15s] ease-out hover:scale-105"
-          style={{ backgroundImage: `url('https://i.pinimg.com/1200x/53/5c/f3/535cf30a8a5e926cd871187f1d979d61.jpg')` }}
+          style={{ backgroundImage: `url('https://i.pinimg.com/736x/9b/51/75/9b5175e2e9b44b35b49c106e43f49ab1.jpg')` }}
         />
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/20 via-black/60 to-black/90" />
         <div className="absolute inset-0 z-1 bg-[radial-gradient(ellipse_at_top_left,rgba(255,61,0,0.15),transparent_50%)]" />

@@ -9,8 +9,8 @@ export default function proxy(request: NextRequest) {
 
   // Root/www domains → serve landing page without rewrite
   if (
-    host === 'envitra.in' ||
-    host === 'www.envitra.in' ||
+    host === 'frixn.in' ||
+    host === 'www.frixn.in' ||
     host === 'localhost' ||
     host.endsWith('.vercel.app')
   ) {
@@ -18,12 +18,12 @@ export default function proxy(request: NextRequest) {
   }
 
   // Extract org slug from subdomain
-  // appaswamy.envitra.in → slug = "appaswamy"
+  // appaswamy.frixn.in → slug = "appaswamy"
   let slug: string | null = null
 
-  if (host.endsWith('.envitra.in')) {
-    slug = host.replace('.envitra.in', '')
-    // Handle www.appaswamy.envitra.in just in case
+  if (host.endsWith('.frixn.in')) {
+    slug = host.replace('.frixn.in', '')
+    // Handle www.appaswamy.frixn.in just in case
     if (slug.startsWith('www.')) {
       slug = slug.replace('www.', '')
     }
@@ -40,19 +40,19 @@ export default function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // appaswamy.envitra.in  →  /sites/appaswamy/admin/dashboard
+  // appaswamy.frixn.in  →  /sites/appaswamy/admin/dashboard
   if (pathname === '/') {
     url.pathname = `/sites/${slug}/admin/dashboard`
     return NextResponse.rewrite(url)
   }
 
-  // appaswamy.envitra.in/admin/employees  →  /sites/appaswamy/admin/employees
+  // appaswamy.frixn.in/admin/employees  →  /sites/appaswamy/admin/employees
   if (pathname.startsWith('/admin')) {
     url.pathname = `/sites/${slug}${pathname}`
     return NextResponse.rewrite(url)
   }
 
-  // appaswamy.envitra.in/65a7aaf7-...  →  /sites/appaswamy/65a7aaf7-...
+  // appaswamy.frixn.in/65a7aaf7-...  →  /sites/appaswamy/65a7aaf7-...
   url.pathname = `/sites/${slug}${pathname}`
   return NextResponse.rewrite(url)
 }

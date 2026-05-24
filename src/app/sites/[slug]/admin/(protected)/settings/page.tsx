@@ -691,7 +691,7 @@ export default function SettingsPage() {
                                         <Label className="text-sm font-medium leading-none">Company Website (Slug)</Label>
                                         <div className="h-14 flex items-center px-5 gap-3 bg-muted/40 border border-border/40 rounded-xl text-sm font-bold text-muted-foreground">
                                             <Globe className="w-5 h-5 opacity-40 shrink-0" />
-                                            <span className="truncate whitespace-nowrap overflow-hidden">envitra.in/sites/<span className="text-foreground">{orgData?.slug}</span></span>
+                                            <span className="truncate whitespace-nowrap overflow-hidden">frixn.in/sites/<span className="text-foreground">{orgData?.slug}</span></span>
                                             <Lock className="w-4 h-4 ml-auto opacity-30 shrink-0" />
                                         </div>
                                         <p className="text-[10px] text-muted-foreground/60 italic font-medium px-1">This permanent URL connects users to your public portal.</p>

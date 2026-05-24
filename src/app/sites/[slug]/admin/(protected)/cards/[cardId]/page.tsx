@@ -369,7 +369,7 @@ export default function CardDetailPage() {
                     <Zap className="w-6 h-6 text-primary" />
                   </div>
                   <p className="text-xs font-bold text-muted-foreground mb-1">PROG. DESTINATION</p>
-                  <p className="text-sm font-bold text-primary truncate max-w-[200px]">{card.card_url || 'envitra.in/c/...'}</p>
+                  <p className="text-sm font-bold text-primary truncate max-w-[200px]">{card.card_url || 'frixn.in/c/...'}</p>
                 </div>
              </div>
           </div>
