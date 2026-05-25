@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
-// ─── Status badge helper ────────────────────────────────────────────────────
+// â”€â”€â”€ Status badge helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; class: string }> = {
     active:    { label: "Active",    class: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
@@ -24,7 +24,7 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-// ─── Plan badge helper ──────────────────────────────────────────────────────
+// â”€â”€â”€ Plan badge helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PlanBadge({ plan }: { plan: string }) {
   return (
     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-[#FF3D00] dark:bg-[#FF3D00]/10 dark:text-[#FF3D00]">
@@ -36,7 +36,7 @@ function PlanBadge({ plan }: { plan: string }) {
 
 
 
-// ─── Main Page ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PAGE_SIZE = 10
 
 export default function OrganizationsPage() {
@@ -71,7 +71,7 @@ export default function OrganizationsPage() {
   // Real-time subscription
   React.useEffect(() => {
     const channel = supabase.channel('superadmin-orgs')
-      .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'organizations' }, () => fetchOrgs())
+      .on('postgres_changes', { event: '*', schema: 'frixn', table: 'organizations' }, () => fetchOrgs())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [fetchOrgs])
@@ -102,7 +102,7 @@ export default function OrganizationsPage() {
         <Input
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1) }}
-          placeholder="Search by name, slug, email…"
+          placeholder="Search by name, slug, emailâ€¦"
           className="pl-9 h-10 text-sm"
         />
       </div>
@@ -160,7 +160,7 @@ export default function OrganizationsPage() {
                   </td>
                   {/* Admin */}
                   <td className="px-4 py-3 min-w-[180px]">
-                    <p className="font-semibold text-xs">{org.admin_name || '—'}</p>
+                    <p className="font-semibold text-xs">{org.admin_name || 'â€”'}</p>
                     <p className="text-[11px] text-muted-foreground">{org.admin_email}</p>
                   </td>
                   {/* Status */}
@@ -171,7 +171,7 @@ export default function OrganizationsPage() {
                   </td>
                   {/* Created */}
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {org.created_at ? new Date(org.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                    {org.created_at ? new Date(org.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'â€”'}
                   </td>
                 </tr>
               ))}
@@ -183,7 +183,7 @@ export default function OrganizationsPage() {
         {totalPages > 1 && (
           <div className="px-4 py-3 border-t border-border/40 bg-muted/10 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
+              {(page - 1) * PAGE_SIZE + 1}â€“{Math.min(page * PAGE_SIZE, total)} of {total}
             </span>
             <div className="flex items-center gap-1.5">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
@@ -208,3 +208,4 @@ export default function OrganizationsPage() {
     </div>
   )
 }
+

@@ -7,11 +7,11 @@ const supabaseAuth = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Admin client — tapconnect schema data operations
+// Admin client — frixn schema data operations
 const supabaseData = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { db: { schema: 'tapconnect' } }
+  { db: { schema: 'frixn' } }
 )
 
 export async function PATCH(
@@ -94,7 +94,7 @@ export async function DELETE(
     const { error: authError } = await supabaseAuth.auth.admin.deleteUser(id)
 
     if (authError) {
-      // Even if auth deletion fails, the organization record is gone from the 'tapconnect' schema.
+      // Even if auth deletion fails, the organization record is gone from the 'frixn' schema.
       // But we should report it.
       return NextResponse.json({ error: `Auth deletion failed: ${authError.message}` }, { status: 400 })
     }

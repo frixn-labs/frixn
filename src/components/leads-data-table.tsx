@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import {
@@ -39,10 +39,10 @@ export type LeadData = {
 
 const _leadDataCache: Record<string, LeadData[]> = {}
 
-// ── Animated search ─────────────────────────────────────────────────────────
+// â”€â”€ Animated search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AnimatedSearch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [focused, setFocused] = React.useState(false)
-  const hints = ["Search by name…", "Search by email…", "Search by company…"]
+  const hints = ["Search by nameâ€¦", "Search by emailâ€¦", "Search by companyâ€¦"]
   const [idx, setIdx] = React.useState(0)
   React.useEffect(() => {
     if (focused || value) return
@@ -72,7 +72,7 @@ function AnimatedSearch({ value, onChange }: { value: string; onChange: (v: stri
   )
 }
 
-// ── Inline edit ──────────────────────────────────────────────────────────────
+// â”€â”€ Inline edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function InlineEdit({ value, leadId, field, type = "text", onSave }: {
   value: string | number | null; leadId: string; field: string
   type?: "text" | "number"
@@ -99,7 +99,7 @@ function InlineEdit({ value, leadId, field, type = "text", onSave }: {
   )
 
   const display = type === "number" && value != null
-    ? `₹${Number(value).toLocaleString("en-IN")}`
+    ? `â‚¹${Number(value).toLocaleString("en-IN")}`
     : value || null
 
   if (!display) return (
@@ -122,7 +122,7 @@ function InlineEdit({ value, leadId, field, type = "text", onSave }: {
   )
 }
 
-// ── Status config ────────────────────────────────────────────────────────────
+// â”€â”€ Status config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STATUS: Record<string, { label: string; dot: string; badge: string; accent: string }> = {
   new:          { label: "New",         dot: "bg-amber-400",   badge: "text-amber-400 border-amber-400/25 bg-amber-400/10",   accent: "from-amber-500/8" },
   followed_up:  { label: "Followed Up", dot: "bg-blue-400",    badge: "text-blue-400 border-blue-400/25 bg-blue-400/10",      accent: "from-blue-500/8" },
@@ -130,7 +130,7 @@ const STATUS: Record<string, { label: string; dot: string; badge: string; accent
   lost:         { label: "Lost",        dot: "bg-rose-400",    badge: "text-rose-400 border-rose-400/25 bg-rose-400/10",      accent: "from-rose-500/8" },
 }
 
-// ── Avatar gradient per name ─────────────────────────────────────────────────
+// â”€â”€ Avatar gradient per name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const AVATAR_COLORS = [
   "from-violet-500 to-purple-600",
   "from-blue-500 to-cyan-600",
@@ -144,7 +144,7 @@ function avatarGradient(name: string | null) {
   return AVATAR_COLORS[n % AVATAR_COLORS.length]
 }
 
-// ── Lead Card ────────────────────────────────────────────────────────────────
+// â”€â”€ Lead Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
   lead: LeadData
   onUpdateStatus: (id: string, s: string) => void
@@ -165,7 +165,7 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
 
       <div className="relative p-5 flex flex-col gap-4">
 
-        {/* ── Header: Avatar + Name + Company ── */}
+        {/* â”€â”€ Header: Avatar + Name + Company â”€â”€ */}
         <div className="flex items-center gap-3 pr-28">
           <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center font-black text-sm text-white shadow-md shrink-0`}>
             {initials}
@@ -184,7 +184,7 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
           </div>
         </div>
 
-        {/* Status dropdown — absolute top-right */}
+        {/* Status dropdown â€” absolute top-right */}
         <div className="absolute top-5 right-5">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -205,7 +205,7 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
           </DropdownMenu>
         </div>
 
-        {/* ── Chips: phone, product ── */}
+        {/* â”€â”€ Chips: phone, product â”€â”€ */}
         <div className="flex flex-wrap gap-2">
           {lead.visitor_phone && (
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full">
@@ -219,7 +219,7 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
           )}
         </div>
 
-        {/* ── Follow-up date + Reminder status combined ── */}
+        {/* â”€â”€ Follow-up date + Reminder status combined â”€â”€ */}
         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
           {lead.followup_date && (() => {
             const isSent = lead.reminder_status === 'sent'
@@ -240,12 +240,12 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
             <span className="flex items-center gap-1.5 truncate">
               <UserCheck className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
               <span className="truncate">{lead.employees.name}</span>
-              {lead.captured_at && <span className="opacity-50 shrink-0">· {format(new Date(lead.captured_at), "MMM d")}</span>}
+              {lead.captured_at && <span className="opacity-50 shrink-0">Â· {format(new Date(lead.captured_at), "MMM d")}</span>}
             </span>
           )}
         </div>
 
-        {/* ── Editable fields ── */}
+        {/* â”€â”€ Editable fields â”€â”€ */}
         <div className="border-t border-border/50 pt-3.5 flex flex-col gap-2.5">
           <div className="flex items-center gap-2 min-w-0">
             <div className="flex items-center gap-1.5 w-[110px] shrink-0">
@@ -263,7 +263,7 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
           </div>
         </div>
 
-        {/* ── Action bar: Email + Delete ── */}
+        {/* â”€â”€ Action bar: Email + Delete â”€â”€ */}
         <div className="border-t border-border/50 pt-3 flex items-center justify-between gap-2">
           {lead.visitor_email ? (
             <a
@@ -291,7 +291,7 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
   )
 }
 
-// ── Main export ──────────────────────────────────────────────────────────────
+// â”€â”€ Main export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function LeadsDataTable({ slug }: { slug: string }) {
   const [data, setData] = React.useState<LeadData[]>(_leadDataCache[slug] || [])
@@ -326,7 +326,7 @@ export function LeadsDataTable({ slug }: { slug: string }) {
   React.useEffect(() => {
     if (!orgId) return
     const filterPrefix = role === 'employee' ? `employee_id=eq.${sessionUserOrOrgId}` : `org_id=eq.${orgId}`
-    const ch = supabase.channel(`leads:${orgId}`).on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'leads', filter: filterPrefix }, fetchData).subscribe()
+    const ch = supabase.channel(`leads:${orgId}`).on('postgres_changes', { event: '*', schema: 'frixn', table: 'leads', filter: filterPrefix }, fetchData).subscribe()
     return () => { supabase.removeChannel(ch) }
   }, [orgId, fetchData, role, sessionUserOrOrgId])
 
@@ -477,3 +477,4 @@ export function LeadsDataTable({ slug }: { slug: string }) {
     </div>
   )
 }
+

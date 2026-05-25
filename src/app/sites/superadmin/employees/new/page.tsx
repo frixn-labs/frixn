@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import Link from "next/link"
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
-// ── Section header ───────────────────────────────────────────────────────────
+// â”€â”€ Section header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pb-3 border-b border-border/50 mb-4">
@@ -23,7 +23,7 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   )
 }
 
-// ── Field wrapper ────────────────────────────────────────────────────────────
+// â”€â”€ Field wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
@@ -35,7 +35,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
   )
 }
 
-// ── Photo Upload Box ────────────────────────────────────────────────────────
+// â”€â”€ Photo Upload Box â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PhotoUpload({
   orgSlug, email, value, onChange,
 }: { orgSlug: string; email: string; value: string; onChange: (url: string) => void }) {
@@ -59,7 +59,7 @@ function PhotoUpload({
     setUploadError("")
 
     const { error } = await supabase.storage
-      .from("tapconnect")
+      .from("frixn")
       .upload(path, file, { upsert: true, contentType: file.type })
 
     if (error) {
@@ -68,7 +68,7 @@ function PhotoUpload({
       return
     }
 
-    const { data: urlData } = supabase.storage.from("tapconnect").getPublicUrl(path)
+    const { data: urlData } = supabase.storage.from("frixn").getPublicUrl(path)
     onChange(urlData.publicUrl)
     setUploading(false)
   }
@@ -97,7 +97,7 @@ function PhotoUpload({
         {uploading ? (
           <>
             <Loader2 className="w-8 h-8 text-[#FF3D00] animate-spin" />
-            <p className="text-xs font-semibold text-muted-foreground">Uploading…</p>
+            <p className="text-xs font-semibold text-muted-foreground">Uploadingâ€¦</p>
           </>
         ) : value ? (
           <>
@@ -134,7 +134,7 @@ function PhotoUpload({
   )
 }
 
-// ── Main Page ────────────────────────────────────────────────────────────────
+// â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function NewEmployeePage() {
   const router = useRouter()
 
@@ -414,7 +414,7 @@ export default function NewEmployeePage() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
   
-            {/* ── Left column: main details ──────────────────────────────── */}
+            {/* â”€â”€ Left column: main details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="xl:col-span-2 space-y-8">
   
               {/* Organization Assignment */}
@@ -500,7 +500,7 @@ export default function NewEmployeePage() {
   
             </div>
   
-            {/* ── Right column: status, security, actions ───────────────── */}
+            {/* â”€â”€ Right column: status, security, actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="space-y-6">
   
               {/* Account Security */}
@@ -574,7 +574,7 @@ export default function NewEmployeePage() {
                   className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 disabled:opacity-70"
                 >
                   {saving ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Adding…</>
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Addingâ€¦</>
                   ) : (
                     <><Plus className="w-4 h-4 mr-2" />Add Employee</>
                   )}
@@ -597,3 +597,4 @@ export default function NewEmployeePage() {
     </div>
   )
 }
+

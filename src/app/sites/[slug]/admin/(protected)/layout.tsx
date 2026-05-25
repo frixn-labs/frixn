@@ -25,7 +25,7 @@ export default async function AdminLayout({
 
   // ── Slug Sync Guard ────────────────────────────────────────────────────────
   const cookieStore = await cookies()
-  const activeSlug = cookieStore.get('tapconnect_active_slug')?.value
+  const activeSlug = cookieStore.get('frixn_active_slug')?.value
 
   // Security Logic:
   // If no active slug is set, or it doesn't match the URL, trigger redirect. 

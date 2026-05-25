@@ -156,16 +156,16 @@ export default function DashboardHome() {
     
     const channels = [
       supabase.channel(`dash-taps:${orgId}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'tapconnect', table: 'taps', filter: filterPrefix }, () => fetchAll())
+        .on('postgres_changes', { event: 'INSERT', schema: 'frixn', table: 'taps', filter: filterPrefix }, () => fetchAll())
         .subscribe(),
       supabase.channel(`dash-leads:${orgId}`)
-        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'leads', filter: filterPrefix }, () => fetchAll())
+        .on('postgres_changes', { event: '*', schema: 'frixn', table: 'leads', filter: filterPrefix }, () => fetchAll())
         .subscribe(),
       supabase.channel(`dash-cards:${orgId}`)
-        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'nfc_cards', filter: filterPrefix }, () => fetchAll())
+        .on('postgres_changes', { event: '*', schema: 'frixn', table: 'nfc_cards', filter: filterPrefix }, () => fetchAll())
         .subscribe(),
       supabase.channel(`dash-emps:${orgId}`)
-        .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'employees', filter: empFilterStr }, () => fetchAll())
+        .on('postgres_changes', { event: '*', schema: 'frixn', table: 'employees', filter: empFilterStr }, () => fetchAll())
         .subscribe(),
     ]
     return () => { channels.forEach(c => supabase.removeChannel(c)) }

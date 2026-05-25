@@ -99,7 +99,7 @@ export default function ProfileClient({
 
     // Realtime subscriptions
     const channel = supabase.channel(`profile-${employee.id}`)
-      .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'employees', filter: `id=eq.${employee.id}` }, async (payload: any) => {
+      .on('postgres_changes', { event: '*', schema: 'frixn', table: 'employees', filter: `id=eq.${employee.id}` }, async (payload: any) => {
         if (payload.new) {
           setLiveEmployee(payload.new)
           // If employee becomes inactive, deactivate immediately
@@ -111,7 +111,7 @@ export default function ProfileClient({
           }
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'nfc_cards', filter: `employee_id=eq.${employee.id}` }, async () => {
+      .on('postgres_changes', { event: '*', schema: 'frixn', table: 'nfc_cards', filter: `employee_id=eq.${employee.id}` }, async () => {
         // Re-fetch cards and re-calc everything
         const { data: cards } = await supabase.from('nfc_cards').select('*').eq('employee_id', employee.id)
         if (cards) {
@@ -123,7 +123,7 @@ export default function ProfileClient({
           if (locked) setIsEditing(false)
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'card_links', filter: `org_id=eq.${org.id}` }, async () => {
+      .on('postgres_changes', { event: '*', schema: 'frixn', table: 'card_links', filter: `org_id=eq.${org.id}` }, async () => {
         // Re-fetch links if any change happens, to handle assigned_to matching easily
         const { data } = await supabase.from('card_links').select('*').eq('org_id', org.id)
         if (data) {

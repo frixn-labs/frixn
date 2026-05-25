@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import Link from "next/link"
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
-// ── Logo Upload Box ──────────────────────────────────────────────────────────
+// â”€â”€ Logo Upload Box â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LogoUpload({
   slug, value, onChange,
 }: { slug: string; value: string; onChange: (url: string) => void }) {
@@ -36,7 +36,7 @@ function LogoUpload({
     setUploadError("")
 
     const { error } = await supabase.storage
-      .from("tapconnect")
+      .from("frixn")
       .upload(path, file, { upsert: true, contentType: file.type })
 
     if (error) {
@@ -45,7 +45,7 @@ function LogoUpload({
       return
     }
 
-    const { data: urlData } = supabase.storage.from("tapconnect").getPublicUrl(path)
+    const { data: urlData } = supabase.storage.from("frixn").getPublicUrl(path)
     onChange(urlData.publicUrl)
     setUploading(false)
   }
@@ -74,7 +74,7 @@ function LogoUpload({
         {uploading ? (
           <>
             <Loader2 className="w-8 h-8 text-[#FF3D00] animate-spin" />
-            <p className="text-xs font-semibold text-muted-foreground">Uploading…</p>
+            <p className="text-xs font-semibold text-muted-foreground">Uploadingâ€¦</p>
           </>
         ) : value ? (
           <>
@@ -95,7 +95,7 @@ function LogoUpload({
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">Drop logo here or click to upload</p>
-              <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, SVG · Max 5MB</p>
+              <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, SVG Â· Max 5MB</p>
             </div>
           </>
         )}
@@ -111,7 +111,7 @@ function LogoUpload({
   )
 }
 
-// ── Section header ───────────────────────────────────────────────────────────
+// â”€â”€ Section header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pb-3 border-b border-border/50 mb-4">
@@ -120,7 +120,7 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   )
 }
 
-// ── Field wrapper ────────────────────────────────────────────────────────────
+// â”€â”€ Field wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
@@ -132,7 +132,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
   )
 }
 
-// ── Color picker row ─────────────────────────────────────────────────────────
+// â”€â”€ Color picker row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <Field label={label}>
@@ -152,7 +152,7 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
   )
 }
 
-// ── Main Page ────────────────────────────────────────────────────────────────
+// â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function NewOrganizationPage() {
   const router = useRouter()
 
@@ -403,7 +403,7 @@ export default function NewOrganizationPage() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
   
-            {/* ── Left column: main details ──────────────────────────────── */}
+            {/* â”€â”€ Left column: main details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="xl:col-span-2 space-y-8">
   
               {/* Identity */}
@@ -419,7 +419,7 @@ export default function NewOrganizationPage() {
                     />
                   </Field>
   
-                  <Field label="Slug — URL identifier" required>
+                  <Field label="Slug â€” URL identifier" required>
                     <div className="flex items-center">
                       <span className="px-3 h-10 bg-muted border border-r-0 border-border rounded-l-xl text-xs text-muted-foreground flex items-center font-mono shrink-0">
                         /sites/
@@ -477,7 +477,7 @@ export default function NewOrganizationPage() {
   
             </div>
   
-            {/* ── Right column: plan, colors, actions ────────────────────── */}
+            {/* â”€â”€ Right column: plan, colors, actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="space-y-6">
   
               {/* Plan & Status */}
@@ -547,7 +547,7 @@ export default function NewOrganizationPage() {
                   className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 disabled:opacity-70"
                 >
                   {saving ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating…</>
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creatingâ€¦</>
                   ) : (
                     <><Building2 className="w-4 h-4 mr-2" />Create Organization</>
                   )}
@@ -570,3 +570,4 @@ export default function NewOrganizationPage() {
     </div>
   )
 }
+

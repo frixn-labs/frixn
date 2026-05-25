@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import {
@@ -193,7 +193,7 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
       const channel = supabase.channel('employees_changes')
         .on(
           'postgres_changes',
-          { event: '*', schema: 'tapconnect', table: 'employees' },
+          { event: '*', schema: 'frixn', table: 'employees' },
           () => {
              // Re-fetch complex joins on any change
              fetchOrgAndData()
@@ -419,12 +419,12 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
       id: "department",
       accessorFn: (row) => row.departments?.name,
       header: "Department",
-      cell: ({ row }) => <div>{row.getValue("department") || "—"}</div>,
+      cell: ({ row }) => <div>{row.getValue("department") || "â€”"}</div>,
     },
     {
       accessorKey: "designation",
       header: "Designation",
-      cell: ({ row }) => <div>{row.getValue("designation") || "—"}</div>,
+      cell: ({ row }) => <div>{row.getValue("designation") || "â€”"}</div>,
     },
 
     {
@@ -809,3 +809,4 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
     </div>
   )
 }
+

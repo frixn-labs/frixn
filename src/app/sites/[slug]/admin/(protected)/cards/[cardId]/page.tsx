@@ -144,7 +144,7 @@ export default function CardDetailPage() {
       .channel(`card-detail-${cardId}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'tapconnect', table: 'nfc_cards', filter: `id=eq.${cardId}` },
+        { event: 'UPDATE', schema: 'frixn', table: 'nfc_cards', filter: `id=eq.${cardId}` },
         (payload) => {
           setCard(prev => prev ? { ...prev, ...payload.new } : null)
         }
@@ -156,7 +156,7 @@ export default function CardDetailPage() {
       .channel(`card-taps-${cardId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'tapconnect', table: 'taps', filter: `card_id=eq.${cardId}` },
+        { event: 'INSERT', schema: 'frixn', table: 'taps', filter: `card_id=eq.${cardId}` },
         () => { fetchCardData() }
       )
       .subscribe()

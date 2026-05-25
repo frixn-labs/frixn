@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Cookie, X } from 'lucide-react'
@@ -13,7 +13,7 @@ export function CookieConsent() {
     // Don't show on /sites/* pages
     if (pathname?.startsWith('/sites')) return
 
-    const consent = localStorage.getItem('tapconnect-cookie-consent')
+    const consent = localStorage.getItem('frixn-cookie-consent')
     if (!consent) {
       const timer = setTimeout(() => setShow(true), 1500)
       return () => clearTimeout(timer)
@@ -21,12 +21,12 @@ export function CookieConsent() {
   }, [pathname])
 
   const handleAccept = () => {
-    localStorage.setItem('tapconnect-cookie-consent', 'accepted')
+    localStorage.setItem('frixn-cookie-consent', 'accepted')
     setShow(false)
   }
 
   const handleDecline = () => {
-    localStorage.setItem('tapconnect-cookie-consent', 'declined')
+    localStorage.setItem('frixn-cookie-consent', 'declined')
     setShow(false)
   }
 
@@ -78,3 +78,4 @@ export function CookieConsent() {
     </AnimatePresence>
   )
 }
+

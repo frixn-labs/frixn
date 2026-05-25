@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import {
@@ -176,14 +176,14 @@ export function NfcCardsDataTable({ slug }: { slug: string }) {
 
   React.useEffect(() => { fetchOrgAndData() }, [fetchOrgAndData])
 
-  // Realtime — re-fetch on any card change (joins make patch-in-place harder)
+  // Realtime â€” re-fetch on any card change (joins make patch-in-place harder)
   React.useEffect(() => {
     if (!orgId) return
     const cardChannel = supabase
       .channel(`nfc_cards:${orgId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'tapconnect', table: 'nfc_cards', filter: `org_id=eq.${orgId}` },
+        { event: '*', schema: 'frixn', table: 'nfc_cards', filter: `org_id=eq.${orgId}` },
         () => { fetchOrgAndData() }
       )
       .subscribe()
@@ -192,7 +192,7 @@ export function NfcCardsDataTable({ slug }: { slug: string }) {
       .channel(`nfc_taps:${orgId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'tapconnect', table: 'taps', filter: `org_id=eq.${orgId}` },
+        { event: 'INSERT', schema: 'frixn', table: 'taps', filter: `org_id=eq.${orgId}` },
         () => { fetchOrgAndData() }
       )
       .subscribe()
@@ -671,3 +671,4 @@ export function NfcCardsDataTable({ slug }: { slug: string }) {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
@@ -28,7 +28,7 @@ export function OrgStatusGate({ initialOrg, initialEmployeeCount, slug }: OrgSta
   const [count, setCount] = React.useState(initialEmployeeCount)
   const [isRefreshing, setIsRefreshing] = React.useState(false)
 
-  // ── Realtime Subscriptions ──────────────────────────────────────────────────
+  // â”€â”€ Realtime Subscriptions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   React.useEffect(() => {
     // 1. Listen for Organization Status Changes
     const orgChannel = supabase
@@ -37,7 +37,7 @@ export function OrgStatusGate({ initialOrg, initialEmployeeCount, slug }: OrgSta
         'postgres_changes',
         {
           event: 'UPDATE',
-          schema: 'tapconnect',
+          schema: 'frixn',
           table: 'organizations',
           filter: `id=eq.${org.id}`
         },
@@ -60,7 +60,7 @@ export function OrgStatusGate({ initialOrg, initialEmployeeCount, slug }: OrgSta
         'postgres_changes',
         {
           event: '*', // Listen to inserts/deletes
-          schema: 'tapconnect',
+          schema: 'frixn',
           table: 'employees',
           filter: `org_id=eq.${org.id}`
         },
@@ -195,3 +195,4 @@ export function OrgStatusGate({ initialOrg, initialEmployeeCount, slug }: OrgSta
     </div>
   )
 }
+

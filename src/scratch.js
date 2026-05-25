@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 const env = fs.readFileSync(path.join(__dirname, '../.env.local'), 'utf-8');
 env.split('\n').forEach(line => {
@@ -13,7 +13,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   db: {
-    schema: 'tapconnect'
+    schema: 'frixn'
   }
 });
 
@@ -27,3 +27,4 @@ async function checkSchema() {
 }
 
 checkSchema();
+

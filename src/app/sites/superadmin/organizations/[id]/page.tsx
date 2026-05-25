@@ -187,14 +187,14 @@ export default function OrganizationDetailsPage() {
         const path = `billing/${slugFolder}/${fileName}`
 
         const { error: uploadError } = await supabase.storage
-          .from("tapconnect")
+          .from("frixn")
           .upload(path, pdfFile, { upsert: true, contentType: "application/pdf" })
 
         if (uploadError) {
           throw new Error(`PDF upload failed: ${uploadError.message}`)
         }
 
-        const { data: urlData } = supabase.storage.from("tapconnect").getPublicUrl(path)
+        const { data: urlData } = supabase.storage.from("frixn").getPublicUrl(path)
         uploadUrl = urlData.publicUrl
       }
 

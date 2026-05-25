@@ -96,7 +96,7 @@ export default function EmployeeDetailPage() {
         const path = `${folder}/${fileName}.${ext}`
 
         const { error: uploadError } = await supabase.storage
-            .from("tapconnect")
+            .from("frixn")
             .upload(path, file, { upsert: true, contentType: file.type })
 
         if (uploadError) {
@@ -105,7 +105,7 @@ export default function EmployeeDetailPage() {
             return
         }
 
-        const { data: urlData } = supabase.storage.from("tapconnect").getPublicUrl(path)
+        const { data: urlData } = supabase.storage.from("frixn").getPublicUrl(path)
         // Append timestamp to bust browser cache
         const newPhotoUrl = `${urlData.publicUrl}?t=${Date.now()}`
 
@@ -224,7 +224,7 @@ export default function EmployeeDetailPage() {
             .channel(`employees:${orgId}`)
             .on(
                 'postgres_changes',
-                { event: 'UPDATE', schema: 'tapconnect', table: 'employees', filter: `org_id=eq.${orgId}` },
+                { event: 'UPDATE', schema: 'frixn', table: 'employees', filter: `org_id=eq.${orgId}` },
                 (payload) => {
                     const updated = payload.new as any
                     // Update sidebar list
@@ -245,7 +245,7 @@ export default function EmployeeDetailPage() {
             .channel(`card_links_emp:${orgId}`)
             .on(
                 'postgres_changes',
-                { event: '*', schema: 'tapconnect', table: 'card_links', filter: `org_id=eq.${orgId}` },
+                { event: '*', schema: 'frixn', table: 'card_links', filter: `org_id=eq.${orgId}` },
                 (payload) => {
                     if (payload.eventType === 'INSERT') {
                         const newLink = payload.new as any

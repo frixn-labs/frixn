@@ -119,7 +119,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                 'postgres_changes',
                 {
                     event: 'INSERT',
-                    schema: 'tapconnect',
+                    schema: 'frixn',
                     table: 'card_links',
                     filter: `org_id=eq.${orgId}`,
                 },
@@ -136,7 +136,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                 'postgres_changes',
                 {
                     event: 'UPDATE',
-                    schema: 'tapconnect',
+                    schema: 'frixn',
                     table: 'card_links',
                     filter: `org_id=eq.${orgId}`,
                 },
@@ -153,7 +153,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                 'postgres_changes',
                 {
                     event: 'DELETE',
-                    schema: 'tapconnect',
+                    schema: 'frixn',
                     table: 'card_links',
                     filter: `org_id=eq.${orgId}`,
                 },
@@ -173,7 +173,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                 'postgres_changes',
                 {
                     event: 'INSERT',
-                    schema: 'tapconnect',
+                    schema: 'frixn',
                     table: 'card_link_clicks',
                     filter: `org_id=eq.${orgId}`,
                 },
@@ -193,7 +193,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
             .channel(`products:${orgId}`)
             .on(
                 'postgres_changes',
-                { event: '*', schema: 'tapconnect', table: 'products', filter: `org_id=eq.${orgId}` },
+                { event: '*', schema: 'frixn', table: 'products', filter: `org_id=eq.${orgId}` },
                 (payload) => {
                     if (payload.eventType === 'DELETE') {
                         setProductsRecordId(null)

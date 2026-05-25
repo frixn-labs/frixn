@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { AIAssistantUI } from "./ai-assistant-ui"
@@ -22,7 +22,7 @@ export function AIAssistantProvider({ children, initialAiUsage, orgId }: { child
   const open = React.useCallback(() => setIsOpen(true), [])
   const close = React.useCallback(() => setIsOpen(false), [])
 
-  // ── Realtime Subscription ──────────────────────────────────────────────────
+  // â”€â”€ Realtime Subscription â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   React.useEffect(() => {
     if (!orgId) return
 
@@ -32,7 +32,7 @@ export function AIAssistantProvider({ children, initialAiUsage, orgId }: { child
         'postgres_changes',
         {
           event: '*',
-          schema: 'tapconnect',
+          schema: 'frixn',
           table: 'ai_usage',
           filter: `org_id=eq.${orgId}`,
         },
@@ -56,7 +56,7 @@ export function AIAssistantProvider({ children, initialAiUsage, orgId }: { child
     setAiUsage(initialAiUsage)
   }, [initialAiUsage])
 
-  // ── Keyboard Shortcut ──────────────────────────────────────────────────────
+  // â”€â”€ Keyboard Shortcut â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd+I (Mac) or Ctrl+I (Windows)
@@ -90,3 +90,4 @@ export function useAIAssistant() {
   }
   return context
 }
+

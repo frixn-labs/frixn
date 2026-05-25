@@ -1,17 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Admin client — auth operations (no schema override needed)
+// Admin client â€” auth operations (no schema override needed)
 const supabaseAuth = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Admin client — tapconnect schema data operations
+// Admin client â€” frixn schema data operations
 const supabaseData = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { db: { schema: 'tapconnect' } }
+  { db: { schema: 'frixn' } }
 )
 
 export async function POST(req: NextRequest) {
@@ -22,14 +22,14 @@ export async function POST(req: NextRequest) {
       designation, phone, employee_code, is_active, photo_url
     } = body
 
-    // ── Validate required fields ─────────────────────────────────────────────
+    // â”€â”€ Validate required fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (!org_id) return NextResponse.json({ error: 'Organization is required.' }, { status: 400 })
     if (!name?.trim()) return NextResponse.json({ error: 'Employee name is required.' }, { status: 400 })
     if (!email?.trim()) return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
     if (!password?.trim()) return NextResponse.json({ error: 'Password is required (min 8 chars).' }, { status: 400 })
     if (password.length < 8) return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 })
 
-    // ── Step 1: Create Supabase auth user ────────────────────────────────────
+    // â”€â”€ Step 1: Create Supabase auth user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: authUser, error: authError } = await supabaseAuth.auth.admin.createUser({
       email: email.trim().toLowerCase(),
       password: password,
@@ -46,11 +46,11 @@ export async function POST(req: NextRequest) {
 
     const uid = authUser.user.id
 
-    // ── Step 2: Insert employee with employee.id = auth uid ──────────────────
+    // â”€â”€ Step 2: Insert employee with employee.id = auth uid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: employee, error: empError } = await supabaseData
       .from('employees')
       .insert([{
-        id: uid,                                          // link employee.id → auth.users.id
+        id: uid,                                          // link employee.id â†’ auth.users.id
         org_id,
         name: name.trim(),
         email: email.trim().toLowerCase(),
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `DB error: ${empError.message}` }, { status: 400 })
     }
 
-    // ── Step 3: Provision NFC Card ───────────────────────────────────────────
+    // â”€â”€ Step 3: Provision NFC Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Generate random alphanumeric UID (e.g. B7C90D6E8F2A77)
     const cardUid = Array.from({ length: 14 }, () =>
       '0123456789ABCDEF'[Math.floor(Math.random() * 16)]
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `NFC Card error: ${cardError.message}` }, { status: 400 })
     }
 
-    // ── Step 4: Insert default notification settings for employee ────────────
+    // â”€â”€ Step 4: Insert default notification settings for employee â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { error: notifError } = await supabaseData
       .from('notification_settings')
       .insert([{
@@ -134,3 +134,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message ?? 'Unexpected error' }, { status: 500 })
   }
 }
+

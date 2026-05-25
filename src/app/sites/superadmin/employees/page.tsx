@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
-// ─── Avatar helper ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Avatar helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getInitials(name: string) {
   if (!name) return '?'
   const parts = name.trim().split(' ')
@@ -20,7 +20,7 @@ function getInitials(name: string) {
 
 
 
-// ─── Main Page ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PAGE_SIZE = 12
 
 export default function EmployeesPage() {
@@ -64,7 +64,7 @@ export default function EmployeesPage() {
   // Real-time
   React.useEffect(() => {
     const channel = supabase.channel('superadmin-employees')
-      .on('postgres_changes', { event: '*', schema: 'tapconnect', table: 'employees' }, () => fetchEmployees())
+      .on('postgres_changes', { event: '*', schema: 'frixn', table: 'employees' }, () => fetchEmployees())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [fetchEmployees])
@@ -94,7 +94,7 @@ export default function EmployeesPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
-            placeholder="Search by name, email, code…" className="pl-9 h-10 text-sm" />
+            placeholder="Search by name, email, codeâ€¦" className="pl-9 h-10 text-sm" />
         </div>
         <Select
           value={orgFilter}
@@ -159,23 +159,23 @@ export default function EmployeesPage() {
                   </td>
                   {/* Org */}
                   <td className="px-4 py-3 min-w-[140px]">
-                    <p className="text-xs font-semibold">{(emp.organizations as any)?.name ?? '—'}</p>
+                    <p className="text-xs font-semibold">{(emp.organizations as any)?.name ?? 'â€”'}</p>
                     <p className="text-[10px] text-muted-foreground font-mono">{(emp.organizations as any)?.slug}</p>
                   </td>
                   {/* Designation */}
                   <td className="px-4 py-3">
-                    <p className="text-xs">{emp.designation || '—'}</p>
+                    <p className="text-xs">{emp.designation || 'â€”'}</p>
                   </td>
                   {/* Contact */}
                   <td className="px-4 py-3 min-w-[160px]">
-                    <p className="text-xs">{emp.email || '—'}</p>
+                    <p className="text-xs">{emp.email || 'â€”'}</p>
                     <p className="text-[11px] text-muted-foreground">{emp.phone || ''}</p>
                   </td>
                   {/* Code */}
                   <td className="px-4 py-3">
                     {emp.employee_code
                       ? <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{emp.employee_code}</span>
-                      : <span className="text-muted-foreground/50">—</span>}
+                      : <span className="text-muted-foreground/50">â€”</span>}
                   </td>
                   {/* Status */}
                   <td className="px-4 py-3">
@@ -191,7 +191,7 @@ export default function EmployeesPage() {
                   </td>
                   {/* Created */}
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {emp.created_at ? new Date(emp.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                    {emp.created_at ? new Date(emp.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'â€”'}
                   </td>
                 </tr>
               ))}
@@ -203,7 +203,7 @@ export default function EmployeesPage() {
         {totalPages > 1 && (
           <div className="px-4 py-3 border-t border-border/40 bg-muted/10 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
+              {(page - 1) * PAGE_SIZE + 1}â€“{Math.min(page * PAGE_SIZE, total)} of {total}
             </span>
             <div className="flex items-center gap-1.5">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
@@ -228,3 +228,4 @@ export default function EmployeesPage() {
     </div>
   )
 }
+

@@ -252,7 +252,7 @@ export default function SettingsPage() {
                     'postgres_changes',
                     {
                         event: '*',
-                        schema: 'tapconnect',
+                        schema: 'frixn',
                         table: 'billing',
                         filter: `org_id=eq.${org.id}`,
                     },
@@ -302,7 +302,7 @@ export default function SettingsPage() {
                     'postgres_changes',
                     {
                         event: 'UPDATE',
-                        schema: 'tapconnect',
+                        schema: 'frixn',
                         table: 'notification_settings',
                         filter: role === 'employee' ? `employee_id=eq.${orgId}` : `org_id=eq.${org.id}`,
                     },
@@ -529,7 +529,7 @@ export default function SettingsPage() {
         const filePath = `${slug}/${fileName}`
 
         const { error: uploadError } = await supabase.storage
-            .from('tapconnect')
+            .from('frixn')
             .upload(filePath, file)
 
         if (uploadError) {
@@ -539,7 +539,7 @@ export default function SettingsPage() {
         }
 
         const { data: { publicUrl } } = supabase.storage
-            .from('tapconnect')
+            .from('frixn')
             .getPublicUrl(filePath)
 
         const { error: updateError } = await supabase

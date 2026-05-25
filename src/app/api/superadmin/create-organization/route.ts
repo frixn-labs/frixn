@@ -1,17 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Admin client — auth operations (no schema override needed)
+// Admin client â€” auth operations (no schema override needed)
 const supabaseAuth = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Admin client — tapconnect schema data operations
+// Admin client â€” frixn schema data operations
 const supabaseData = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { db: { schema: 'tapconnect' } }
+  { db: { schema: 'frixn' } }
 )
 
 export async function POST(req: NextRequest) {
@@ -23,14 +23,14 @@ export async function POST(req: NextRequest) {
       admin_name, admin_email, admin_password, admin_phone, status,
     } = body
 
-    // ── Validate required fields ─────────────────────────────────────────────
+    // â”€â”€ Validate required fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (!name?.trim()) return NextResponse.json({ error: 'Organization name is required.' }, { status: 400 })
     if (!slug?.trim()) return NextResponse.json({ error: 'Slug is required.' }, { status: 400 })
     if (!admin_email?.trim()) return NextResponse.json({ error: 'Admin email is required.' }, { status: 400 })
     if (!admin_password?.trim()) return NextResponse.json({ error: 'Admin password is required (min 8 chars).' }, { status: 400 })
     if (admin_password.length < 8) return NextResponse.json({ error: 'Admin password must be at least 8 characters.' }, { status: 400 })
 
-    // ── Step 1: Create Supabase auth user ────────────────────────────────────
+    // â”€â”€ Step 1: Create Supabase auth user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: authUser, error: authError } = await supabaseAuth.auth.admin.createUser({
       email: admin_email.trim().toLowerCase(),
       password: admin_password,
@@ -48,11 +48,11 @@ export async function POST(req: NextRequest) {
 
     const uid = authUser.user.id
 
-    // ── Step 2: Insert organization with org.id = auth uid ───────────────────
+    // â”€â”€ Step 2: Insert organization with org.id = auth uid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: org, error: orgError } = await supabaseData
       .from('organizations')
       .insert([{
-        id: uid,                                          // link org.id → auth.users.id
+        id: uid,                                          // link org.id â†’ auth.users.id
         name: name.trim(),
         slug: slug.trim().toLowerCase(),
         logo_url: logo_url || null,
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `DB error: ${orgError.message}` }, { status: 400 })
     }
 
-    // ── Step 3: Insert default notification settings for organization ────────
+    // â”€â”€ Step 3: Insert default notification settings for organization â”€â”€â”€â”€â”€â”€â”€â”€
     const { error: notifError } = await supabaseData
       .from('notification_settings')
       .insert([{
@@ -107,3 +107,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message ?? 'Unexpected error' }, { status: 500 })
   }
 }
+

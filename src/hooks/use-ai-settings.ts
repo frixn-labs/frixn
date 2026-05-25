@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { supabase } from "@/lib/supabase"
@@ -54,7 +54,7 @@ export function useAISettings(orgId: string | null) {
         'postgres_changes',
         {
           event: '*',
-          schema: 'tapconnect',
+          schema: 'frixn',
           table: 'ai_usage',
           filter: `org_id=eq.${orgId}`,
         },
@@ -73,3 +73,4 @@ export function useAISettings(orgId: string | null) {
 
   return { settings, loading, refresh: fetchSettings }
 }
+

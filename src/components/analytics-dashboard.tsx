@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { format, startOfDay, endOfDay } from "date-fns"
@@ -75,7 +75,7 @@ const chartConfig = {
   Other: { label: "Other", color: "var(--chart-5)" },
 } satisfies ChartConfig
 
-// ─── DateSelector ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ DateSelector â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Defined OUTSIDE AnalyticsDashboard to prevent re-creation on every render
 interface DateSelectorProps {
   date: DateRange | undefined
@@ -96,7 +96,7 @@ function DateSelector({ date, setDate, minDate }: DateSelectorProps) {
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date?.from ? (
             date.to && date.to.getTime() !== date.from.getTime() ? (
-              <>{format(date.from, "LLL dd, y")} – {format(date.to, "LLL dd, y")}</>
+              <>{format(date.from, "LLL dd, y")} â€“ {format(date.to, "LLL dd, y")}</>
             ) : (
               format(date.from, "LLL dd, y")
             )
@@ -123,7 +123,7 @@ function DateSelector({ date, setDate, minDate }: DateSelectorProps) {
   )
 }
 
-// ─── MetricCard ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ MetricCard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface MetricCardProps {
   title: string
   value: React.ReactNode
@@ -165,7 +165,7 @@ function MetricCard({ title, value, subtitle, trend, icon: Icon, delay, loading 
   )
 }
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function AnalyticsDashboard({ slug }: { slug: string }) {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(),
@@ -182,7 +182,7 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
   const [employeesMap, setEmployeesMap] = React.useState<Record<string, { name: string; avatar_url?: string | null; dept_id?: string | null }>>({})
   const [deptsMap, setDeptsMap] = React.useState<Record<string, string>>({})
 
-  // ── fetch org + employees once ────────────────────────────────────────────
+  // â”€â”€ fetch org + employees once â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const fetchBaseData = React.useCallback(async () => {
     const { data: org } = await supabase
       .from("organizations").select("id, created_at").eq("slug", slug).single()
@@ -209,7 +209,7 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
     }
   }, [slug])
 
-  // ── fetch range data ──────────────────────────────────────────────────────
+  // â”€â”€ fetch range data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const fetchRangeData = React.useCallback(async () => {
     if (!orgId || !date?.from) return
     setLoading(true)
@@ -248,25 +248,25 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
     }
   }, [orgId, date])
 
-  // ── effects ───────────────────────────────────────────────────────────────
+  // â”€â”€ effects â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   React.useEffect(() => { fetchBaseData() }, [fetchBaseData])
 
   React.useEffect(() => {
     if (orgId) fetchRangeData()
   }, [orgId, date, fetchRangeData])
 
-  // ── realtime ──────────────────────────────────────────────────────────────
+  // â”€â”€ realtime â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   React.useEffect(() => {
     if (!orgId) return
     const filterPrefix = role === 'employee' ? `employee_id=eq.${sessionUserOrOrgId}` : `org_id=eq.${orgId}`
     const r1 = supabase.channel(`taps-an:${orgId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "tapconnect", table: "taps" }, fetchRangeData)
+      .on("postgres_changes", { event: "INSERT", schema: "frixn", table: "taps" }, fetchRangeData)
       .subscribe()
     const r2 = supabase.channel(`leads-an:${orgId}`)
-      .on("postgres_changes", { event: "*", schema: "tapconnect", table: "leads", filter: filterPrefix }, fetchRangeData)
+      .on("postgres_changes", { event: "*", schema: "frixn", table: "leads", filter: filterPrefix }, fetchRangeData)
       .subscribe()
     const r3 = supabase.channel(`clicks-an:${orgId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "tapconnect", table: "card_link_clicks", filter: filterPrefix }, fetchRangeData)
+      .on("postgres_changes", { event: "INSERT", schema: "frixn", table: "card_link_clicks", filter: filterPrefix }, fetchRangeData)
       .subscribe()
     return () => {
       supabase.removeChannel(r1)
@@ -275,7 +275,7 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
     }
   }, [orgId, fetchRangeData, role, sessionUserOrOrgId])
 
-  // ── derived metrics ───────────────────────────────────────────────────────
+  // â”€â”€ derived metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const daysDiff = date?.to && date?.from
     ? Math.max(1, Math.ceil((date.to.getTime() - date.from.getTime()) / 86_400_000))
     : 1
@@ -362,7 +362,7 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
     .sort((a,b) => b[1] - a[1])
     .slice(0, 5)
 
-  // ── render ─────────────────────────────────────────────────────────────────
+  // â”€â”€ render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500 pb-10">
 
@@ -754,3 +754,4 @@ export function AnalyticsDashboard({ slug }: { slug: string }) {
     </div>
   )
 }
+

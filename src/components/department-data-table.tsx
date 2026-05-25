@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import {
@@ -161,7 +161,7 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
         channel = supabase.channel(`dept_list_${orgData.id}`)
           .on(
             'postgres_changes',
-            { event: '*', schema: 'tapconnect', table: 'departments' },
+            { event: '*', schema: 'frixn', table: 'departments' },
             (p) => { 
                 console.log('[Real-time] Dept change detected:', p.eventType)
                 fetchDepartments() 
@@ -173,7 +173,7 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
         empChannel = supabase.channel(`dept_emp_counts_${orgData.id}`)
           .on(
             'postgres_changes',
-            { event: '*', schema: 'tapconnect', table: 'employees' },
+            { event: '*', schema: 'frixn', table: 'employees' },
             () => { 
                 console.log('[Real-time] Employee change detected (updating counts)')
                 fetchDepartments() 
@@ -294,7 +294,7 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
     {
       accessorKey: "description",
       header: () => <div className="text-xs font-bold uppercase tracking-wider">Description</div>,
-      cell: ({ row }) => <div className="max-w-[400px] truncate text-muted-foreground text-sm py-4">{row.getValue("description") || "—"}</div>,
+      cell: ({ row }) => <div className="max-w-[400px] truncate text-muted-foreground text-sm py-4">{row.getValue("description") || "â€”"}</div>,
     },
     {
       id: "actions",
@@ -588,3 +588,4 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
     </div>
   )
 }
+
