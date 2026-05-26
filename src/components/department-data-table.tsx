@@ -14,7 +14,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { RealtimeChannel } from "@supabase/supabase-js"
-import { ArrowUpDown, ChevronDown, Plus, Trash, Search, Loader2, AlertTriangle, Trash2 } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Plus, Trash, Search, Loader2, AlertTriangle, Edit } from "lucide-react"
+import { DepartmentManageDialog } from "./department-manage-dialog"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -121,10 +122,10 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false)
-  const [newDeptName, setNewDeptName] = React.useState("")
-  const [newDeptDescription, setNewDeptDescription] = React.useState("")
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isManageDialogOpen, setIsManageDialogOpen] = React.useState(false)
+  const [selectedDeptForEdit, setSelectedDeptForEdit] = React.useState<Department | undefined>(undefined)
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0)
+  const refresh = () => setRefreshTrigger(prev => prev + 1)
   
   const [selectedDeptForDelete, setSelectedDeptForDelete] = React.useState<Department | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -190,7 +191,7 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
       if (channel) supabase.removeChannel(channel)
       if (empChannel) supabase.removeChannel(empChannel)
     }
-  }, [slug])
+  }, [slug, refreshTrigger])
 
   const handleDelete = async () => {
     if (!selectedDeptForDelete || !orgId) return
@@ -234,28 +235,6 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
     setIsDeleting(false)
   }
 
-  const handleAddDepartment = async () => {
-    if (!newDeptName.trim() || !orgId) return
-    setIsSubmitting(true)
-    
-    const { error } = await supabase
-      .from('departments')
-      .insert({
-        org_id: orgId,
-        name: newDeptName.trim(),
-        description: newDeptDescription.trim()
-      })
-
-    if (!error) {
-      setNewDeptName("")
-      setNewDeptDescription("")
-      setIsAddDialogOpen(false)
-    } else {
-      console.error('Error adding department:', error)
-    }
-    
-    setIsSubmitting(false)
-  }
 
   const columns: ColumnDef<Department>[] = [
     {
@@ -300,14 +279,25 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
       id: "actions",
       header: () => <div className="text-right pr-6 text-xs font-bold uppercase tracking-wider">Action</div>,
       cell: ({ row }) => (
-        <div className="text-right pr-4">
+        <div className="text-right pr-4 flex items-center justify-end gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            onClick={() => {
+              setSelectedDeptForEdit(row.original)
+              setIsManageDialogOpen(true)
+            }}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
           <Button 
             variant="ghost" 
             size="icon" 
             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             onClick={() => setSelectedDeptForDelete(row.original)}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -443,71 +433,24 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
                 }
             </DropdownMenuContent>
             </DropdownMenu>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-9 px-4">
-                        <Plus className="w-4 h-4 mr-2" /> Add Department
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle className="text-xl font-bold">Add New Department</DialogTitle>
-                        <DialogDescription className="text-muted-foreground">
-                            Create a new organizational unit to group your employees.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-6 py-6">
-                        <div className="grid gap-2">
-                            <label htmlFor="name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
-                                Department Name
-                            </label>
-                            <Input
-                                id="name"
-                                placeholder="e.g. Sales, Engineering, Marketing"
-                                value={newDeptName}
-                                onChange={(e) => setNewDeptName(e.target.value)}
-                                className="h-10 focus-visible:ring-primary/20"
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <label htmlFor="description" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
-                                Description <span className="text-[10px] font-normal lowercase">(optional)</span>
-                            </label>
-                            <Input
-                                id="description"
-                                placeholder="Short brief about department functions..."
-                                value={newDeptDescription}
-                                onChange={(e) => setNewDeptDescription(e.target.value)}
-                                className="h-10 focus-visible:ring-primary/20"
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setIsAddDialogOpen(false)}
-                          disabled={isSubmitting}
-                          className="font-bold h-11"
-                        >
-                            Cancel
-                        </Button>
-                        <Button 
-                          onClick={handleAddDepartment} 
-                          disabled={isSubmitting || !newDeptName.trim()}
-                          className="font-bold h-11 px-8 min-w-[140px]"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Creating...
-                                </>
-                            ) : (
-                                "Create Department"
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-9 px-4"
+              onClick={() => {
+                setSelectedDeptForEdit(undefined)
+                setIsManageDialogOpen(true)
+              }}
+            >
+                <Plus className="w-4 h-4 mr-2" /> Add Department
+            </Button>
+            {orgId && (
+              <DepartmentManageDialog
+                open={isManageDialogOpen}
+                onOpenChange={setIsManageDialogOpen}
+                orgId={orgId}
+                existingDept={selectedDeptForEdit}
+                onSuccess={refresh}
+              />
+            )}
         </div>
       </div>
       <div className="rounded-md border bg-card">

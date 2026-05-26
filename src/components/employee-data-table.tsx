@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash2, FileDown, Eye, Edit, Search, Loader2 } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash2, Trash, FileDown, Eye, Edit, Search, Loader2 } from "lucide-react"
 import * as XLSX from "xlsx"
 import jsPDF from "jspdf"
 import "jspdf-autotable"
@@ -444,23 +444,36 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Actions</div>,
+      header: () => <div className="text-right pr-4">Actions</div>,
       cell: ({ row }) => {
         const emp = row.original
         return (
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-1">
             {role !== 'employee' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setSelectedEmployeeForDelete(emp)
-                }}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    router.push(`/sites/${slug}/admin/employees/${emp.id}`)
+                  }}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedEmployeeForDelete(emp)
+                  }}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </>
             )}
           </div>
         )

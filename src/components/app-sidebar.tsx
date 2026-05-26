@@ -9,15 +9,14 @@ import {
   CreditCard, 
   Link as LinkIcon, 
   Magnet, 
-  LogOut, 
   LayoutDashboard,
-  Settings,
   Sparkles,
-  Command
+  Command,
+  Package
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useAIAssistant } from './ai-assistant-provider'
-import { useRole } from './role-provider'
+import { useAIAssistant } from '@/components/ai-assistant-provider'
+import { useRole } from '@/components/role-provider'
 import { cn } from '@/lib/utils'
 
 import {
@@ -53,6 +52,7 @@ export function AppSidebar({ org, ...props }: React.ComponentProps<typeof Sideba
     { icon: Users, label: 'Employees', href: `/sites/${slug}/admin/employees` },
     { icon: CreditCard, label: 'NFC Cards', href: `/sites/${slug}/admin/cards` },
     { icon: LinkIcon, label: 'Manage Links', href: `/sites/${slug}/admin/links` },
+    { icon: Package, label: 'Manage Products', href: `/sites/${slug}/admin/products` },
     { icon: Magnet, label: 'Leads', href: `/sites/${slug}/admin/leads` },
     { icon: BarChart3, label: 'Analytics', href: `/sites/${slug}/admin/analytics` },
   ]
@@ -131,50 +131,7 @@ export function AppSidebar({ org, ...props }: React.ComponentProps<typeof Sideba
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter>
-        <SidebarMenu>
-          {!isSuperAdmin && (
-            <SidebarMenuItem>
-               <SidebarMenuButton asChild tooltip="Settings">
-                 <Link href={`/sites/${slug}/admin/settings`}>
-                   <Settings />
-                   <span>Settings</span>
-                 </Link>
-               </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-          <SidebarMenuItem>
-             <SidebarMenuButton 
-               tooltip="Sign Out" 
-               className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
-               onClick={async () => {
-                 // 1. Clear Supabase auth
-                 await supabase.auth.signOut()
-                 // 2. Clear internal session cookies (important for Slug Guard)
-                 await fetch('/api/auth/logout', { method: 'POST' })
-                 // 3. Redirect to login
-                 window.location.href = '/login'
-               }}
-             >
-               <LogOut />
-               <span>Sign Out</span>
-             </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
- 
-        <div className="mt-4 mx-2 mb-2 p-2 flex items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-0">
-            <div className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </div>
-            <div className="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="font-semibold tracking-tight">Authenticated</span>
-                <span className="truncate text-[10px] text-muted-foreground font-medium">
-                  {isSuperAdmin ? 'Super Admin Session' : (role === 'employee' ? 'Employee Session' : 'Admin Session Secure')}
-                </span>
-            </div>
-        </div>
-      </SidebarFooter>
+      <SidebarFooter />
     </Sidebar>
   )
 }

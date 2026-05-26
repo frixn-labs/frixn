@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, Download, Trash2, Search, FileText } from "lucide-react"
+import { ArrowUpDown, Download, Trash, Search, FileText } from "lucide-react"
 import { format } from "date-fns"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -214,7 +214,7 @@ export function BillingDataTable({
               onDelete?.(row.original.id);
             }}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash className="w-4 h-4" />
           </Button>
         </div>
       ),

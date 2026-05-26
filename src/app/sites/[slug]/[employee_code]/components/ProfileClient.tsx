@@ -57,6 +57,7 @@ export default function ProfileClient({
   // Form State
   const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', designation: '', product: '', followup_date: '' })
   const [availableProducts, setAvailableProducts] = useState<string[]>([])
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
 
   // Edit State
   const [isEditing, setIsEditing] = useState(false)
@@ -472,7 +473,7 @@ END:VCARD`
                     )}
 
                     <div className="md:col-span-2 relative">
-                      <Popover>
+                      <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             type="button"
@@ -494,7 +495,10 @@ END:VCARD`
                           <Calendar
                             mode="single"
                             selected={form.followup_date ? new Date(form.followup_date) : undefined}
-                            onSelect={(date) => setForm({ ...form, followup_date: date ? format(date, 'yyyy-MM-dd') : '' })}
+                            onSelect={(date) => {
+                              setForm({ ...form, followup_date: date ? format(date, 'yyyy-MM-dd') : '' })
+                              setIsDatePickerOpen(false)
+                            }}
                             disabled={(date) => {
                               const today = new Date();
                               today.setHours(0, 0, 0, 0);

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import {
@@ -14,7 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { useRouter } from "next/navigation"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash, FileDown, Search, Lock, Unlock, Zap, CreditCard, Cpu, Filter, ExternalLink } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash, FileDown, Search, Lock, Unlock, Zap, CreditCard, Cpu, Filter, ExternalLink, Copy, Check } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -114,6 +114,38 @@ export type NfcCardData = {
     taps: { id: string }[] | null
   } | null
   card_taps: { id: string }[] | null
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = React.useState(false)
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error("Failed to copy text: ", err)
+    }
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-muted shrink-0"
+      onClick={handleCopy}
+      title="Copy URL"
+    >
+      {copied ? (
+        <Check className="h-3.5 w-3.5 text-emerald-500 animate-in fade-in duration-200" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
+    </Button>
+  )
 }
 
 const _cardDataCache: Record<string, NfcCardData[]> = {}
@@ -358,9 +390,12 @@ export function NfcCardsDataTable({ slug }: { slug: string }) {
           const url = row.getValue("card_url") as string
           if (!url) return <span className="text-muted-foreground text-xs italic">Unlinked</span>
           return (
-             <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline hover:text-primary/80 truncate max-w-[140px] inline-block font-medium">
-                {url.replace(/^https?:\/\//, '')}
-             </a>
+             <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+               <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline hover:text-primary/80 truncate max-w-[120px] inline-block font-medium">
+                  {url.replace(/^https?:\/\//, '')}
+               </a>
+               <CopyButton text={url} />
+             </div>
           )
       },
     },

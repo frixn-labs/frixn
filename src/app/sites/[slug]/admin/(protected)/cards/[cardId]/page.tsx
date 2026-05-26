@@ -18,7 +18,9 @@ import {
   Info,
   User,
   Zap,
-  FileDown
+  FileDown,
+  Copy,
+  Check
 } from "lucide-react"
 import * as XLSX from "xlsx"
 import { Calendar } from "@/components/ui/calendar"
@@ -70,6 +72,38 @@ type TapLog = {
     name: string
     photo_url: string
   } | null
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = React.useState(false)
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error("Failed to copy text: ", err)
+    }
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-muted shrink-0"
+      onClick={handleCopy}
+      title="Copy URL"
+    >
+      {copied ? (
+        <Check className="h-3.5 w-3.5 text-emerald-500 animate-in fade-in duration-200" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
+    </Button>
+  )
 }
 
 export default function CardDetailPage() {
@@ -369,7 +403,10 @@ export default function CardDetailPage() {
                     <Zap className="w-6 h-6 text-primary" />
                   </div>
                   <p className="text-xs font-bold text-muted-foreground mb-1">PROG. DESTINATION</p>
-                  <p className="text-sm font-bold text-primary truncate max-w-[200px]">{card.card_url || 'frixn.in/c/...'}</p>
+                  <div className="flex items-center gap-1.5 px-3 max-w-full">
+                    <p className="text-sm font-bold text-primary truncate max-w-[180px]">{card.card_url || 'frixn.in/c/...'}</p>
+                    {card.card_url && <CopyButton text={card.card_url} />}
+                  </div>
                 </div>
              </div>
           </div>

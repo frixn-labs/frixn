@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ThemeToggle } from "@/components/ThemeToggle"
+import { HeaderProfile } from "@/components/HeaderProfile"
 import { AppSidebar } from "@/components/app-sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
@@ -27,8 +27,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                     <div className="h-4 w-px bg-border/50 hidden md:block" />
                     <span className="font-semibold text-sm">Super Admin Portal</span>
                   </div>
-                  <div className="flex items-center gap-1.5 align-middle">
-                    <ThemeToggle />
+                  <div className="flex items-center gap-4 align-middle">
+                    <HeaderProfile />
                   </div>
                 </header>
                 <main className="flex-1 overflow-y-auto bg-background">

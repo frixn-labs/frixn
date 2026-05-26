@@ -104,7 +104,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
             }
         }
         setLoading(false)
-    }, [slug, fetchClickData])
+    }, [slug, fetchClickData, role, sessionUserOrOrgId])
 
     // Initial data load
     React.useEffect(() => { fetchData() }, [fetchData])
@@ -210,7 +210,6 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
         return () => { 
             supabase.removeChannel(channel)
             supabase.removeChannel(clickChannel)
-            supabase.removeChannel(productsChannel)
         }
     }, [orgId])
 
@@ -521,7 +520,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="w-8 h-8 opacity-40 hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-all"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                                                     onClick={() => { setEditingLink(link); setDialogOpen(true) }}
                                                 >
                                                     <Edit className="w-4 h-4" />
@@ -531,7 +530,7 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="w-8 h-8 opacity-40 hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                                                     onClick={() => handleDelete(link.id)}
                                                     disabled={deletingId === link.id}
                                                 >
@@ -546,70 +545,6 @@ export default function ManageLinksPage({ params }: { params: Promise<{ slug: st
                                 </Reorder.Item>
                             ))}
                         </Reorder.Group>
-                    </div>
-                </div>
-            )}
-
-            {/* Products list */}
-            {!loading && role !== 'employee' && (
-                <div className="bg-card border rounded-xl overflow-hidden shadow-sm mt-8">
-                    <div className="px-6 py-4 flex items-center justify-between border-b bg-muted/20">
-                        <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm">Organization Products</span>
-                            <Badge variant="secondary" className="text-[10px] uppercase font-bold">
-                                {products.length} {products.length === 1 ? 'Product' : 'Products'}
-                            </Badge>
-                        </div>
-                        <span className="text-xs text-muted-foreground hidden sm:block">
-                            Changes save instantly
-                        </span>
-                    </div>
-
-                    <div className="p-5 flex flex-col gap-4">
-                        <div className="flex items-center gap-3">
-                            <Input 
-                                placeholder="Add a new product/service..." 
-                                value={newProduct} 
-                                onChange={(e) => setNewProduct(e.target.value)} 
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handleAddProduct()
-                                }}
-                                className="flex-1"
-                            />
-                            <Button onClick={handleAddProduct} disabled={isAddingProduct || !newProduct.trim()}>
-                                {isAddingProduct ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-                                Add
-                            </Button>
-                        </div>
-
-                        {products.length > 0 ? (
-                            <div className="flex flex-col gap-2 mt-2">
-                                {products.map((product, idx) => (
-                                    <div key={idx} className="flex items-center justify-between bg-background border px-4 py-3 rounded-lg group">
-                                        <div className="flex items-center gap-3 w-full">
-                                            <div className="w-7 h-7 flex items-center justify-center bg-primary/10 text-primary rounded-md font-bold text-xs tabular-nums shrink-0">
-                                                {idx + 1}
-                                            </div>
-                                            <span className="font-semibold text-sm">{product}</span>
-                                        </div>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="w-8 h-8 opacity-40 hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all shrink-0" 
-                                            onClick={() => handleDeleteProduct(idx)}
-                                        >
-                                            <Trash className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bg-background border px-4 py-8 rounded-lg mt-2 flex flex-col items-center justify-center text-center">
-                                <FileText className="w-8 h-8 text-muted-foreground/30 mb-2" />
-                                <span className="text-sm font-semibold text-foreground">No Products Defined</span>
-                                <span className="text-xs text-muted-foreground mt-1">Add your first custom product or package above.</span>
-                            </div>
-                        )}
                     </div>
                 </div>
             )}

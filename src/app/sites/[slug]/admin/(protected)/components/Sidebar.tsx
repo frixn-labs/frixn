@@ -16,7 +16,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Sparkles,
-  Command
+  Command,
+  Package
 } from 'lucide-react'
 
 export default function Sidebar({ org }: { org: any }) {
@@ -30,6 +31,7 @@ export default function Sidebar({ org }: { org: any }) {
     { icon: Users, label: 'Employees', href: `/admin/employees` },
     { icon: CreditCard, label: 'NFC Cards', href: `/admin/cards` },
     { icon: LinkIcon, label: 'Manage Links', href: `/admin/links` },
+    { icon: Package, label: 'Manage Products', href: `/admin/products` },
     { icon: Magnet, label: 'Leads', href: `/admin/leads` },
     { icon: BarChart3, label: 'Analytics', href: `/admin/analytics` },
   ]

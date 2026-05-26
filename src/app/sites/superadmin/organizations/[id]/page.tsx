@@ -6,7 +6,7 @@ import { useRouter, useParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import {
   ArrowLeft, Building2, Loader2, CheckCircle2,
-  AlertCircle, ShieldAlert, Trash2, Save, ExternalLink,
+  AlertCircle, ShieldAlert, Trash, Save, ExternalLink,
   Plus, FileText, Download, CalendarDays, Upload, X, Users, IndianRupee
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -621,9 +621,9 @@ export default function OrganizationDetailsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteInvoice(bill.id)}
-                        className="text-muted-foreground/50 hover:text-rose-600 hover:bg-rose-500/10 h-8 w-8 p-0 rounded-lg"
+                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors h-8 w-8 p-0 rounded-lg"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash className="w-4 h-4" />
                       </Button>
                     </td>
                   </tr>
@@ -662,7 +662,7 @@ export default function OrganizationDetailsPage() {
             ) : confirmDelete ? (
                 "Confirm Deletion"
             ) : (
-                <><Trash2 className="w-4 h-4 mr-2" /> Delete Organization</>
+                <><Trash className="w-4 h-4 mr-2" /> Delete Organization</>
             )}
         </Button>
       </div>

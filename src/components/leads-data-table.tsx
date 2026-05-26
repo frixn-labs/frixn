@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  Search, Trash2, Pencil, Check, X, MailPlus, Phone,
+  Search, Trash, Pencil, Check, X, MailPlus, Phone,
   Building2, ChevronDown, FileDown, Loader2, User,
   IndianRupee, CalendarClock, UserCheck, Package, Briefcase,
   Bell, CheckCircle2
@@ -282,7 +282,7 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
             className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground/50 hover:text-destructive hover:bg-destructive/8 border border-transparent hover:border-destructive/20 px-2.5 py-1.5 rounded-lg transition-all shrink-0"
             title="Delete lead"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash className="w-3.5 h-3.5" />
           </button>
         </div>
 

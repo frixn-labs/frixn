@@ -97,12 +97,16 @@ export default function SettingsPage() {
     const [invoices, setInvoices] = React.useState<any[]>([])
     const [loadingInvoices, setLoadingInvoices] = React.useState(true)
     const [passwordLastChanged, setPasswordLastChanged] = React.useState<string | null>(null)
+    const [userEmail, setUserEmail] = React.useState<string | null>(null)
 
     // Fetch the real password-last-changed timestamp from Supabase auth user
     React.useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
             if (data?.user?.updated_at) {
                 setPasswordLastChanged(data.user.updated_at)
+            }
+            if (data?.user?.email) {
+                setUserEmail(data.user.email)
             }
         })
     }, [])
@@ -1303,120 +1307,27 @@ export default function SettingsPage() {
                                 </section>
                             )}
 
-                            {/* Section 4: Email Delivery Configuration
-                <section className="w-full">
-                    <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Delivery Channels</h3>
-                    <div className="border border-border/50 rounded-2xl bg-card w-full overflow-hidden shadow-sm flex flex-col xl:flex-row">
-                        
-                        
-                        <div className="p-6 border-b xl:border-b-0 xl:border-r border-border/50 bg-muted/10 flex-1 flex flex-col justify-start">
-                            <div className="space-y-1.5 mb-8">
-                                <Label className="text-[15px] font-bold tracking-widest text-foreground block">PRIMARY ADMIN</Label>
-                                <p className="text-[13px] text-muted-foreground leading-relaxed">Default recipient for all configured platform notifications.</p>
-                            </div>
-                            <div className="flex items-center justify-between p-4 bg-background border border-border/50 rounded-xl shadow-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                        <Mail className="w-4 h-4 text-primary" />
+                            {/* Section 4: Email Delivery Configuration */}
+                            <section className="w-full">
+                                <h3 className="text-xs font-black text-muted-foreground tracking-[0.15em] uppercase mb-4 ml-1">Delivery Channels</h3>
+                                <div className="border border-border/50 rounded-2xl bg-card w-full overflow-hidden shadow-sm p-6">
+                                    <div className="space-y-1.5 mb-4">
+                                        <Label className="text-[15px] font-bold tracking-widest text-foreground block">YOUR NOTIFICATION EMAIL</Label>
+                                        <p className="text-[13px] text-muted-foreground leading-relaxed">Default recipient for all your configured personal notifications.</p>
                                     </div>
-                                    <span className="text-sm font-semibold text-foreground truncate max-w-[150px] sm:max-w-none">{formData.admin_email || 'admin@example.com'}</span>
-                                </div>
-                                <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-none shadow-none text-[10px] uppercase font-bold tracking-wider shrink-0">Active</Badge>
-                            </div>
-
-                            
-                            {extraEmails.length > 0 && (
-                                <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl animate-in fade-in zoom-in-95 duration-500">
-                                    <div className="flex items-start gap-3">
-                                        <Activity className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                                        <div className="space-y-1.5">
-                                            <p className="text-[11px] font-black text-primary tracking-widest uppercase">Split Delivery Active</p>
-                                            <p className="text-[12px] text-muted-foreground leading-relaxed">System notifications will automatically copy all {extraEmails.length} secondary recipients ensuring your broader team is kept completely in the loop.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        
-                        <div className="p-6 flex-1 flex flex-col justify-between">
-                            <div>
-                                <div className="flex items-start justify-between mb-6">
-                                    <div className="space-y-1.5 flex-1 pr-6">
-                                        <Label className="text-[15px] font-bold tracking-widest text-foreground block">ADDITIONAL RECIPIENTS</Label>
-                                        <p className="text-[13px] text-muted-foreground leading-relaxed">Add team members or external addresses to receive a copy of these alerts. You can add up to 3.</p>
-                                    </div>
-                                    <Badge variant="outline" className="shrink-0 text-xs font-bold text-muted-foreground bg-muted/20 border-border/50">
-                                        {extraEmails.length} / 3
-                                    </Badge>
-                                </div>
-                                
-                                {extraEmails.length > 0 && (
-                                    <div className="space-y-3 mb-6">
-                                        {extraEmails.map((email, idx) => (
-                                            <div key={idx} className="flex items-center justify-between p-3 bg-muted/20 border border-border/50 rounded-xl animate-in slide-in-from-bottom-2 fade-in duration-300">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                                                        <Mail className="w-3.5 h-3.5 text-primary" />
-                                                    </div>
-                                                    <span className="text-sm font-semibold text-foreground truncate max-w-[200px]">{email}</span>
-                                                </div>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="sm" 
-                                                    onClick={() => handleUpdateExtraEmails(extraEmails.filter((_, i) => i !== idx))}
-                                                    className="h-7 text-[10px] text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 uppercase font-bold tracking-wider"
-                                                >
-                                                    Remove
-                                                </Button>
+                                    <div className="flex items-center justify-between p-4 bg-background border border-border/50 rounded-xl shadow-sm max-w-md">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                                <Mail className="w-4 h-4 text-primary" />
                                             </div>
-                                        ))}
+                                            <span className="text-sm font-semibold text-foreground truncate">
+                                                {role === 'employee' ? userEmail : (formData.admin_email || userEmail || 'admin@example.com')}
+                                            </span>
+                                        </div>
+                                        <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-none shadow-none text-[10px] uppercase font-bold tracking-wider shrink-0 px-2.5 py-0.5 rounded-full">ACTIVE</Badge>
                                     </div>
-                                )}
-                            </div>
-
-                            <div className="flex items-center gap-3 mt-auto">
-                                <Input 
-                                    placeholder={extraEmails.length >= 3 ? "Limit reached" : "finance@company.com"}
-                                    value={newEmailInput}
-                                    onChange={(e) => setNewEmailInput(e.target.value)}
-                                    disabled={extraEmails.length >= 3}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            const trimmedEmail = newEmailInput.trim();
-                                            if (trimmedEmail && extraEmails.length < 3) {
-                                                const normalizedPrev = extraEmails.map(em => em.toLowerCase());
-                                                if (!normalizedPrev.includes(trimmedEmail.toLowerCase())) {
-                                                    handleUpdateExtraEmails([...extraEmails, trimmedEmail]);
-                                                }
-                                                setNewEmailInput('');
-                                            }
-                                        }
-                                    }}
-                                    className="h-11 bg-muted/20 border-border/50 flex-1 rounded-xl disabled:opacity-50" 
-                                />
-                                <Button 
-                                    disabled={extraEmails.length >= 3}
-                                    className="h-11 px-5 rounded-xl font-bold tracking-widest text-xs shrink-0 transition-transform active:scale-95 disabled:opacity-50"
-                                    onClick={() => {
-                                        const trimmedEmail = newEmailInput.trim();
-                                        if (trimmedEmail && extraEmails.length < 3) {
-                                            const normalizedPrev = extraEmails.map(em => em.toLowerCase());
-                                            if (!normalizedPrev.includes(trimmedEmail.toLowerCase())) {
-                                                handleUpdateExtraEmails([...extraEmails, trimmedEmail]);
-                                            }
-                                            setNewEmailInput('');
-                                        }
-                                    }}
-                                >
-                                    ADD EMAIL
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                */ }
+                                </div>
+                            </section>
                         </div>
                     </TabsContent>
 
