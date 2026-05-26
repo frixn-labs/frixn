@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
@@ -81,8 +81,8 @@ export default function EmployeesPage() {
             {loading ? "Loading..." : `${total.toLocaleString()} employee${total !== 1 ? 's' : ''} across all organizations`}
           </p>
         </div>
-        <Button 
-          onClick={() => router.push("/sites/superadmin/employees/new")} 
+        <Button
+          onClick={() => router.push("/sites/superadmin/employees/new")}
           className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold h-10 px-5 shadow-lg shadow-[#FF3D00]/20 gap-2"
         >
           <Plus className="w-4 h-4" /> Add Employee
@@ -94,7 +94,7 @@ export default function EmployeesPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
-            placeholder="Search by name, email, codeâ€¦" className="pl-9 h-10 text-sm" />
+            placeholder="Search by name, email, code..." className="pl-9 h-10 text-sm" />
         </div>
         <Select
           value={orgFilter}
@@ -138,8 +138,8 @@ export default function EmployeesPage() {
                   </td>
                 </tr>
               ) : employees.map(emp => (
-                <tr 
-                  key={emp.id} 
+                <tr
+                  key={emp.id}
                   onClick={() => router.push(`/sites/superadmin/employees/${emp.id}`)}
                   className="border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors cursor-pointer"
                 >
@@ -159,23 +159,23 @@ export default function EmployeesPage() {
                   </td>
                   {/* Org */}
                   <td className="px-4 py-3 min-w-[140px]">
-                    <p className="text-xs font-semibold">{(emp.organizations as any)?.name ?? 'â€”'}</p>
+                    <p className="text-xs font-semibold">{(emp.organizations as any)?.name ?? '—'}</p>
                     <p className="text-[10px] text-muted-foreground font-mono">{(emp.organizations as any)?.slug}</p>
                   </td>
                   {/* Designation */}
                   <td className="px-4 py-3">
-                    <p className="text-xs">{emp.designation || 'â€”'}</p>
+                    <p className="text-xs">{emp.designation || '—'}</p>
                   </td>
                   {/* Contact */}
                   <td className="px-4 py-3 min-w-[160px]">
-                    <p className="text-xs">{emp.email || 'â€”'}</p>
+                    <p className="text-xs">{emp.email || '—'}</p>
                     <p className="text-[11px] text-muted-foreground">{emp.phone || ''}</p>
                   </td>
                   {/* Code */}
                   <td className="px-4 py-3">
                     {emp.employee_code
                       ? <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{emp.employee_code}</span>
-                      : <span className="text-muted-foreground/50">â€”</span>}
+                      : <span className="text-muted-foreground/50">—</span>}
                   </td>
                   {/* Status */}
                   <td className="px-4 py-3">
@@ -191,7 +191,7 @@ export default function EmployeesPage() {
                   </td>
                   {/* Created */}
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {emp.created_at ? new Date(emp.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'â€”'}
+                    {emp.created_at ? new Date(emp.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                   </td>
                 </tr>
               ))}
@@ -203,7 +203,7 @@ export default function EmployeesPage() {
         {totalPages > 1 && (
           <div className="px-4 py-3 border-t border-border/40 bg-muted/10 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-              {(page - 1) * PAGE_SIZE + 1}â€“{Math.min(page * PAGE_SIZE, total)} of {total}
+              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
             </span>
             <div className="flex items-center gap-1.5">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}

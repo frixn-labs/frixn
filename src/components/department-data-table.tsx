@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import {
@@ -294,7 +294,7 @@ export function DepartmentDataTable({ slug }: { slug: string }) {
     {
       accessorKey: "description",
       header: () => <div className="text-xs font-bold uppercase tracking-wider">Description</div>,
-      cell: ({ row }) => <div className="max-w-[400px] truncate text-muted-foreground text-sm py-4">{row.getValue("description") || "â€”"}</div>,
+      cell: ({ row }) => <div className="max-w-[400px] truncate text-muted-foreground text-sm py-4">{row.getValue("description") || "—"}</div>,
     },
     {
       id: "actions",

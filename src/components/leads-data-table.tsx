@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import {
@@ -42,7 +42,7 @@ const _leadDataCache: Record<string, LeadData[]> = {}
 // â”€â”€ Animated search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AnimatedSearch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [focused, setFocused] = React.useState(false)
-  const hints = ["Search by nameâ€¦", "Search by emailâ€¦", "Search by companyâ€¦"]
+  const hints = ["Search by name...", "Search by email...", "Search by company..."]
   const [idx, setIdx] = React.useState(0)
   React.useEffect(() => {
     if (focused || value) return
@@ -99,7 +99,7 @@ function InlineEdit({ value, leadId, field, type = "text", onSave }: {
   )
 
   const display = type === "number" && value != null
-    ? `â‚¹${Number(value).toLocaleString("en-IN")}`
+    ? `₹${Number(value).toLocaleString("en-IN")}`
     : value || null
 
   if (!display) return (
@@ -240,7 +240,7 @@ function LeadCard({ lead, onUpdateStatus, onInlineSave, onDelete }: {
             <span className="flex items-center gap-1.5 truncate">
               <UserCheck className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
               <span className="truncate">{lead.employees.name}</span>
-              {lead.captured_at && <span className="opacity-50 shrink-0">Â· {format(new Date(lead.captured_at), "MMM d")}</span>}
+              {lead.captured_at && <span className="opacity-50 shrink-0">· {format(new Date(lead.captured_at), "MMM d")}</span>}
             </span>
           )}
         </div>

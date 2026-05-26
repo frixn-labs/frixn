@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import Link from "next/link"
@@ -97,7 +97,7 @@ function PhotoUpload({
         {uploading ? (
           <>
             <Loader2 className="w-8 h-8 text-[#FF3D00] animate-spin" />
-            <p className="text-xs font-semibold text-muted-foreground">Uploadingâ€¦</p>
+            <p className="text-xs font-semibold text-muted-foreground">Uploading...</p>
           </>
         ) : value ? (
           <>
@@ -574,7 +574,7 @@ export default function NewEmployeePage() {
                   className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 disabled:opacity-70"
                 >
                   {saving ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Addingâ€¦</>
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Adding...</>
                   ) : (
                     <><Plus className="w-4 h-4 mr-2" />Add Employee</>
                   )}

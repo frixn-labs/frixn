@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
@@ -102,7 +102,7 @@ export default function OrganizationsPage() {
         <Input
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1) }}
-          placeholder="Search by name, slug, emailâ€¦"
+          placeholder="Search by name, slug, email..."
           className="pl-9 h-10 text-sm"
         />
       </div>
@@ -160,7 +160,7 @@ export default function OrganizationsPage() {
                   </td>
                   {/* Admin */}
                   <td className="px-4 py-3 min-w-[180px]">
-                    <p className="font-semibold text-xs">{org.admin_name || 'â€”'}</p>
+                    <p className="font-semibold text-xs">{org.admin_name || '—'}</p>
                     <p className="text-[11px] text-muted-foreground">{org.admin_email}</p>
                   </td>
                   {/* Status */}
@@ -171,7 +171,7 @@ export default function OrganizationsPage() {
                   </td>
                   {/* Created */}
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {org.created_at ? new Date(org.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'â€”'}
+                    {org.created_at ? new Date(org.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                   </td>
                 </tr>
               ))}
@@ -183,7 +183,7 @@ export default function OrganizationsPage() {
         {totalPages > 1 && (
           <div className="px-4 py-3 border-t border-border/40 bg-muted/10 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-              {(page - 1) * PAGE_SIZE + 1}â€“{Math.min(page * PAGE_SIZE, total)} of {total}
+              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
             </span>
             <div className="flex items-center gap-1.5">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}

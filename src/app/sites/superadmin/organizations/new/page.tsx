@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import Link from "next/link"
@@ -74,7 +74,7 @@ function LogoUpload({
         {uploading ? (
           <>
             <Loader2 className="w-8 h-8 text-[#FF3D00] animate-spin" />
-            <p className="text-xs font-semibold text-muted-foreground">Uploadingâ€¦</p>
+            <p className="text-xs font-semibold text-muted-foreground">Uploading...</p>
           </>
         ) : value ? (
           <>
@@ -95,7 +95,7 @@ function LogoUpload({
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">Drop logo here or click to upload</p>
-              <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, SVG Â· Max 5MB</p>
+              <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, SVG · Max 5MB</p>
             </div>
           </>
         )}
@@ -419,7 +419,7 @@ export default function NewOrganizationPage() {
                     />
                   </Field>
   
-                  <Field label="Slug â€” URL identifier" required>
+                  <Field label="Slug — URL identifier" required>
                     <div className="flex items-center">
                       <span className="px-3 h-10 bg-muted border border-r-0 border-border rounded-l-xl text-xs text-muted-foreground flex items-center font-mono shrink-0">
                         /sites/
@@ -547,7 +547,7 @@ export default function NewOrganizationPage() {
                   className="w-full h-11 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold rounded-xl shadow-lg shadow-[#FF3D00]/20 disabled:opacity-70"
                 >
                   {saving ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creatingâ€¦</>
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</>
                   ) : (
                     <><Building2 className="w-4 h-4 mr-2" />Create Organization</>
                   )}

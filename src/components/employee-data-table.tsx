@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import {
@@ -419,12 +419,12 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
       id: "department",
       accessorFn: (row) => row.departments?.name,
       header: "Department",
-      cell: ({ row }) => <div>{row.getValue("department") || "â€”"}</div>,
+      cell: ({ row }) => <div>{row.getValue("department") || "—"}</div>,
     },
     {
       accessorKey: "designation",
       header: "Designation",
-      cell: ({ row }) => <div>{row.getValue("designation") || "â€”"}</div>,
+      cell: ({ row }) => <div>{row.getValue("designation") || "—"}</div>,
     },
 
     {
