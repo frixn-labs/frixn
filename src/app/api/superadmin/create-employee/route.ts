@@ -1,4 +1,4 @@
-﻿import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Admin client â€” auth operations (no schema override needed)
@@ -19,17 +19,17 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       org_id, name, email, password,
-      designation, phone, employee_code, is_active, photo_url
+      designation, phone, employee_code, is_active, photo_url, dept_id
     } = body
 
-    // â”€â”€ Validate required fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ——————————————————————————————————————————————————————————————————————————
     if (!org_id) return NextResponse.json({ error: 'Organization is required.' }, { status: 400 })
     if (!name?.trim()) return NextResponse.json({ error: 'Employee name is required.' }, { status: 400 })
     if (!email?.trim()) return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
     if (!password?.trim()) return NextResponse.json({ error: 'Password is required (min 8 chars).' }, { status: 400 })
     if (password.length < 8) return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 })
 
-    // â”€â”€ Step 1: Create Supabase auth user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ——————————————————————————————————————————————————————————————————————————
     const { data: authUser, error: authError } = await supabaseAuth.auth.admin.createUser({
       email: email.trim().toLowerCase(),
       password: password,
@@ -46,12 +46,13 @@ export async function POST(req: NextRequest) {
 
     const uid = authUser.user.id
 
-    // â”€â”€ Step 2: Insert employee with employee.id = auth uid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ——————————————————————————————————————————————————————————————————
     const { data: employee, error: empError } = await supabaseData
       .from('employees')
       .insert([{
-        id: uid,                                          // link employee.id â†’ auth.users.id
+        id: uid,                                          // link employee.id → auth.users.id
         org_id,
+        dept_id: dept_id || null,
         name: name.trim(),
         email: email.trim().toLowerCase(),
         designation: designation?.trim() || null,
@@ -126,6 +127,29 @@ export async function POST(req: NextRequest) {
       await supabaseData.from('employees').delete().eq('id', uid)
       await supabaseAuth.auth.admin.deleteUser(uid)
       return NextResponse.json({ error: `Notification Settings DB error: ${notifError.message}` }, { status: 400 })
+    }
+
+    // —— Step 5: Check and update max_employees limit if new count is higher ——
+    try {
+      const { count: currentEmployeeCount } = await supabaseData
+        .from('employees')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', org_id)
+
+      const { data: orgData } = await supabaseData
+        .from('organizations')
+        .select('max_employees')
+        .eq('id', org_id)
+        .single()
+
+      if (orgData && currentEmployeeCount !== null && currentEmployeeCount > (orgData.max_employees || 0)) {
+        await supabaseData
+          .from('organizations')
+          .update({ max_employees: currentEmployeeCount })
+          .eq('id', org_id)
+      }
+    } catch (maxLimitError) {
+      console.error('Failed to update max_employees limit:', maxLimitError)
     }
 
     return NextResponse.json({ success: true, employee, cardUrl })

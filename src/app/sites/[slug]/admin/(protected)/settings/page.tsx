@@ -935,6 +935,7 @@ export default function SettingsPage() {
                                 {/* Billing History Table */}
                                 <BillingDataTable
                                     data={invoices}
+                                    loading={loadingInvoices}
                                     onDelete={handleDeleteInvoice}
                                     onStatusChange={handleUpdateInvoiceStatus}
                                 />

@@ -143,6 +143,7 @@ export default function NewEmployeePage() {
 
   const [form, setForm] = React.useState({
     org_id: "",
+    dept_id: "",
     name: "",
     designation: "",
     employee_code: "",
@@ -165,6 +166,9 @@ export default function NewEmployeePage() {
   const [copyingLink, setCopyingLink] = React.useState(false)
   const [copyingCard, setCopyingCard] = React.useState(false)
 
+  // Departments State
+  const [departments, setDepartments] = React.useState<{ id: string; name: string }[]>([])
+
   // Fetch orgs
   React.useEffect(() => {
     supabase.from('organizations').select('id, name, slug').order('name').then(({ data }) => {
@@ -172,6 +176,30 @@ export default function NewEmployeePage() {
       setLoadingOrgs(false)
     })
   }, [])
+
+  // Fetch departments for selected org
+  React.useEffect(() => {
+    if (!form.org_id) {
+      setDepartments([])
+      setForm(f => ({ ...f, dept_id: "" }))
+      return
+    }
+
+    supabase
+      .from('departments')
+      .select('id, name')
+      .eq('org_id', form.org_id)
+      .order('name')
+      .then(({ data }) => {
+        const list = data ?? []
+        setDepartments(list)
+        // If the current selected dept is not in the new list, reset it
+        setForm(f => ({
+          ...f,
+          dept_id: list.some(d => d.id === f.dept_id) ? f.dept_id : ""
+        }))
+      })
+  }, [form.org_id])
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
@@ -265,6 +293,7 @@ export default function NewEmployeePage() {
   const handleResetForm = () => {
     setForm({
       org_id: "",
+      dept_id: "",
       name: "",
       designation: "",
       employee_code: "",
@@ -470,6 +499,25 @@ export default function NewEmployeePage() {
                       className="h-10 rounded-xl font-mono text-sm"
                     />
                   </Field>
+                  {departments.length > 0 && (
+                    <div className="col-span-full">
+                      <Field label="Department">
+                        <Select
+                          value={form.dept_id}
+                          onValueChange={v => set("dept_id", v)}
+                        >
+                          <SelectTrigger className="w-full h-10 rounded-xl">
+                            <SelectValue placeholder="Select department" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {departments.map(d => (
+                              <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    </div>
+                  )}
                 </div>
               </div>
   

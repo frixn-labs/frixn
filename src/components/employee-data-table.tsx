@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash2, Trash, FileDown, Eye, Edit, Search, Loader2 } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash2, Trash, FileDown, Eye, Edit, Search, Loader2, CheckCircle2 } from "lucide-react"
 import * as XLSX from "xlsx"
 import jsPDF from "jspdf"
 import "jspdf-autotable"
@@ -128,6 +128,7 @@ let _empColumnFiltersCache: ColumnFiltersState = []
 export function EmployeeDataTable({ slug }: { slug: string }) {
   const [data, setData] = React.useState<EmployeeData[]>(_empDataCache[slug] || [])
   const [orgId, setOrgId] = React.useState<string | null>(null)
+  const [orgName, setOrgName] = React.useState<string>("")
   const [selectedEmployeeForDelete, setSelectedEmployeeForDelete] = React.useState<EmployeeData | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [loading, setLoading] = React.useState(!_empDataCache[slug])
@@ -140,6 +141,7 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
   const { role, orgId: sessionUserOrOrgId } = useRole()
 
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false)
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [departments, setDepartments] = React.useState<{id: string, name: string}[]>([])
   const [formData, setFormData] = React.useState({
@@ -160,12 +162,13 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
     // 1. Get Org ID
     const { data: orgData } = await supabase
       .from('organizations')
-      .select('id')
+      .select('id, name')
       .eq('slug', slug)
       .single()
     
     if (orgData) {
       setOrgId(orgData.id)
+      setOrgName(orgData.name || "")
       
       // 2. Fetch Employees with joined Departments & Cards
       let query = supabase
@@ -234,38 +237,28 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
       
       setIsSubmitting(true)
       try {
-          // 1. Insert Employee
-          const { data: emp, error: empError } = await supabase
-            .from('employees')
-            .insert({
-                org_id: orgId,
-                dept_id: formData.dept_id || null,
-                name: formData.name,
-                employee_code: formData.employee_code,
-                email: formData.email || null,
-                phone: formData.phone || null,
-                designation: formData.designation || null,
-                photo_url: formData.photo_url || null,
-                is_active: true
-            })
-            .select()
-            .single()
+          const deptName = departments.find(d => d.id === formData.dept_id)?.name || "N/A"
+          const response = await fetch("https://server.frixn.in/api/email/new-employee", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                  orgName: orgName || "N/A",
+                  employeeName: formData.name,
+                  designation: formData.designation || "N/A",
+                  department: deptName,
+                  employeeCode: formData.employee_code,
+                  email: formData.email || "N/A",
+                  phone: formData.phone || "N/A"
+              })
+          })
 
-          if (empError) throw empError
+          if (!response.ok) {
+              throw new Error("Failed to send request email")
+          }
 
-          // 2. Create NFC Card record (Status: requested)
-          // uid and card_code are now allowed to be NULL per updated schema
-          const { error: cardError } = await supabase
-            .from('nfc_cards')
-            .insert({
-                org_id: orgId,
-                employee_id: emp.id,
-                status: 'requested',
-                chip_type: 'NFC216'
-            })
-          
-          if (cardError) throw cardError
-
+          setIsSuccessDialogOpen(true)
           setIsAddDialogOpen(false)
           setFormData({
             name: "",
@@ -279,7 +272,7 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
           fetchOrgAndData()
       } catch (err) {
           console.error('Error creating employee:', err)
-          alert('Failed to create employee. Please try again.')
+          alert('Failed to send employee request. Please try again.')
       } finally {
           setIsSubmitting(false)
       }
@@ -292,25 +285,21 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
       const empId = selectedEmployeeForDelete.id
 
       try {
-          // 1. Delete all related details as per the confirmation message
-          // This avoids foreign key constraint violations
-          await supabase.from('taps').delete().eq('employee_id', empId)
-          await supabase.from('leads').delete().eq('employee_id', empId)
-          await supabase.from('nfc_cards').delete().eq('employee_id', empId)
-          
-          // 2. Finally delete the employee record
-          const { error } = await supabase.from('employees').delete().eq('id', empId)
-          
-          if (!error) {
-              setData(prev => prev.filter(emp => emp.id !== empId))
-              setSelectedEmployeeForDelete(null)
-              setRowSelection({})
-          } else {
-              throw error
+          const response = await fetch(`/api/superadmin/employees/${empId}`, {
+              method: "DELETE"
+          })
+
+          const resData = await response.json()
+          if (!response.ok) {
+              throw new Error(resData.error || "Failed to delete employee and auth user.")
           }
-      } catch (err) {
+          
+          setData(prev => prev.filter(emp => emp.id !== empId))
+          setSelectedEmployeeForDelete(null)
+          setRowSelection({})
+      } catch (err: any) {
           console.error('Error deleting employee:', err)
-          alert('Failed to delete employee and related details. Please try again.')
+          alert(err.message || 'Failed to delete employee. Please try again.')
       } finally {
           setIsDeleting(false)
       }
@@ -664,17 +653,6 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="photo" className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground/70 ml-0.5">Photo URL</Label>
-                            <Input 
-                                id="photo" 
-                                placeholder="https://..." 
-                                className="h-10 w-full bg-muted/30 border-muted-foreground/10 transition-all rounded-lg"
-                                value={formData.photo_url}
-                                onChange={e => setFormData({...formData, photo_url: e.target.value})}
-                            />
-                        </div>
-
                         <DialogFooter className="border-t pt-6 gap-3 sm:gap-2">
                             <Button 
                                 type="button" 
@@ -687,7 +665,7 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
                             <Button 
                                 type="submit" 
                                 disabled={isSubmitting || !formData.name || !formData.employee_code}
-                                className="h-11 px-6 font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 transition-all rounded-lg min-w-[160px]"
+                                className="h-11 px-6 font-bold bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white shadow-lg shadow-[#FF3D00]/20 transition-all rounded-lg min-w-[160px]"
                             >
                                 {isSubmitting ? (
                                     <>
@@ -794,9 +772,8 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
                             Confirm Delete
                         </DialogTitle>
                         <DialogDescription className="py-2 text-foreground/80">
-                            Deleting an employee will delete all the related details. 
                             Are you sure you want to permanently delete <span className="font-bold text-foreground">"{selectedEmployeeForDelete?.name}"</span>? 
-                            This action cannot be undone.
+                            This will remove their profile and delete all associated taps, leads, and NFC cards from Auth and Database. This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 mt-4">
@@ -815,6 +792,28 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
                                     Deleting...
                                 </>
                             ) : "Delete Permanently"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+                <DialogContent className="max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-emerald-500 flex items-center gap-2">
+                            <CheckCircle2 className="w-5 h-5" />
+                            Request Sent
+                        </DialogTitle>
+                        <DialogDescription className="py-2 text-foreground/80">
+                            NEW employee request sent successfully. The sales team will contact you shortly and provide you with the NFC card.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-4">
+                        <Button 
+                          onClick={() => setIsSuccessDialogOpen(false)} 
+                          className="w-full bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold"
+                        >
+                            OK
                         </Button>
                     </DialogFooter>
                 </DialogContent>

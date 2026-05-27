@@ -76,30 +76,38 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    // 1. Delete from organizations table
-    // Note: If cascading is set up, this might delete everything. 
-    // If not, we might need to delete related data manually.
-    // Based on the 'create-organization' route, organization.id = auth.users.id
-    
-    const { error: dbError } = await supabaseData
-      .from('organizations')
-      .delete()
-      .eq('id', id)
-
-    if (dbError) {
-      return NextResponse.json({ error: `DB deletion failed: ${dbError.message}` }, { status: 400 })
+    if (!id) {
+      return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 })
     }
 
-    // 2. Delete the Auth User
+    // 1. Fetch all employee IDs for this organization
+    const { data: employees, error: fetchEmpError } = await supabaseData
+      .from('employees')
+      .select('id')
+      .eq('org_id', id)
+
+    if (fetchEmpError) {
+      return NextResponse.json({ error: `Failed to fetch employees: ${fetchEmpError.message}` }, { status: 400 })
+    }
+
+    // 2. Delete all employees from Supabase Auth (will cascade delete their DB records)
+    if (employees && employees.length > 0) {
+      for (const emp of employees) {
+        const { error: authEmpError } = await supabaseAuth.auth.admin.deleteUser(emp.id)
+        if (authEmpError) {
+          console.error(`Failed to delete employee ${emp.id} from Auth:`, authEmpError.message)
+        }
+      }
+    }
+
+    // 3. Delete the Organization Admin from Supabase Auth (will cascade delete the organization record)
     const { error: authError } = await supabaseAuth.auth.admin.deleteUser(id)
 
     if (authError) {
-      // Even if auth deletion fails, the organization record is gone from the 'frixn' schema.
-      // But we should report it.
-      return NextResponse.json({ error: `Auth deletion failed: ${authError.message}` }, { status: 400 })
+      return NextResponse.json({ error: `Auth deletion of organization admin failed: ${authError.message}` }, { status: 400 })
     }
 
-    return NextResponse.json({ success: true, message: 'Organization and admin user deleted successfully' })
+    return NextResponse.json({ success: true, message: 'Organization employees and admin deleted from Auth successfully' })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Unexpected error' }, { status: 500 })
   }

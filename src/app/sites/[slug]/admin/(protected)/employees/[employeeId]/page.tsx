@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { supabase } from "@/lib/supabase"
-import { Edit, ArrowLeft, Search, MoreVertical, Briefcase, Mail, Phone, Calendar, MapPin, MousePointerClick, UserPlus, Zap, ExternalLink, Globe, Link as LinkIcon, Contact, FileText, Save, X, Loader2, Building2, Camera } from "lucide-react"
+import { Edit, ArrowLeft, Search, MoreVertical, Briefcase, Mail, Phone, Calendar, MapPin, MousePointerClick, UserPlus, Zap, ExternalLink, Globe, Link as LinkIcon, Contact, FileText, Save, X, Loader2, Building2, Camera, Trash2, ShieldAlert, Trash } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import { addDays, format } from "date-fns"
+import { addDays, format, startOfDay, endOfDay } from "date-fns"
 import { type DateRange } from "react-day-picker"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -52,6 +52,7 @@ export default function EmployeeDetailPage() {
     const [employee, setEmployee] = React.useState<EmployeeDetailsData | null>(null)
     const [tapCount, setTapCount] = React.useState<number>(0)
     const [leadCount, setLeadCount] = React.useState<number>(0)
+    const [orgCreatedAt, setOrgCreatedAt] = React.useState<string | null>(null)
 
     const [loadingList, setLoadingList] = React.useState(true)
     const [loadingDetail, setLoadingDetail] = React.useState(true)
@@ -71,6 +72,39 @@ export default function EmployeeDetailPage() {
     const [isEditingWorkDetails, setIsEditingWorkDetails] = React.useState(false)
     const [workDetailsForm, setWorkDetailsForm] = React.useState({ phone: '', email: '', designation: '', dept_id: '' })
     const [savingWorkDetails, setSavingWorkDetails] = React.useState(false)
+
+    // Delete states
+    const [confirmDelete, setConfirmDelete] = React.useState(false)
+    const [isDeleting, setIsDeleting] = React.useState(false)
+
+    const handleDelete = async () => {
+        if (!confirmDelete) {
+            setConfirmDelete(true)
+            return
+        }
+
+        setIsDeleting(true)
+        try {
+            const response = await fetch(`/api/superadmin/employees/${employeeId}`, {
+                method: "DELETE"
+            })
+
+            const data = await response.json()
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to delete employee and auth user.")
+            }
+
+            setConfirmDelete(false)
+            cachedEmployeeList = null // invalidate cache
+            router.push(`/sites/${slug}/admin/employees`)
+        } catch (err: any) {
+            console.error("Error deleting employee:", err)
+            alert(err.message || "Failed to delete employee.")
+            setConfirmDelete(false)
+        } finally {
+            setIsDeleting(false)
+        }
+    }
 
     // Photo upload states
     const [uploadingPhoto, setUploadingPhoto] = React.useState(false)
@@ -189,12 +223,13 @@ export default function EmployeeDetailPage() {
                 // Fetch org_id from the employee's org for links query
                 const { data: orgData } = await supabase
                     .from('organizations')
-                    .select('id')
+                    .select('id, created_at')
                     .eq('slug', slug)
                     .single()
 
                 if (orgData) {
                     setOrgId(orgData.id)
+                    setOrgCreatedAt(orgData.created_at)
                     // Fetch ALL active org links
                     const { data: linksData } = await supabase
                         .from('card_links')
@@ -310,7 +345,6 @@ export default function EmployeeDetailPage() {
             .from('employees')
             .update({
                 phone: workDetailsForm.phone,
-                email: workDetailsForm.email,
                 designation: workDetailsForm.designation,
                 dept_id: workDetailsForm.dept_id || null
             })
@@ -321,7 +355,6 @@ export default function EmployeeDetailPage() {
             setEmployee(prev => prev ? { 
                 ...prev, 
                 phone: workDetailsForm.phone,
-                email: workDetailsForm.email,
                 designation: workDetailsForm.designation,
                 dept_id: workDetailsForm.dept_id,
                 departments: newDep ? { name: newDep.name } : prev.departments
@@ -473,7 +506,8 @@ export default function EmployeeDetailPage() {
         return (
             <div className="animate-in fade-in duration-500 overflow-y-auto pr-2 pb-10">
                 {/* Header Identity block */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b pb-8">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 border-b pb-8">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                     <div className="p-1">
                         <div 
                             className="relative group cursor-pointer w-24 h-24 rounded-full"
@@ -522,6 +556,7 @@ export default function EmployeeDetailPage() {
                         </p>
                     </div>
                 </div>
+            </div>
 
                 {/* Overview Meta grid */}
                 <div className="mt-8">
@@ -566,9 +601,9 @@ export default function EmployeeDetailPage() {
                                         onSelect={setDate}
                                         numberOfMonths={1}
                                         disabled={(d) => {
-                                            const maxDate = new Date();
-                                            const minDate = cachedOrgDate ? new Date(cachedOrgDate) : new Date(0);
-                                            return d > maxDate || d < minDate;
+                                            const maxDate = endOfDay(new Date());
+                                            const minLimit = orgCreatedAt ? startOfDay(new Date(orgCreatedAt)) : new Date(0);
+                                            return d > maxDate || d < minLimit;
                                         }}
                                     />
                                 </PopoverContent>
@@ -665,10 +700,9 @@ export default function EmployeeDetailPage() {
                             <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><Mail className="w-3 h-3" /> Email Address</span>
                             {isEditingWorkDetails ? (
                                 <Input 
-                                    value={workDetailsForm.email} 
-                                    onChange={(e) => setWorkDetailsForm({...workDetailsForm, email: e.target.value})}
-                                    className="h-8 mt-1"
-                                    type="email"
+                                    value={employee.email} 
+                                    disabled
+                                    className="h-8 mt-1 bg-muted/50 cursor-not-allowed opacity-80"
                                 />
                             ) : (
                                 <span className="text-sm font-medium text-foreground">{employee.email || '—'}</span>
@@ -829,6 +863,42 @@ export default function EmployeeDetailPage() {
                         </Tabs>
                     </div>
                 )}
+
+                {/* Danger Zone */}
+                {role !== 'employee' && (
+                    <div className="bg-rose-500/5 border border-rose-500/10 rounded-2xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mt-8">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-rose-600">
+                                <ShieldAlert className="w-4 h-4" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Danger Zone</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
+                                Deleting this employee will permanently remove their profile and delete all associated taps, leads, and NFC cards from Auth and Database. This action cannot be undone.
+                            </p>
+                        </div>
+                        
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className={cn(
+                                "h-11 px-6 rounded-xl font-bold transition-all shrink-0 md:min-w-[180px]",
+                                confirmDelete 
+                                    ? "bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-600/20 animate-pulse" 
+                                    : "text-rose-600 hover:bg-rose-600/10 hover:text-rose-700 border border-rose-500/20"
+                            )}
+                        >
+                            {isDeleting ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : confirmDelete ? (
+                                "Confirm Deletion"
+                            ) : (
+                                <><Trash className="w-4 h-4 mr-2" /> Delete Employee</>
+                            )}
+                        </Button>
+                    </div>
+                )}
             </div>
         )
     }
@@ -904,6 +974,7 @@ export default function EmployeeDetailPage() {
                     {renderDetail()}
                 </div>
             </div>
+
 
         </div>
     )

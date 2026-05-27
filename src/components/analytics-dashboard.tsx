@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import { format, startOfDay, endOfDay } from "date-fns"
@@ -96,7 +96,7 @@ function DateSelector({ date, setDate, minDate }: DateSelectorProps) {
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date?.from ? (
             date.to && date.to.getTime() !== date.from.getTime() ? (
-              <>{format(date.from, "LLL dd, y")} â€“ {format(date.to, "LLL dd, y")}</>
+              <>{format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}</>
             ) : (
               format(date.from, "LLL dd, y")
             )
@@ -115,7 +115,8 @@ function DateSelector({ date, setDate, minDate }: DateSelectorProps) {
           numberOfMonths={2}
           disabled={(d) => {
             const maxDate = endOfDay(new Date())
-            return d > maxDate
+            const minLimit = minDate ? startOfDay(minDate) : new Date(0)
+            return d > maxDate || d < minLimit
           }}
         />
       </PopoverContent>

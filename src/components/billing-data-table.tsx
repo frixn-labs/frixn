@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, Download, Trash, Search, FileText } from "lucide-react"
+import { ArrowUpDown, Download, Trash, Search, FileText, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -75,20 +75,17 @@ function AnimatedSearchBox({ value, onChange }: { value: string; onChange: (v: s
   )
 }
 
-// ─── Fallback data (shown when no real invoices exist) ────────────────────────
-const FALLBACK_INVOICES = [
-  { id: "1", invoice_number: "INV-2026-SETUP", created_at: "2026-03-10T12:00:00Z", plan: "basic", payment_method: "Mastercard •••• 4242", status: "paid", invoice_link: null },
-  { id: "2", invoice_number: "INV-2026-0012", created_at: "2026-03-31T12:00:00Z", plan: "basic", payment_method: "Visa •••• 1234", status: "paid", invoice_link: null },
-  { id: "3", invoice_number: "INV-2026-0010", created_at: "2026-02-28T12:00:00Z", plan: "basic", payment_method: "Mastercard •••• 4242", status: "pending", invoice_link: null },
-]
+// Fallback invoices removed to show empty state when no invoices exist
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function BillingDataTable({ 
   data, 
+  loading,
   onDelete, 
   onStatusChange 
 }: { 
   data: any[], 
+  loading?: boolean,
   onDelete?: (id: string) => void,
   onStatusChange?: (id: string, currentStatus: string) => void
 }) {
@@ -97,7 +94,30 @@ export function BillingDataTable({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
-  const safeData = data && data.length > 0 ? data : FALLBACK_INVOICES
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center border rounded-2xl bg-card">
+        <Loader2 className="w-6 h-6 animate-spin text-primary mb-2" />
+        <p className="text-xs text-muted-foreground">Loading invoices...</p>
+      </div>
+    )
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-2xl bg-card/50">
+        <div className="p-3 bg-muted rounded-full mb-4">
+          <FileText className="w-6 h-6 text-muted-foreground" />
+        </div>
+        <h3 className="text-sm font-bold text-foreground tracking-tight">No invoices yet</h3>
+        <p className="text-xs text-muted-foreground max-w-sm mt-1">
+          You don't have any billing invoices yet. Once an invoice is generated for your organization, it will appear here.
+        </p>
+      </div>
+    )
+  }
+
+  const safeData = data
 
   // Define columns inside component to access onDelete and onStatusChange
   const columns: ColumnDef<any>[] = [

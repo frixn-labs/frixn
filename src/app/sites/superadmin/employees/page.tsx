@@ -3,11 +3,19 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import { Users, Plus, Search, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
+import { Users, Plus, Search, Loader2, ChevronLeft, ChevronRight, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 // â”€â”€â”€ Avatar helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getInitials(name: string) {
@@ -32,6 +40,8 @@ export default function EmployeesPage() {
   const [orgFilter, setOrgFilter] = React.useState("")
   const [page, setPage] = React.useState(1)
   const [total, setTotal] = React.useState(0)
+  const [selectedEmployeeForDelete, setSelectedEmployeeForDelete] = React.useState<any | null>(null)
+  const [isDeleting, setIsDeleting] = React.useState(false)
 
   // Fetch all orgs for filter dropdown and add form
   React.useEffect(() => {
@@ -68,6 +78,27 @@ export default function EmployeesPage() {
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [fetchEmployees])
+
+  const handleDelete = async () => {
+    if (!selectedEmployeeForDelete) return
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/superadmin/employees/${selectedEmployeeForDelete.id}`, {
+        method: "DELETE"
+      })
+      const resData = await response.json()
+      if (!response.ok) {
+        throw new Error(resData.error || "Failed to delete employee and auth user.")
+      }
+      setSelectedEmployeeForDelete(null)
+      fetchEmployees()
+    } catch (err: any) {
+      console.error("Error deleting employee:", err)
+      alert(err.message || "Failed to delete employee. Please try again.")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
@@ -119,20 +150,21 @@ export default function EmployeesPage() {
                 {["Employee", "Organization", "Designation", "Contact", "Code", "Status", "Joined"].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">{h}</th>
                 ))}
+                <th className="px-4 py-3 text-right text-[10px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 Array(6).fill(0).map((_, i) => (
                   <tr key={i} className="border-b border-border/40">
-                    {Array(7).fill(0).map((_, j) => (
+                    {Array(8).fill(0).map((_, j) => (
                       <td key={j} className="px-4 py-4"><div className="h-4 bg-muted animate-pulse rounded w-3/4" /></td>
                     ))}
                   </tr>
                 ))
               ) : employees.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center">
+                  <td colSpan={8} className="px-4 py-16 text-center">
                     <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                     <p className="text-sm font-semibold text-muted-foreground">No employees found</p>
                   </td>
@@ -193,6 +225,20 @@ export default function EmployeesPage() {
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                     {emp.created_at ? new Date(emp.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                   </td>
+                  {/* Actions */}
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedEmployeeForDelete(emp)
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -224,6 +270,45 @@ export default function EmployeesPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!selectedEmployeeForDelete} onOpenChange={(open) => !open && setSelectedEmployeeForDelete(null)}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-rose-600 flex items-center gap-2">
+              <Trash2 className="w-5 h-5" />
+              Confirm Delete
+            </DialogTitle>
+            <DialogDescription className="py-2 text-foreground/80">
+              Are you sure you want to permanently delete <span className="font-bold text-foreground">"{selectedEmployeeForDelete?.name}"</span>?
+              This will remove their profile and delete all associated taps, leads, and NFC cards from Auth and Database. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setSelectedEmployeeForDelete(null)}
+              disabled={isDeleting}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex-1 min-w-[140px]"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : "Delete Permanently"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   )

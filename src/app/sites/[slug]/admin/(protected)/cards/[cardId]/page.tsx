@@ -117,6 +117,22 @@ export default function CardDetailPage() {
   const [loading, setLoading] = React.useState(true)
   const [locking, setLocking] = React.useState(false)
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
+  const [orgCreatedAt, setOrgCreatedAt] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    async function loadOrgInfo() {
+      if (!slug) return
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('created_at')
+        .eq('slug', slug)
+        .single()
+      if (orgData) {
+        setOrgCreatedAt(orgData.created_at)
+      }
+    }
+    loadOrgInfo()
+  }, [slug])
   
   const [revokeDialogOpen, setRevokeDialogOpen] = React.useState(false)
   const [revokeReason, setRevokeReason] = React.useState("")
@@ -458,6 +474,11 @@ export default function CardDetailPage() {
                         selected={dateRange}
                         onSelect={setDateRange}
                         numberOfMonths={2}
+                        disabled={(d) => {
+                          const maxDate = endOfDay(new Date());
+                          const minLimit = orgCreatedAt ? startOfDay(new Date(orgCreatedAt)) : new Date(0);
+                          return d > maxDate || d < minLimit;
+                        }}
                       />
                     </PopoverContent>
                   </Popover>
