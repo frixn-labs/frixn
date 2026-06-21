@@ -233,30 +233,69 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
 
   const handleCreateEmployee = async (e: React.FormEvent) => {
       e.preventDefault()
-      if (!orgId || !formData.name || !formData.employee_code) return
+      if (!orgId || !formData.name || !formData.employee_code || !formData.email) {
+          alert("Please fill in all required fields (Name, Employee Code, and Email).")
+          return
+      }
       
       setIsSubmitting(true)
       try {
-          const deptName = departments.find(d => d.id === formData.dept_id)?.name || "N/A"
-          const response = await fetch("/api/email", {
+          const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).toUpperCase().slice(-4) + '!'
+
+          // 1. Create the employee in the database and auth
+          const createResponse = await fetch("/api/superadmin/create-employee", {
               method: "POST",
               headers: {
                   "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                  endpoint: "/api/email/new-employee",
-                  orgName: orgName || "N/A",
-                  employeeName: formData.name,
-                  designation: formData.designation || "N/A",
-                  department: deptName,
-                  employeeCode: formData.employee_code,
-                  email: formData.email || "N/A",
-                  phone: formData.phone || "N/A"
+                  org_id: orgId,
+                  name: formData.name.trim(),
+                  email: formData.email.trim().toLowerCase(),
+                  password: generatedPassword,
+                  designation: formData.designation?.trim() || null,
+                  phone: formData.phone?.trim() || null,
+                  employee_code: formData.employee_code.trim(),
+                  is_active: true,
+                  photo_url: formData.photo_url || null,
+                  dept_id: formData.dept_id || null,
+                  org_slug: slug
               })
           })
 
-          if (!response.ok) {
-              throw new Error("Failed to send request email")
+          if (!createResponse.ok) {
+              const errData = await createResponse.json()
+              throw new Error(errData.error || "Failed to create employee profile.")
+          }
+
+          // 2. Generate the onboarding reset link
+          const resetResponse = await fetch("/api/superadmin/generate-reset-link", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                  email: formData.email.trim().toLowerCase(),
+                  org_slug: slug
+              })
+          })
+
+          if (resetResponse.ok) {
+              const resetData = await resetResponse.json()
+              
+              // 3. Send onboarding email via Node server
+              await fetch("/api/email", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                      endpoint: "/api/email/onboarding",
+                      FullName: formData.name.trim(),
+                      Email: formData.email.trim().toLowerCase(),
+                      OnboardingLink: resetData.link
+                  })
+              })
           }
 
           setIsSuccessDialogOpen(true)
@@ -271,9 +310,9 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
             photo_url: ""
           })
           fetchOrgAndData()
-      } catch (err) {
+      } catch (err: any) {
           console.error('Error creating employee:', err)
-          alert('Failed to send employee request. Please try again.')
+          alert(err.message || 'Failed to create employee. Please try again.')
       } finally {
           setIsSubmitting(false)
       }
@@ -605,12 +644,13 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground/70 ml-0.5">Email</Label>
+                                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground/70 ml-0.5">Email *</Label>
                                 <Input 
                                     id="email" 
                                     type="email" 
                                     placeholder="john@example.com" 
                                     className="h-10 w-full bg-muted/30 border-muted-foreground/10 transition-all rounded-lg"
+                                    required
                                     value={formData.email}
                                     onChange={e => setFormData({...formData, email: e.target.value})}
                                 />
@@ -803,10 +843,10 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-emerald-500 flex items-center gap-2">
                             <CheckCircle2 className="w-5 h-5" />
-                            Request Sent
+                            Employee Created
                         </DialogTitle>
                         <DialogDescription className="py-2 text-foreground/80">
-                            NEW employee request sent successfully. The sales team will contact you shortly and provide you with the NFC card.
+                            The employee profile has been created successfully. An onboarding email has been sent to them to set up their password.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-4">
