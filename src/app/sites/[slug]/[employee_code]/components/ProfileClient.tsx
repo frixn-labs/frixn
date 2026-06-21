@@ -210,8 +210,14 @@ END:VCARD`
       setLeadSent(true)
 
       if (liveEmployee.phone) {
-        const phoneBase = liveEmployee.phone.replace(/[^0-9]/g, '');
-        const msg = `Hi ${liveEmployee.name.split(' ')[0]}!\nI just shared my contact details via your digital profile.\n\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}${form.company ? `\nCompany: ${form.company}` : ''}${form.designation ? `\nDesignation: ${form.designation}` : ''}${form.product ? `\nProduct Interest: ${form.product}` : ''}${form.followup_date ? `\nFollow-up Date: ${format(new Date(form.followup_date), 'PPP')}` : ''}`;
+        let phoneBase = liveEmployee.phone.replace(/[^0-9]/g, '');
+        if (phoneBase.startsWith('0')) {
+          phoneBase = phoneBase.substring(1);
+        }
+        if (phoneBase.length === 10) {
+          phoneBase = '91' + phoneBase;
+        }
+        const msg = `Hi ${liveEmployee.name.split(' ')[0]}!\nI just shared my contact details via your digital profile.\n\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}${form.company ? `\nCompany: ${form.company}` : ''}`;
         const encodedMsg = encodeURIComponent(msg);
         const waUrl = `https://wa.me/${phoneBase}?text=${encodedMsg}`;
         window.location.href = waUrl;
