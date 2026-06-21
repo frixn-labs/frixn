@@ -218,7 +218,7 @@ END:VCARD`
           phoneBase = '91' + phoneBase;
         }
         const firstName = liveEmployee.name ? liveEmployee.name.split(' ')[0] : 'there';
-        const msg = `Hey ${firstName} —\n\nGreat meeting you.\nDropping my details here so we stay connected and pick things up from where we left off.\n\nSpeak soon ⚡\n\nName: ${form.name}\nCompany: ${form.company}`;
+        const msg = `Hey ${firstName} —\nGreat meeting you.\nDropping my details here so we stay connected and pick things up from where we left off.\n\nName: ${form.name}\nCompany: ${form.company}\n\nspeak soon.`;
         const encodedMsg = encodeURIComponent(msg);
         const waUrl = `https://wa.me/${phoneBase}?text=${encodedMsg}`;
         window.location.href = waUrl;
