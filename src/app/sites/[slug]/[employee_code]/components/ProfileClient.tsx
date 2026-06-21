@@ -281,7 +281,7 @@ END:VCARD`
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-[#0A0A0B] text-[#F5F5F5] font-sans overflow-x-hidden flex flex-col items-center px-4 py-8 select-none">
+    <div className="relative h-[100dvh] w-full bg-[#0A0A0B] text-[#F5F5F5] font-sans overflow-hidden flex flex-col items-center justify-center px-4 select-none">
       {/* Background Grid Pattern */}
       <div className="absolute top-0 left-0 right-0 h-[400px] bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" />
 
@@ -289,167 +289,104 @@ END:VCARD`
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[550px] h-[350px] bg-[radial-gradient(circle_at_center,rgba(255,61,0,0.15)_0%,transparent_70%)] blur-[50px] pointer-events-none z-0" />
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[450px] bg-[radial-gradient(circle_at_center,rgba(255,61,0,0.08)_0%,transparent_75%)] blur-[60px] pointer-events-none z-0" />
 
-      {/* Utility controls (ThemeToggle and optional Settings/Edit mode button) */}
-      <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
-        {!liveLocked && (
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="p-2 rounded-xl bg-[#16161A]/80 border border-zinc-800/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-          >
-            {isEditing ? <X className="w-4 h-4" /> : <Settings2 className="w-4 h-4" />}
-          </button>
-        )}
-        <ThemeToggle />
-      </div>
-
       {/* Content Wrapper */}
-      <div className="w-full max-w-[390px] relative z-10 flex flex-col min-h-screen pt-4">
-        {/* Top Left Logo */}
-        <div className="flex items-center gap-1 bg-[#121214] border border-zinc-800/80 px-3 py-1.5 rounded-xl self-start mb-8 select-none">
-          <span className="text-white font-bold text-xs tracking-tight flex items-center">
-            fr
-            <svg className="w-3.5 h-3.5 text-[#FF3D00] fill-current mx-[0.5px]" viewBox="0 0 24 24">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-            xn.
-          </span>
+      <div className="w-full max-w-[390px] h-full max-h-[100dvh] relative z-10 flex flex-col justify-between py-3 sm:py-6">
+        {/* Header Row */}
+        <div className="flex items-center justify-between w-full flex-shrink-0">
+          {/* Top Left Logo */}
+          <div className="flex items-center gap-1 bg-[#121214] border border-zinc-800/80 px-3 py-1.5 rounded-xl select-none">
+            <span className="text-white font-bold text-xs tracking-tight flex items-center">
+              fr
+              <svg className="w-3.5 h-3.5 text-[#FF3D00] fill-current mx-[0.5px]" viewBox="0 0 24 24">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+              xn.
+            </span>
+          </div>
+
+          {/* Utility controls */}
+          <div className="flex items-center gap-2">
+            {!liveLocked && (
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="p-2 rounded-xl bg-[#16161A]/80 border border-zinc-800/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                {isEditing ? <X className="w-4 h-4" /> : <Settings2 className="w-4 h-4" />}
+              </button>
+            )}
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Avatar & Name Identity Section */}
-        <div className="flex items-center gap-4 w-full mb-8">
+        <div className="flex items-center gap-4 w-full flex-shrink-0 mt-3 sm:mt-5">
           {/* Avatar with Custom Outline and Indicator */}
           <div className="relative flex-shrink-0">
-            <div className="w-[84px] h-[84px] rounded-full p-[2.5px] bg-[#FF3D00] shadow-[0_0_15px_rgba(255,61,0,0.25)] flex items-center justify-center">
-              <div className="w-full h-full rounded-full bg-[#0A0A0B] p-[2.5px] flex items-center justify-center">
+            <div className="w-[68px] h-[68px] sm:w-[80px] sm:h-[80px] rounded-full p-[2px] bg-[#FF3D00] shadow-[0_0_12px_rgba(255,61,0,0.2)] flex items-center justify-center">
+              <div className="w-full h-full rounded-full bg-[#0A0A0B] p-[2px] flex items-center justify-center">
                 <div className="w-full h-full rounded-full overflow-hidden bg-zinc-900">
                   {liveEmployee.photo_url ? (
                     <img src={liveEmployee.photo_url} alt={liveEmployee.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xl font-black text-zinc-400">
+                    <div className="w-full h-full flex items-center justify-center text-lg sm:text-xl font-black text-zinc-400">
                       {liveEmployee.name?.substring(0, 2).toUpperCase()}
                     </div>
                   )}
                 </div>
               </div>
             </div>
-            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#FF3D00] border-[2.5px] border-[#0A0A0B]" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#FF3D00] border-[2px] border-[#0A0A0B]" />
           </div>
 
           {/* Text Identity Info */}
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <h1 className="text-xl font-bold text-white tracking-tight leading-tight">
+              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-tight">
                 {liveEmployee.name}
               </h1>
               {/* Verified Badge */}
-              <div className="flex items-center justify-center w-4.5 h-4.5 rounded-full bg-[#FF3D00]">
-                <svg className="w-2.5 h-2.5 text-white stroke-[3px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex items-center justify-center w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-full bg-[#FF3D00]">
+                <svg className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-white stroke-[3px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
             </div>
-            <p className="text-[13px] font-semibold text-[#FF3D00] mt-0.5">
+            <p className="text-[12px] sm:text-[13px] font-semibold text-[#FF3D00] mt-0.5">
               {liveEmployee.designation || "Founder"}
             </p>
           </div>
         </div>
 
-        {/* Editable info card */}
-        <AnimatePresence>
-          {isEditing && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="w-full space-y-4 overflow-hidden mb-6"
-            >
-              <div className="bg-[#16161A]/95 p-6 rounded-2xl border border-zinc-800/80 space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={editForm.phone}
-                    onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                    placeholder="+1 234 567 890"
-                    className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email Address</label>
-                  <input
-                    type="email"
-                    value={editForm.email}
-                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                    placeholder="name@company.com"
-                    className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
-                  />
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <button
-                    onClick={async () => {
-                      setSaving(true)
-                      try {
-                        const { error } = await supabase
-                          .from('employees')
-                          .update({ phone: editForm.phone, email: editForm.email })
-                          .eq('id', liveEmployee.id)
-
-                        if (error) throw error
-                        setIsEditing(false)
-                      } catch (err) {
-                        alert('Failed to save changes.')
-                      } finally {
-                        setSaving(false)
-                      }
-                    }}
-                    disabled={saving}
-                    className="flex-1 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Save Info
-                  </button>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold py-3 rounded-xl transition-all text-sm cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Headlines Section */}
-        <div className="w-full mb-6">
-          <h2 className="text-[32px] font-extrabold text-white tracking-tight leading-[1.15] mb-4">
+        <div className="w-full flex-shrink-0 mt-3 sm:mt-5">
+          <h2 className="text-[20px] sm:text-[24px] md:text-[28px] font-extrabold text-white tracking-tight leading-[1.15] mb-1.5 sm:mb-2.5">
             So, are we going to stay in touch?
           </h2>
-          <p className="text-zinc-400 text-sm leading-relaxed mb-4 font-medium">
+          <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed mb-1.5 font-medium">
             Leave your details and I'll personally make sure the right opportunity finds its way back to you.
           </p>
-          <p className="text-zinc-400 text-sm leading-relaxed font-medium">
+          <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-medium hidden xs:block">
             <span className="text-[#FF3D00] font-bold">Frixn?</span> It's the tiny tap that turns a quick hello into your next big deal.
           </p>
         </div>
 
         {/* Form Section */}
-        <div className="w-full">
+        <div className="w-full flex-shrink-0 mt-3 sm:mt-5">
           {leadSent ? (
-            <div className="py-16 w-full flex flex-col items-center text-center bg-[#16161A]/80 rounded-3xl border border-zinc-800/80 shadow-lg animate-in fade-in zoom-in duration-300">
-              <CheckCircle2 className="w-16 h-16 text-emerald-500 mb-4 animate-bounce" />
-              <h3 className="text-2xl font-bold text-white mb-2">Details Sent!</h3>
-              <p className="text-sm font-medium text-zinc-400">I will get in touch with you shortly.</p>
+            <div className="py-8 sm:py-12 w-full flex flex-col items-center text-center bg-[#16161A]/80 rounded-3xl border border-zinc-800/80 shadow-lg animate-in fade-in zoom-in duration-300">
+              <CheckCircle2 className="w-12 h-12 text-emerald-500 mb-2 sm:mb-3 animate-bounce" />
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">Details Sent!</h3>
+              <p className="text-xs sm:text-sm font-medium text-zinc-400">I will get in touch with you shortly.</p>
             </div>
           ) : (
-            <form onSubmit={handleLeadSubmit} className="flex flex-col gap-3 w-full">
+            <form onSubmit={handleLeadSubmit} className="flex flex-col gap-2 sm:gap-2.5 w-full">
               <input
                 type="text"
                 placeholder="What's your name?"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-2xl px-5 py-4 text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
               />
               <input
                 type="email"
@@ -457,7 +394,7 @@ END:VCARD`
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-2xl px-5 py-4 text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
               />
               <input
                 type="tel"
@@ -465,7 +402,7 @@ END:VCARD`
                 required
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-2xl px-5 py-4 text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
               />
               <input
                 type="text"
@@ -473,16 +410,16 @@ END:VCARD`
                 required
                 value={form.company}
                 onChange={(e) => setForm({ ...form, company: e.target.value })}
-                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-2xl px-5 py-4 text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
               />
 
               <button
                 type="submit"
                 disabled={sendingLead}
-                className="w-full bg-gradient-to-r from-[#FF6D3A] to-[#FF3D00] text-white font-bold py-4.5 rounded-2xl mt-4 shadow-[0_4px_20px_rgba(255,61,0,0.25)] hover:shadow-[0_4px_25px_rgba(255,61,0,0.35)] active:scale-[0.98] transition-all text-base flex items-center justify-center gap-2 cursor-pointer font-sans"
+                className="w-full bg-gradient-to-r from-[#FF6D3A] to-[#FF3D00] text-white font-bold py-3 sm:py-3.5 rounded-xl mt-2 shadow-[0_4px_15px_rgba(255,61,0,0.2)] hover:shadow-[0_4px_20px_rgba(255,61,0,0.3)] active:scale-[0.98] transition-all text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer font-sans"
               >
                 {sendingLead ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4.5 h-4.5 animate-spin" />
                 ) : (
                   "Let's stay in touch"
                 )}
@@ -492,40 +429,42 @@ END:VCARD`
         </div>
 
         {/* Optional Links Section if configured for the employee */}
-        {liveLinks.filter((l: any) => l.is_active).length > 0 && (
-          <div className="w-full mt-10 space-y-4">
-            <div className="flex items-center gap-3">
+        {liveLinks.filter((l: any) => l.is_active).length > 0 ? (
+          <div className="w-full mt-3 sm:mt-5 space-y-2 flex-1 min-h-0 flex flex-col justify-end animate-in fade-in slide-in-from-bottom-3 duration-500">
+            <div className="flex items-center gap-3 mb-1">
               <div className="h-[1px] flex-1 bg-zinc-800/80" />
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Or connect on</span>
+              <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest animate-pulse">Or connect on</span>
               <div className="h-[1px] flex-1 bg-zinc-800/80" />
             </div>
-            <div className="grid grid-cols-1 gap-3">
+            <div className="overflow-y-auto max-h-[140px] pr-1 space-y-2 scrollbar-thin scrollbar-thumb-zinc-800">
               {liveLinks.filter((l: any) => l.is_active).map((link: any, i: number) => (
                 <a
                   key={link.id}
                   href={link.url}
                   target="_blank"
                   onClick={() => handleLinkClick(link)}
-                  className="w-full bg-[#16161A]/50 border border-zinc-800/60 rounded-2xl p-4 flex items-center justify-between group active:scale-[0.98] transition-all hover:border-zinc-700/80 hover:bg-[#16161A]/80 cursor-pointer"
+                  className="w-full bg-[#16161A]/50 border border-zinc-800/60 rounded-xl p-3 flex items-center justify-between group active:scale-[0.98] transition-all hover:border-zinc-700/80 hover:bg-[#16161A]/80 cursor-pointer"
                 >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#0A0A0B] border border-zinc-800 text-zinc-400 group-hover:text-[#FF3D00] transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#0A0A0B] border border-zinc-800 text-zinc-400 group-hover:text-[#FF3D00] transition-colors flex-shrink-0">
                       {getPlatformIcon(link.platform)}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-bold text-white text-[15px] truncate">{link.label || link.platform}</span>
-                      <span className="text-[12px] text-zinc-500 truncate tracking-wide mt-0.5">{link.url.replace(/^https?:\/\//, '')}</span>
+                      <span className="font-bold text-white text-[13px] sm:text-[14px] truncate leading-tight">{link.label || link.platform}</span>
+                      <span className="text-[10px] sm:text-[11px] text-zinc-500 truncate tracking-wide mt-0.5">{link.url.replace(/^https?:\/\//, '')}</span>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-[#FF3D00] transition-colors" />
+                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#FF3D00] transition-colors flex-shrink-0" />
                 </a>
               ))}
             </div>
           </div>
+        ) : (
+          <div className="flex-1" />
         )}
 
         {/* Premium Footer */}
-        <div className="mt-auto pt-16 pb-8 flex items-center justify-center gap-1.5 text-zinc-500 text-[11px] font-semibold tracking-tight select-none z-10">
+        <div className="pt-4 pb-2 flex items-center justify-center gap-1.5 text-zinc-500 text-[10px] sm:text-[11px] font-semibold tracking-tight select-none z-10 flex-shrink-0">
           <svg className="w-3.5 h-3.5 text-[#FFB300] fill-current" viewBox="0 0 24 24">
             <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
           </svg>
@@ -539,6 +478,81 @@ END:VCARD`
           </span>
         </div>
       </div>
+
+      {/* Editable info card (Modal Overlay) */}
+      <AnimatePresence>
+        {isEditing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-[#0A0A0B]/95 backdrop-blur-md z-30 flex flex-col justify-center px-4"
+          >
+            <div className="w-full max-w-[390px] mx-auto bg-[#16161A]/95 p-6 rounded-3xl border border-zinc-800/80 space-y-4 shadow-2xl relative">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Edit Profile Details</h3>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={editForm.phone}
+                  onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                  placeholder="+1 234 567 890"
+                  className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email Address</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                  placeholder="name@company.com"
+                  className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={async () => {
+                    setSaving(true)
+                    try {
+                      const { error } = await supabase
+                        .from('employees')
+                        .update({ phone: editForm.phone, email: editForm.email })
+                        .eq('id', liveEmployee.id)
+
+                      if (error) throw error
+                      setIsEditing(false)
+                    } catch (err) {
+                      alert('Failed to save changes.')
+                    } finally {
+                      setSaving(false)
+                    }
+                  }}
+                  disabled={saving}
+                  className="flex-1 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Save Info
+                </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold py-3 rounded-xl transition-all text-sm cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
