@@ -217,7 +217,8 @@ END:VCARD`
         if (phoneBase.length === 10) {
           phoneBase = '91' + phoneBase;
         }
-        const msg = `Hi ${liveEmployee.name.split(' ')[0]}!\nI just shared my contact details via your digital profile.\n\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}${form.company ? `\nCompany: ${form.company}` : ''}`;
+        const firstName = liveEmployee.name ? liveEmployee.name.split(' ')[0] : 'there';
+        const msg = `Hey ${firstName} —\n\nGreat meeting you.\nDropping my details here so we stay connected and pick things up from where we left off.\n\nSpeak soon ⚡\n\nName: ${form.name}\nCompany: ${form.company}`;
         const encodedMsg = encodeURIComponent(msg);
         const waUrl = `https://wa.me/${phoneBase}?text=${encodedMsg}`;
         window.location.href = waUrl;
