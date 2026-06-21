@@ -365,7 +365,7 @@ END:VCARD`
           <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed mb-1.5 font-medium">
             Leave your details and I'll personally make sure the right opportunity finds its way back to you.
           </p>
-          <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-medium hidden xs:block">
+          <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-medium">
             <span className="text-[#FF3D00] font-bold">Frixn?</span> It's the tiny tap that turns a quick hello into your next big deal.
           </p>
         </div>
