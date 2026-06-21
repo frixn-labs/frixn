@@ -238,12 +238,13 @@ export function EmployeeDataTable({ slug }: { slug: string }) {
       setIsSubmitting(true)
       try {
           const deptName = departments.find(d => d.id === formData.dept_id)?.name || "N/A"
-          const response = await fetch("https://server.frixn.in/api/email/new-employee", {
+          const response = await fetch("/api/email", {
               method: "POST",
               headers: {
                   "Content-Type": "application/json",
               },
               body: JSON.stringify({
+                  endpoint: "/api/email/new-employee",
                   orgName: orgName || "N/A",
                   employeeName: formData.name,
                   designation: formData.designation || "N/A",

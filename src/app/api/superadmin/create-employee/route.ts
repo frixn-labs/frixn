@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 
 // Admin client â€” auth operations (no schema override needed)
 const supabaseAuth = createClient(
@@ -71,13 +72,12 @@ export async function POST(req: NextRequest) {
     }
 
     // â”€â”€ Step 3: Provision NFC Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // Generate random alphanumeric UID (e.g. B7C90D6E8F2A77)
-    const cardUid = Array.from({ length: 14 }, () =>
-      '0123456789ABCDEF'[Math.floor(Math.random() * 16)]
-    ).join('')
+    // Generate secure random alphanumeric UID (exactly 14 uppercase hex characters)
+    const cardUid = crypto.randomBytes(7).toString('hex').toUpperCase()
 
-    // Generate card code (frx-XXXXXX)
-    const cardCode = `frx-${Math.floor(100000 + Math.random() * 900000)}`
+    // Generate secure random card code (frx-XXXXXX, where XXXXXX is 6 digits: 100000 to 999999)
+    const randomVal = crypto.randomBytes(4).readUInt32BE(0)
+    const cardCode = `frx-${100000 + (randomVal % 900000)}`
 
     // Construct card URL
     const orgSlug = body.org_slug || 'unnamed'

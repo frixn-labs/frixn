@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers'
 
-export async function setSession(orgSlug: string, orgId: string, role: string = 'org_admin') {
+export async function setSession(orgSlug: string, orgId: string, role: string = 'org_admin', accessToken?: string) {
   const cookieStore = await cookies()
   
   // 1. Store slug-specific session
-  cookieStore.set(`frixn_session_${orgSlug}`, JSON.stringify({ orgId, orgSlug, role }), {
+  cookieStore.set(`frixn_session_${orgSlug}`, JSON.stringify({ orgId, orgSlug, role, accessToken }), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

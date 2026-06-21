@@ -240,10 +240,11 @@ export default function NewOrganizationPage() {
 
         // Trigger onboarding email via Node server
         try {
-          await fetch("https://server.frixn.in/api/email/onboarding", {
+          await fetch("/api/email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              endpoint: "/api/email/onboarding",
               FullName: form.admin_name.trim() || "Organization Admin",
               Email: form.admin_email.trim(),
               OnboardingLink: data.link

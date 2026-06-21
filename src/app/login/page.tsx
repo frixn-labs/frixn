@@ -79,6 +79,19 @@ export default function LoginPage() {
           .from('super_admins')
           .update({ last_login_at: new Date().toISOString() })
           .eq('id', uid)
+
+        // Call the internal API to set session cookies for superadmin
+        await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            orgId: uid, 
+            orgSlug: 'superadmin', 
+            role: 'superadmin', 
+            accessToken: authData.session?.access_token 
+          })
+        })
+
         setResolvedRole('superadmin')
         setTimeout(() => router.push('/sites/superadmin'), 800)
         return
@@ -99,7 +112,12 @@ export default function LoginPage() {
         await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orgId: org.id, orgSlug: org.slug, role: 'org_admin' })
+          body: JSON.stringify({ 
+            orgId: org.id, 
+            orgSlug: org.slug, 
+            role: 'org_admin',
+            accessToken: authData.session?.access_token
+          })
         })
         
         setResolvedRole('org_admin')
@@ -131,7 +149,12 @@ export default function LoginPage() {
         await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orgId: employee.id, orgSlug: empOrg.slug, role: 'employee' })
+          body: JSON.stringify({ 
+            orgId: employee.id, 
+            orgSlug: empOrg.slug, 
+            role: 'employee',
+            accessToken: authData.session?.access_token
+          })
         })
 
         setResolvedRole('employee')

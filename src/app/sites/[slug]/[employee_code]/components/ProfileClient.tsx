@@ -18,18 +18,10 @@ import {
   Bookmark,
   Contact
 } from 'lucide-react'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { supabase } from '@/lib/supabase'
 import { ThemeToggle } from "@/components/ThemeToggle"
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Edit2, Save, X, Settings2, Calendar as CalendarIcon } from 'lucide-react'
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Save, X, Settings2 } from 'lucide-react'
 import { format } from "date-fns"
-import { cn } from "@/lib/utils"
 import DeactivatedView from './DeactivatedView'
 
 export default function ProfileClient({
@@ -289,83 +281,110 @@ END:VCARD`
   }
 
   return (
-    <div style={{ fontFamily: 'var(--font-outfit)' }} className="w-full min-h-screen bg-background flex flex-col items-center overflow-x-hidden font-sans pb-20 pt-4 text-foreground transition-colors duration-300">
+    <div className="relative min-h-screen w-full bg-[#0A0A0B] text-[#F5F5F5] font-sans overflow-x-hidden flex flex-col items-center px-4 py-8 select-none">
+      {/* Background Grid Pattern */}
+      <div className="absolute top-0 left-0 right-0 h-[400px] bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" />
 
-      {/* Figma Container Max Width - Scales for Tablets */}
-      <div className="w-full max-w-md md:max-w-2xl mx-auto relative px-5 md:px-10 flex flex-col pt-2 ">
+      {/* Radial Glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[550px] h-[350px] bg-[radial-gradient(circle_at_center,rgba(255,61,0,0.15)_0%,transparent_70%)] blur-[50px] pointer-events-none z-0" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[450px] bg-[radial-gradient(circle_at_center,rgba(255,61,0,0.08)_0%,transparent_75%)] blur-[60px] pointer-events-none z-0" />
 
-        {/* Theme Toggle Utility */}
-        <div className="absolute top-6 right-8 z-20 flex items-center gap-2">
-          {!liveLocked && (
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="p-2 rounded-full bg-background border border-border shadow-sm hover:bg-muted transition-colors text-foreground"
-            >
-              {isEditing ? <X className="w-4 h-4" /> : <Settings2 className="w-4 h-4" />}
-            </button>
-          )}
-          <ThemeToggle />
+      {/* Utility controls (ThemeToggle and optional Settings/Edit mode button) */}
+      <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
+        {!liveLocked && (
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="p-2 rounded-xl bg-[#16161A]/80 border border-zinc-800/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+          >
+            {isEditing ? <X className="w-4 h-4" /> : <Settings2 className="w-4 h-4" />}
+          </button>
+        )}
+        <ThemeToggle />
+      </div>
+
+      {/* Content Wrapper */}
+      <div className="w-full max-w-[390px] relative z-10 flex flex-col min-h-screen pt-4">
+        {/* Top Left Logo */}
+        <div className="flex items-center gap-1 bg-[#121214] border border-zinc-800/80 px-3 py-1.5 rounded-xl self-start mb-8 select-none">
+          <span className="text-white font-bold text-xs tracking-tight flex items-center">
+            fr
+            <svg className="w-3.5 h-3.5 text-[#FF3D00] fill-current mx-[0.5px]" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            xn.
+          </span>
         </div>
 
-        {/* 1. Header Image Cover */}
-        <div className="w-full h-40 md:h-56 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center mt-2 relative overflow-hidden bg-muted shadow-sm border border-border/50">
-          {org.logo_url ? (
-            <img src={org.logo_url} alt={org.name} className="absolute inset-0 w-full h-full object-cover" />
-          ) : (
-            <div className="text-2xl md:text-3xl font-black text-muted-foreground/30 tracking-widest uppercase relative z-10">{org.name}</div>
-          )}
-        </div>
+        {/* Avatar & Name Identity Section */}
+        <div className="flex items-center gap-4 w-full mb-8">
+          {/* Avatar with Custom Outline and Indicator */}
+          <div className="relative flex-shrink-0">
+            <div className="w-[84px] h-[84px] rounded-full p-[2.5px] bg-[#FF3D00] shadow-[0_0_15px_rgba(255,61,0,0.25)] flex items-center justify-center">
+              <div className="w-full h-full rounded-full bg-[#0A0A0B] p-[2.5px] flex items-center justify-center">
+                <div className="w-full h-full rounded-full overflow-hidden bg-zinc-900">
+                  {liveEmployee.photo_url ? (
+                    <img src={liveEmployee.photo_url} alt={liveEmployee.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xl font-black text-zinc-400">
+                      {liveEmployee.name?.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#FF3D00] border-[2.5px] border-[#0A0A0B]" />
+          </div>
 
-        {/* 2. Avatar intersecting bottom-left Edge matched cleanly to text */}
-        <div className="relative -mt-10 md:-mt-14 ml-5 md:ml-8 z-10 w-[104px] h-[104px] md:w-[136px] md:h-[136px] rounded-full p-1 bg-background">
-          <div className="w-full h-full rounded-full border-[3px] md:border-[4px] border-background overflow-hidden bg-muted shadow-[0_8px_20px_rgb(0,0,0,0.06)] relative group">
-            {liveEmployee.photo_url ? (
-              <img src={liveEmployee.photo_url} alt={liveEmployee.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-3xl md:text-5xl font-black text-muted-foreground/50">{liveEmployee.name?.substring(0, 2).toUpperCase()}</div>
-            )}
+          {/* Text Identity Info */}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-xl font-bold text-white tracking-tight leading-tight">
+                {liveEmployee.name}
+              </h1>
+              {/* Verified Badge */}
+              <div className="flex items-center justify-center w-4.5 h-4.5 rounded-full bg-[#FF3D00]">
+                <svg className="w-2.5 h-2.5 text-white stroke-[3px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-[13px] font-semibold text-[#FF3D00] mt-0.5">
+              {liveEmployee.designation || "Founder"}
+            </p>
           </div>
         </div>
 
-        {/* 3. Typography identity aligned left */}
-        <div className="px-5 md:px-8 mt-4 md:mt-6 text-left">
-          <h1 className="text-[28px] md:text-[40px] font-black text-foreground tracking-tight leading-none mb-1">{liveEmployee.name}</h1>
-          <p className="text-xs md:text-sm font-bold text-primary tracking-wide uppercase">{liveEmployee.designation}</p>
-          <p className="text-[13px] md:text-[16px] font-medium text-muted-foreground leading-relaxed mt-4 md:mt-6 max-w-[95%]">
-            {liveEmployee.bio || "Passionate about connecting with clients and delivering solutions that create real business value."}
-          </p>
-        </div>
-
+        {/* Editable info card */}
         <AnimatePresence>
           {isEditing && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="px-5 mt-6 space-y-4 overflow-hidden"
+              className="w-full space-y-4 overflow-hidden mb-6"
             >
-              <div className="bg-muted/30 p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-border/50 space-y-4 md:space-y-6">
+              <div className="bg-[#16161A]/95 p-6 rounded-2xl border border-zinc-800/80 space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Phone Number</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Phone Number</label>
                   <input
                     type="tel"
                     value={editForm.phone}
                     onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
                     placeholder="+1 234 567 890"
-                    className="w-full bg-background border border-border/50 rounded-xl md:rounded-2xl px-4 py-3 md:py-4 text-sm md:text-base font-semibold focus:ring-1 focus:ring-primary outline-none transition-all"
+                    className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email Address</label>
                   <input
                     type="email"
                     value={editForm.email}
                     onChange={e => setEditForm({ ...editForm, email: e.target.value })}
                     placeholder="name@company.com"
-                    className="w-full bg-background border border-border/50 rounded-xl md:rounded-2xl px-4 py-3 md:py-4 text-sm md:text-base font-semibold focus:ring-1 focus:ring-primary outline-none transition-all"
+                    className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
                   />
                 </div>
-                <div className="flex gap-2 md:gap-4 pt-2">
+                <div className="flex gap-2 pt-2">
                   <button
                     onClick={async () => {
                       setSaving(true)
@@ -384,14 +403,14 @@ END:VCARD`
                       }
                     }}
                     disabled={saving}
-                    className="flex-1 bg-primary text-primary-foreground font-bold py-3 md:py-4 rounded-xl md:rounded-2xl shadow-sm hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Save Info
                   </button>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="px-4 md:px-6 bg-muted text-muted-foreground font-bold py-3 md:py-4 rounded-xl md:rounded-2xl hover:bg-muted/80 active:scale-95 transition-all text-sm md:text-base"
+                    className="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold py-3 rounded-xl transition-all text-sm cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -401,162 +420,124 @@ END:VCARD`
           )}
         </AnimatePresence>
 
-        {/* 4. Transparent Floating Action Module (Monochrome until hovered) */}
-        <div className="mt-6 md:mt-10 mx-5 md:mx-8 flex items-center justify-start gap-2 h-20 md:h-28">
-          <a href={`tel:${liveEmployee.phone}`} className="flex-1 h-16 md:h-24 flex flex-col items-center justify-center transition-transform hover:-translate-y-1 active:scale-95 group outline-none bg-transparent">
-            <Phone className="w-6 h-6 md:w-8 md:h-8 text-foreground mb-1 group-hover:scale-110 group-hover:text-primary transition-all" strokeWidth={2} />
-            <span className="text-[10px] md:text-xs font-black text-muted-foreground uppercase tracking-wider group-hover:text-primary transition-colors">Call</span>
-          </a>
-          <a href={liveEmployee.phone ? `https://wa.me/${liveEmployee.phone.replace(/[^0-9]/g, '')}` : '#'} className="flex-1 h-16 md:h-24 flex flex-col items-center justify-center transition-transform hover:-translate-y-1 active:scale-95 group outline-none bg-transparent">
-            <MessageCircle className="w-6 h-6 md:w-8 md:h-8 text-foreground mb-1 group-hover:scale-110 group-hover:text-[#25D366] transition-all" strokeWidth={2} />
-            <span className="text-[10px] md:text-xs font-black text-muted-foreground uppercase tracking-wider group-hover:text-[#25D366] transition-colors">Chat</span>
-          </a>
-          <a href={`mailto:${liveEmployee.email}`} className="flex-1 h-16 md:h-24 flex flex-col items-center justify-center transition-transform hover:-translate-y-1 active:scale-95 group outline-none bg-transparent">
-            <Mail className="w-6 h-6 md:w-8 md:h-8 text-foreground mb-1 group-hover:scale-110 transition-all" strokeWidth={2} />
-            <span className="text-[10px] md:text-xs font-black text-muted-foreground uppercase tracking-wider group-hover:text-foreground transition-colors">Email</span>
-          </a>
+        {/* Headlines Section */}
+        <div className="w-full mb-6">
+          <h2 className="text-[32px] font-extrabold text-white tracking-tight leading-[1.15] mb-4">
+            So, are we going to stay in touch?
+          </h2>
+          <p className="text-zinc-400 text-sm leading-relaxed mb-4 font-medium">
+            Leave your details and I'll personally make sure the right opportunity finds its way back to you.
+          </p>
+          <p className="text-zinc-400 text-sm leading-relaxed font-medium">
+            <span className="text-[#FF3D00] font-bold">Frixn?</span> It's the tiny tap that turns a quick hello into your next big deal.
+          </p>
         </div>
 
-        {/* 5. Premium Theme Actions Block */}
-        <div className="mt-5 md:mt-8 mx-5 md:mx-8 flex gap-3 h-14 md:h-16">
-          <button onClick={handleSaveContact} className="flex-1 bg-primary text-primary-foreground rounded-2xl md:rounded-3xl font-black text-[15px] md:text-lg shadow-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-            Save Contact
-          </button>
-          <button onClick={() => navigator.share && navigator.share({ url: window.location.href, title: `Contact ${liveEmployee.name}` })} className="aspect-square h-full rounded-2xl md:rounded-3xl bg-card shadow-sm border border-border/50 flex items-center justify-center transition-all hover:bg-muted active:scale-95 outline-none text-foreground">
-            <Share2 className="w-[22px] h-[22px] md:w-7 md:h-7" strokeWidth={2} />
-          </button>
+        {/* Form Section */}
+        <div className="w-full">
+          {leadSent ? (
+            <div className="py-16 w-full flex flex-col items-center text-center bg-[#16161A]/80 rounded-3xl border border-zinc-800/80 shadow-lg animate-in fade-in zoom-in duration-300">
+              <CheckCircle2 className="w-16 h-16 text-emerald-500 mb-4 animate-bounce" />
+              <h3 className="text-2xl font-bold text-white mb-2">Details Sent!</h3>
+              <p className="text-sm font-medium text-zinc-400">I will get in touch with you shortly.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleLeadSubmit} className="flex flex-col gap-3 w-full">
+              <input
+                type="text"
+                placeholder="What's your name?"
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-2xl px-5 py-4 text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+              />
+              <input
+                type="email"
+                placeholder="Where can I email you?"
+                required
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-2xl px-5 py-4 text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+              />
+              <input
+                type="tel"
+                placeholder="Your mobile number"
+                required
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-2xl px-5 py-4 text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+              />
+              <input
+                type="text"
+                placeholder="Which company are you with?"
+                required
+                value={form.company}
+                onChange={(e) => setForm({ ...form, company: e.target.value })}
+                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-2xl px-5 py-4 text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+              />
+
+              <button
+                type="submit"
+                disabled={sendingLead}
+                className="w-full bg-gradient-to-r from-[#FF6D3A] to-[#FF3D00] text-white font-bold py-4.5 rounded-2xl mt-4 shadow-[0_4px_20px_rgba(255,61,0,0.25)] hover:shadow-[0_4px_25px_rgba(255,61,0,0.35)] active:scale-[0.98] transition-all text-base flex items-center justify-center gap-2 cursor-pointer font-sans"
+              >
+                {sendingLead ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  "Let's stay in touch"
+                )}
+              </button>
+            </form>
+          )}
         </div>
 
-        {/* 6. Tabs Variant="Line" Architecture scales for tablets */}
-        <div className="mt-8 md:mt-12 px-5 md:px-8 relative h-full w-full max-w-md md:max-w-2xl mx-auto">
-          <Tabs defaultValue="reports" className="w-full">
-
-            <TabsList variant="line" className="mb-4 md:mb-8 grid w-full grid-cols-2">
-              <TabsTrigger value="reports" className="text-xs md:text-sm font-semibold">Forms</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs md:text-sm font-semibold">Links</TabsTrigger>
-            </TabsList>
-
-            {/* Forms Tab */}
-            <TabsContent value="reports" className="m-0 focus-visible:outline-none focus:outline-none pt-2">
-              {leadSent ? (
-                <div className="py-12 flex flex-col items-center text-center bg-card rounded-2xl md:rounded-3xl shadow-sm border border-border/50">
-                  <CheckCircle2 className="w-12 h-12 md:w-16 md:h-16 text-emerald-500 mb-3" />
-                  <h3 className="text-xl md:text-2xl font-black text-foreground mb-1">Details Sent!</h3>
-                  <p className="text-xs md:text-sm font-semibold text-muted-foreground">I will get in touch with you shortly.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleLeadSubmit} className="flex flex-col gap-3 pb-8 bg-card p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] shadow-sm border border-border/50">
-                  <div className="mb-2 md:mb-6 text-center">
-                    <h3 className="text-[17px] md:text-2xl font-bold tracking-tight text-foreground mb-1">{`Drop ${liveEmployee.name?.split(' ')[0]} a note`}</h3>
-                    <p className="text-[13px] md:text-base font-medium text-muted-foreground">Fill out this quick form securely underneath to instantly engage.</p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input type="text" id="name" name="name" placeholder="Full Name *" autoComplete="name" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full bg-background border border-border p-4 md:p-5 rounded-xl md:rounded-2xl outline-none font-semibold text-[15px] md:text-base focus:bg-card focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground" />
-                    <input type="email" id="email" name="email" placeholder="Email Address *" autoComplete="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full bg-background border border-border p-4 md:p-5 rounded-xl md:rounded-2xl outline-none font-semibold text-[15px] md:text-base focus:bg-card focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground" />
-                    <input type="tel" id="tel" name="tel" placeholder="Phone Number *" autoComplete="tel" required value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full bg-background border border-border p-4 md:p-5 rounded-xl md:rounded-2xl outline-none font-semibold text-[15px] md:text-base focus:bg-card focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground" />
-                    <input type="text" id="organization" name="organization" placeholder="Company *" autoComplete="organization" required value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} className="w-full bg-background border border-border p-4 md:p-5 rounded-xl md:rounded-2xl outline-none font-semibold text-[15px] md:text-base focus:bg-card focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground" />
-                    <input type="text" id="designation" name="designation" placeholder="Designation" autoComplete="organization-title" value={form.designation} onChange={e => setForm({ ...form, designation: e.target.value })} className="w-full md:col-span-2 bg-background border border-border p-4 md:p-5 rounded-xl md:rounded-2xl outline-none font-semibold text-[15px] md:text-base focus:bg-card focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground" />
-
-                    {availableProducts.length > 0 && (
-                      <div className="md:col-span-2 relative">
-                        <Select value={form.product} onValueChange={(val) => setForm({ ...form, product: val })}>
-                          <SelectTrigger className="w-full bg-background border border-border px-5 rounded-xl md:rounded-2xl outline-none font-semibold text-[15px] md:text-base hover:bg-muted/50 focus:bg-card focus:ring-1 focus:ring-primary transition-all min-h-[56px] md:min-h-[64px] text-foreground">
-                            <SelectValue placeholder="Select a Product / Service" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60 z-[100]">
-                            {availableProducts.map((p, i) => (
-                              <SelectItem key={i} value={p}>{p}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    <div className="md:col-span-2 relative">
-                      <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className={cn(
-                              "w-full bg-background border border-border px-5 rounded-xl md:rounded-2xl outline-none font-semibold text-[15px] md:text-base hover:bg-muted/50 focus:bg-card focus:ring-1 focus:ring-primary transition-all flex items-center justify-between min-h-[56px] md:min-h-[64px]",
-                              !form.followup_date && "text-muted-foreground"
-                            )}
-                          >
-                            {form.followup_date ? (
-                              <span className="text-foreground">{format(new Date(form.followup_date), "PPP")}</span>
-                            ) : (
-                              <span>Pick a connect date</span>
-                            )}
-                            <CalendarIcon className="h-5 w-5 opacity-50 ml-auto" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 z-[100]" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={form.followup_date ? new Date(form.followup_date) : undefined}
-                            onSelect={(date) => {
-                              setForm({ ...form, followup_date: date ? format(date, 'yyyy-MM-dd') : '' })
-                              setIsDatePickerOpen(false)
-                            }}
-                            disabled={(date) => {
-                              const today = new Date();
-                              today.setHours(0, 0, 0, 0);
-                              const maxDate = new Date(today);
-                              maxDate.setDate(today.getDate() + 9); // today + 9 more = 10 days total
-                              return date < today || date > maxDate;
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </div>
-                  <button type="submit" disabled={sendingLead} className="w-full bg-primary text-primary-foreground font-bold py-4 md:py-5 mt-4 rounded-xl md:rounded-2xl shadow-md flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all text-base md:text-lg">
-                    {sendingLead ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Details directly'}
-                  </button>
-                </form>
-              )}
-            </TabsContent>
-
-            {/* Links Tab */}
-            <TabsContent value="analytics" className="m-0 focus-visible:outline-none focus:outline-none grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+        {/* Optional Links Section if configured for the employee */}
+        {liveLinks.filter((l: any) => l.is_active).length > 0 && (
+          <div className="w-full mt-10 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-[1px] flex-1 bg-zinc-800/80" />
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Or connect on</span>
+              <div className="h-[1px] flex-1 bg-zinc-800/80" />
+            </div>
+            <div className="grid grid-cols-1 gap-3">
               {liveLinks.filter((l: any) => l.is_active).map((link: any, i: number) => (
-                <motion.a
+                <a
                   key={link.id}
                   href={link.url}
                   target="_blank"
                   onClick={() => handleLinkClick(link)}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="w-full bg-card rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm border border-border/50 flex items-center justify-between group active:scale-[0.98] transition-all hover:shadow-md"
+                  className="w-full bg-[#16161A]/50 border border-zinc-800/60 rounded-2xl p-4 flex items-center justify-between group active:scale-[0.98] transition-all hover:border-zinc-700/80 hover:bg-[#16161A]/80 cursor-pointer"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-[1rem] md:rounded-2xl flex items-center justify-center transition-colors shadow-none text-foreground bg-muted border border-border/50">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#0A0A0B] border border-zinc-800 text-zinc-400 group-hover:text-[#FF3D00] transition-colors">
                       {getPlatformIcon(link.platform)}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-bold text-foreground text-[15px] md:text-[17px] truncate">{link.label || link.platform}</span>
-                      <span className="text-[12px] md:text-[13px] font-medium text-muted-foreground truncate tracking-wide mt-0.5">{link.url.replace(/^https?:\/\//, '')}</span>
+                      <span className="font-bold text-white text-[15px] truncate">{link.label || link.platform}</span>
+                      <span className="text-[12px] text-zinc-500 truncate tracking-wide mt-0.5">{link.url.replace(/^https?:\/\//, '')}</span>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
-                </motion.a>
+                  <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-[#FF3D00] transition-colors" />
+                </a>
               ))}
-              {liveLinks.filter((l: any) => l.is_active).length === 0 && (
-                <div className="w-full col-span-full py-10 flex flex-col items-center justify-center text-center opacity-70 bg-card rounded-2xl shadow-sm border border-border/50">
-                  <LinkIcon className="w-8 h-8 mb-3 text-muted-foreground" />
-                  <p className="text-sm font-semibold text-muted-foreground">No valid links enabled.</p>
-                </div>
-              )}
-            </TabsContent>
+            </div>
+          </div>
+        )}
 
-
-
-          </Tabs>
+        {/* Premium Footer */}
+        <div className="mt-auto pt-16 pb-8 flex items-center justify-center gap-1.5 text-zinc-500 text-[11px] font-semibold tracking-tight select-none z-10">
+          <svg className="w-3.5 h-3.5 text-[#FFB300] fill-current" viewBox="0 0 24 24">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+          </svg>
+          <span>Your details stay private. Powered by</span>
+          <span className="text-white font-bold flex items-center ml-0.5">
+            fr
+            <svg className="w-3.5 h-3.5 text-[#FF3D00] fill-current mx-[0.5px]" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            xn.
+          </span>
         </div>
-
       </div>
     </div>
   )

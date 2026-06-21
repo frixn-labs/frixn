@@ -59,6 +59,18 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { useRole } from "@/components/role-provider"
 
+const getSecureRandom = (): number => {
+    const array = new Uint32Array(1)
+    if (typeof window !== 'undefined' && window.crypto) {
+        window.crypto.getRandomValues(array)
+    } else if (typeof globalThis !== 'undefined' && globalThis.crypto) {
+        globalThis.crypto.getRandomValues(array)
+    } else {
+        return Math.random()
+    }
+    return array[0] / 4294967296
+}
+
 // Mock data for Audit Logs
 const MOCK_LOGS = [
     { id: 1, action: "Organization profile updated", user: "Admin", date: "2 mins ago", type: "system" },
@@ -386,7 +398,7 @@ export default function SettingsPage() {
         setSaving(true)
 
         try {
-            const invoiceNum = `INV-${Math.random().toString(36).substring(2, 7).toUpperCase()}-${Date.now().toString().slice(-4)}`
+            const invoiceNum = `INV-${getSecureRandom().toString(36).substring(2, 7).toUpperCase()}-${Date.now().toString().slice(-4)}`
             const baseAmount = newPlan === 'premium' ? 60000 : 5000
             const gst = Math.round(baseAmount * 0.18)
 
@@ -529,7 +541,7 @@ export default function SettingsPage() {
 
         setUploading(true)
         const fileExt = file.name.split('.').pop()
-        const fileName = `${Math.random()}.${fileExt}`
+        const fileName = `${getSecureRandom()}.${fileExt}`
         const filePath = `${slug}/${fileName}`
 
         const { error: uploadError } = await supabase.storage

@@ -32,10 +32,13 @@ export default function ContactPage() {
     setErrorMessage("")
 
     try {
-      const response = await fetch("https://server.frixn.in/api/email/sales", {
+      const response = await fetch("/api/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          endpoint: "/api/email/sales",
+          ...formData
+        })
       });
 
       const data = await response.json();
