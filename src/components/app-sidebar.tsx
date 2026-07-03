@@ -30,7 +30,7 @@ import {
   SidebarMenuItem,
   SidebarMenuBadge,
 } from "@/components/ui/sidebar"
-import { Building2, Shield } from "lucide-react"
+import { Building2, Shield, Mail } from "lucide-react"
 
 export function AppSidebar({ org, ...props }: React.ComponentProps<typeof Sidebar> & { org?: any }) {
   const pathname = usePathname()
@@ -54,6 +54,9 @@ export function AppSidebar({ org, ...props }: React.ComponentProps<typeof Sideba
     { icon: LinkIcon, label: 'Manage Links', href: `/sites/${slug}/admin/links` },
     { icon: Package, label: 'Manage Products', href: `/sites/${slug}/admin/products` },
     { icon: Magnet, label: 'Leads', href: `/sites/${slug}/admin/leads` },
+    ...(role === 'employee' ? [
+      { icon: Mail, label: 'Email Auto-response', href: `/sites/${slug}/admin/settings?tab=email-template` }
+    ] : []),
     { icon: BarChart3, label: 'Analytics', href: `/sites/${slug}/admin/analytics` },
   ]
 

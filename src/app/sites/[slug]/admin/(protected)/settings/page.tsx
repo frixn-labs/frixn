@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { ColorPicker } from 'antd'
 import {
     Settings,
@@ -41,7 +41,8 @@ import {
     Pencil,
     Trash2,
     Wand2,
-    Brain
+    Brain,
+    Paperclip
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -95,8 +96,20 @@ interface OrgFormData {
 export default function SettingsPage() {
     const params = useParams()
     const slug = params.slug as string
+    const searchParams = useSearchParams()
+    const tabParam = searchParams?.get('tab')
     const { theme, setTheme } = useTheme()
     const { role, orgId } = useRole()
+
+    const [activeTab, setActiveTab] = React.useState<string>('profile')
+
+    React.useEffect(() => {
+        if (tabParam) {
+            setActiveTab(tabParam)
+        } else if (role) {
+            setActiveTab(role === 'employee' ? 'security' : 'profile')
+        }
+    }, [tabParam, role])
 
     const [loading, setLoading] = React.useState(true)
     const [saving, setSaving] = React.useState(false)
@@ -132,7 +145,11 @@ export default function SettingsPage() {
     // Email Template State
     const [emailSubject, setEmailSubject] = React.useState("Great meeting you!")
     const [emailBody, setEmailBody] = React.useState("Hi {visitor_name},\n\nGreat meeting you. Let's stay in touch!\n\nBest regards,\n{employee_name}\n{designation}\n{company_name}")
+    const [emailAttachmentUrl, setEmailAttachmentUrl] = React.useState("")
+    const [uploadingAttachment, setUploadingAttachment] = React.useState(false)
     const [savingEmailSettings, setSavingEmailSettings] = React.useState(false)
+
+    const attachmentInputRef = React.useRef<HTMLInputElement>(null)
 
 
     const [extraEmails, setExtraEmails] = React.useState<string[]>([])
@@ -323,7 +340,7 @@ export default function SettingsPage() {
                 try {
                     const { data: empData, error: empErr } = await supabase
                         .from('employees')
-                        .select('email_template_subject, email_template_body')
+                        .select('email_template_subject, email_template_body, email_attachment_url')
                         .eq('id', orgId)
                         .maybeSingle()
 
@@ -333,6 +350,9 @@ export default function SettingsPage() {
                         }
                         if (empData.email_template_body) {
                             setEmailBody(empData.email_template_body)
+                        }
+                        if (empData.email_attachment_url) {
+                            setEmailAttachmentUrl(empData.email_attachment_url)
                         }
                     }
                 } catch (err) {
@@ -572,7 +592,8 @@ export default function SettingsPage() {
                 .from('employees')
                 .update({
                     email_template_subject: emailSubject,
-                    email_template_body: emailBody
+                    email_template_body: emailBody,
+                    email_attachment_url: emailAttachmentUrl || null
                 })
                 .eq('id', orgId)
 
@@ -583,6 +604,42 @@ export default function SettingsPage() {
             alert("Failed to save email auto-response template.")
         } finally {
             setSavingEmailSettings(false)
+        }
+    }
+
+    const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file || !orgId) return
+
+        if (file.type !== "application/pdf") {
+            alert("Please upload a PDF file.")
+            return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            alert("File must be under 5MB.")
+            return
+        }
+
+        setUploadingAttachment(true)
+        try {
+            const ext = "pdf"
+            const folder = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-")
+            const fileName = `brochure_${orgId}_${Date.now()}`
+            const path = `attachments/${folder}/${fileName}.${ext}`
+
+            const { error: uploadError } = await supabase.storage
+                .from("frixn")
+                .upload(path, file, { upsert: true, contentType: file.type })
+
+            if (uploadError) throw uploadError
+
+            const { data: urlData } = supabase.storage.from("frixn").getPublicUrl(path)
+            setEmailAttachmentUrl(urlData.publicUrl)
+        } catch (err: any) {
+            console.error(err)
+            alert(`Upload failed: ${err.message || err}`)
+        } finally {
+            setUploadingAttachment(false)
         }
     }
 
@@ -652,7 +709,7 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            <Tabs defaultValue={role === 'employee' ? 'security' : 'profile'} className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList variant="line" className="w-full justify-start border-b border-border/40 pb-0 mb-8 overflow-x-auto overflow-y-hidden whitespace-nowrap">
                     {role !== 'employee' && (
                         <TabsTrigger value="profile" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
@@ -1447,6 +1504,68 @@ export default function SettingsPage() {
                                             <div className="flex items-center gap-1.5"><code className="bg-background border border-border/50 px-1 py-0.5 rounded text-primary font-bold">{`{company_name}`}</code> <span className="text-muted-foreground font-semibold">Organization Name</span></div>
                                         </div>
                                     </div>
+                                </div>
+
+                                <div className="space-y-2.5">
+                                    <Label className="text-sm font-bold tracking-wide text-foreground">Email Attachment (Optional PDF)</Label>
+                                    
+                                    <input
+                                        type="file"
+                                        ref={attachmentInputRef}
+                                        onChange={handleAttachmentUpload}
+                                        className="hidden"
+                                        accept="application/pdf"
+                                    />
+
+                                    {emailAttachmentUrl ? (
+                                        <div className="flex items-center justify-between p-4 bg-muted/20 border border-border/50 rounded-xl max-w-md shadow-sm">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+                                                    <Mail className="w-4 h-4 text-rose-500" />
+                                                </div>
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="text-xs font-bold text-foreground truncate">Attachment PDF</span>
+                                                    <a 
+                                                        href={emailAttachmentUrl} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer" 
+                                                        className="text-[10px] text-[#FF3D00] hover:underline truncate"
+                                                    >
+                                                        View uploaded file
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setEmailAttachmentUrl("")}
+                                                className="text-muted-foreground hover:text-rose-500 h-8 px-2 rounded-lg"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => attachmentInputRef.current?.click()}
+                                            disabled={uploadingAttachment}
+                                            className="h-12 border-dashed border-border/60 bg-muted/5 hover:bg-muted/10 w-full max-w-md rounded-xl flex items-center justify-center gap-2"
+                                        >
+                                            {uploadingAttachment ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin text-[#FF3D00]" />
+                                                    Uploading PDF...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Paperclip className="w-4 h-4 text-muted-foreground" />
+                                                    Attach PDF Brochure / Catalog
+                                                </>
+                                            )}
+                                        </Button>
+                                    )}
                                 </div>
 
                                 <div className="flex justify-end pt-4 border-t border-border/40">

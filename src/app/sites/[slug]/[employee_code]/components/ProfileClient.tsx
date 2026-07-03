@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Phone,
@@ -54,10 +54,67 @@ export default function ProfileClient({
   // Edit State
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({
+    name: employee.name || '',
+    designation: employee.designation || '',
     phone: employee.phone || '',
-    email: employee.email || ''
+    email: employee.email || '',
+    photo_url: employee.photo_url || '',
+    cover_url: employee.cover_url || '',
+    lead_form_fields: employee.lead_form_fields || ['email', 'phone', 'company']
   })
   const [saving, setSaving] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
+
+  const profileInputRef = useRef<HTMLInputElement>(null)
+  const coverInputRef = useRef<HTMLInputElement>(null)
+
+  // Keep editForm synchronized when liveEmployee changes or editor opens
+  useEffect(() => {
+    if (isEditing) {
+      setEditForm({
+        name: liveEmployee.name || '',
+        designation: liveEmployee.designation || '',
+        phone: liveEmployee.phone || '',
+        email: liveEmployee.email || '',
+        photo_url: liveEmployee.photo_url || '',
+        cover_url: liveEmployee.cover_url || '',
+        lead_form_fields: liveEmployee.lead_form_fields || ['email', 'phone', 'company']
+      })
+    }
+  }, [isEditing, liveEmployee])
+
+  const handleUploadImage = async (file: File, type: 'photo' | 'cover') => {
+    if (type === 'photo') setUploadingPhoto(true)
+    else setUploadingCover(true)
+
+    try {
+      const ext = file.name.split('.').pop()
+      const folder = org.slug.toLowerCase().replace(/[^a-z0-9-]/g, '-')
+      const fileName = `${employee.id}_${type}_${Date.now()}`
+      const path = `${folder}/${fileName}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from("frixn")
+        .upload(path, file, { upsert: true, contentType: file.type })
+
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage.from("frixn").getPublicUrl(path)
+      const freshUrl = `${urlData.publicUrl}?t=${Date.now()}`
+      
+      setEditForm(prev => ({
+        ...prev,
+        [type === 'photo' ? 'photo_url' : 'cover_url']: freshUrl
+      }))
+    } catch (err: any) {
+      console.error(err)
+      alert(`Upload failed: ${err.message || err}`)
+    } finally {
+      if (type === 'photo') setUploadingPhoto(false)
+      else setUploadingCover(false)
+    }
+  }
 
   // Realtime Logic
   const [liveLocked, setLiveLocked] = useState(isLocked)
@@ -189,6 +246,11 @@ END:VCARD`
     document.body.removeChild(link)
   }
 
+  const showField = (fieldName: string) => {
+    const fields = liveEmployee.lead_form_fields || ['email', 'phone', 'company'];
+    return fields.includes(fieldName);
+  };
+
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSendingLead(true)
@@ -240,7 +302,13 @@ END:VCARD`
             subject: emailSubject,
             html: emailHtml,
             fromName: liveEmployee.name,
-            replyTo: liveEmployee.email
+            replyTo: liveEmployee.email,
+            attachments: liveEmployee.email_attachment_url ? [
+              {
+                filename: `${liveEmployee.name.replace(/\s+/g, '_')}_Brochure.pdf`,
+                path: liveEmployee.email_attachment_url
+              }
+            ] : []
           })
         }).catch(err => {
           console.error("Failed to send auto-response email:", err);
@@ -364,6 +432,17 @@ END:VCARD`
           </div>
         </div>
 
+        {/* Cover Image Banner */}
+        <div className="relative w-full h-[100px] sm:h-[120px] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800/60 flex-shrink-0 mt-2 animate-in fade-in slide-in-from-top-3 duration-500">
+          {liveEmployee.cover_url ? (
+            <img src={liveEmployee.cover_url} alt="Cover Banner" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-[#FF3D00]/20 to-zinc-950/90 flex items-center justify-center">
+              <span className="text-[10px] font-black tracking-widest text-[#FF3D00]/60 uppercase">Frixn Smart Profile</span>
+            </div>
+          )}
+        </div>
+
         {/* Avatar & Name Identity Section */}
         <div className="flex items-center gap-4 w-full flex-shrink-0 mt-3 sm:mt-5">
           {/* Avatar with Custom Outline and Indicator */}
@@ -434,30 +513,68 @@ END:VCARD`
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
               />
-              <input
-                type="email"
-                placeholder="Where can I email you?"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
-              />
-              <input
-                type="tel"
-                placeholder="Your mobile number"
-                required
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
-              />
-              <input
-                type="text"
-                placeholder="Which company are you with?"
-                required
-                value={form.company}
-                onChange={(e) => setForm({ ...form, company: e.target.value })}
-                className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
-              />
+              {showField('email') && (
+                <input
+                  type="email"
+                  placeholder="Where can I email you?"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                />
+              )}
+              {showField('phone') && (
+                <input
+                  type="tel"
+                  placeholder="Your mobile number"
+                  required
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                />
+              )}
+              {showField('company') && (
+                <input
+                  type="text"
+                  placeholder="Which company are you with?"
+                  required
+                  value={form.company}
+                  onChange={(e) => setForm({ ...form, company: e.target.value })}
+                  className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                />
+              )}
+              {showField('designation') && (
+                <input
+                  type="text"
+                  placeholder="What is your job title?"
+                  required
+                  value={form.designation}
+                  onChange={(e) => setForm({ ...form, designation: e.target.value })}
+                  className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                />
+              )}
+              {showField('product') && availableProducts.length > 0 && (
+                <select
+                  value={form.product}
+                  onChange={(e) => setForm({ ...form, product: e.target.value })}
+                  required
+                  className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                >
+                  <option value="" disabled className="bg-[#16161a] text-zinc-500">Interested in which product?</option>
+                  {availableProducts.map((p, idx) => (
+                    <option key={idx} value={p} className="bg-[#16161a] text-white">{p}</option>
+                  ))}
+                </select>
+              )}
+              {showField('followup_date') && (
+                <input
+                  type="date"
+                  required
+                  value={form.followup_date}
+                  onChange={(e) => setForm({ ...form, followup_date: e.target.value })}
+                  className="w-full bg-[#16161A]/60 border border-zinc-800/85 rounded-xl px-4 py-2.5 sm:py-3 text-[14px] sm:text-[15px] font-medium text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]/20 transition-all"
+                />
+              )}
 
               <button
                 type="submit"
@@ -544,51 +661,197 @@ END:VCARD`
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Phone Number</label>
-                <input
-                  type="tel"
-                  value={editForm.phone}
-                  onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                  placeholder="+1 234 567 890"
-                  className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
-                />
+
+              {/* Scrollable Container of Fields */}
+              <div className="max-h-[380px] overflow-y-auto pr-1 space-y-3 scrollbar-thin scrollbar-thumb-zinc-800">
+                
+                {/* Profile & Cover Images Upload */}
+                <div className="grid grid-cols-2 gap-4 pb-2 border-b border-zinc-800/50">
+                  <div className="flex flex-col items-center gap-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Profile Image</span>
+                    <div 
+                      onClick={() => !uploadingPhoto && profileInputRef.current?.click()}
+                      className="relative w-16 h-16 rounded-full overflow-hidden bg-zinc-900 border border-zinc-800 cursor-pointer flex items-center justify-center hover:border-[#FF3D00] transition-colors"
+                    >
+                      {uploadingPhoto ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-[#FF3D00]" />
+                      ) : editForm.photo_url ? (
+                        <img src={editForm.photo_url} className="w-full h-full object-cover" />
+                      ) : (
+                        <Plus className="w-5 h-5 text-zinc-600" />
+                      )}
+                    </div>
+                    <input 
+                      type="file" 
+                      ref={profileInputRef} 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleUploadImage(file, 'photo')
+                      }}
+                      className="hidden" 
+                      accept="image/*" 
+                    />
+                  </div>
+
+                  <div className="flex flex-col items-center gap-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Cover Banner</span>
+                    <div 
+                      onClick={() => !uploadingCover && coverInputRef.current?.click()}
+                      className="relative w-full h-16 rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 cursor-pointer flex items-center justify-center hover:border-[#FF3D00] transition-colors"
+                    >
+                      {uploadingCover ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-[#FF3D00]" />
+                      ) : editForm.cover_url ? (
+                        <img src={editForm.cover_url} className="w-full h-full object-cover" />
+                      ) : (
+                        <Plus className="w-5 h-5 text-zinc-600" />
+                      )}
+                    </div>
+                    <input 
+                      type="file" 
+                      ref={coverInputRef} 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleUploadImage(file, 'cover')
+                      }}
+                      className="hidden" 
+                      accept="image/*" 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                    placeholder="Full Name"
+                    className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Designation</label>
+                  <input
+                    type="text"
+                    value={editForm.designation}
+                    onChange={e => setEditForm({ ...editForm, designation: e.target.value })}
+                    placeholder="Founder"
+                    className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={editForm.phone}
+                    onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                    placeholder="+1 234 567 890"
+                    className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email Address</label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                    placeholder="name@company.com"
+                    className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Lead Fields to Collect</label>
+                  <div className="flex flex-wrap gap-1.5 p-2 bg-[#0A0A0B] border border-zinc-800 rounded-xl">
+                    {[
+                      { id: 'email', label: 'Email' },
+                      { id: 'phone', label: 'Phone' },
+                      { id: 'company', label: 'Company' },
+                      { id: 'designation', label: 'Designation' },
+                      { id: 'product', label: 'Product Interest' },
+                      { id: 'followup_date', label: 'Followup Date' }
+                    ].map((field) => {
+                      const active = editForm.lead_form_fields.includes(field.id);
+                      return (
+                        <button
+                          key={field.id}
+                          type="button"
+                          onClick={() => {
+                            const next = active 
+                              ? editForm.lead_form_fields.filter((f: string) => f !== field.id)
+                              : [...editForm.lead_form_fields, field.id];
+                            setEditForm({ ...editForm, lead_form_fields: next });
+                          }}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                            active 
+                              ? 'bg-[#FF3D00]/10 border-[#FF3D00] text-[#FF3D00]' 
+                              : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-300'
+                          }`}
+                        >
+                          {field.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email Address</label>
-                <input
-                  type="email"
-                  value={editForm.email}
-                  onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                  placeholder="name@company.com"
-                  className="w-full bg-[#0A0A0B] border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-[#FF3D00] transition-all"
-                />
-              </div>
+
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={async () => {
                     setSaving(true)
                     try {
-                      const { error } = await supabase
-                        .from('employees')
-                        .update({ phone: editForm.phone, email: editForm.email })
-                        .eq('id', liveEmployee.id)
+                      const response = await fetch("/api/employee/update-profile", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          employeeId: liveEmployee.id,
+                          name: editForm.name,
+                          designation: editForm.designation,
+                          phone: editForm.phone,
+                          email: editForm.email,
+                          photo_url: editForm.photo_url,
+                          cover_url: editForm.cover_url,
+                          lead_form_fields: editForm.lead_form_fields
+                        })
+                      })
 
-                      if (error) throw error
+                      const resData = await response.json()
+                      if (!response.ok) {
+                        throw new Error(resData.error || "Failed to update profile details.")
+                      }
+
+                      // Update local states immediately
+                      setLiveEmployee((prev: any) => ({
+                        ...prev,
+                        name: editForm.name,
+                        designation: editForm.designation,
+                        phone: editForm.phone,
+                        email: editForm.email,
+                        photo_url: editForm.photo_url,
+                        cover_url: editForm.cover_url,
+                        lead_form_fields: editForm.lead_form_fields
+                      }))
+
                       setIsEditing(false)
-                    } catch (err) {
-                      alert('Failed to save changes.')
+                    } catch (err: any) {
+                      alert(err.message || 'Failed to save changes.')
                     } finally {
                       setSaving(false)
                     }
                   }}
-                  disabled={saving}
+                  disabled={saving || uploadingPhoto || uploadingCover}
                   className="flex-1 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {saving ? <Loader2 className="w-4.5 h-4.5 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Info
                 </button>
                 <button
+                  type="button"
                   onClick={() => setIsEditing(false)}
                   className="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold py-3 rounded-xl transition-all text-sm cursor-pointer"
                 >

@@ -341,31 +341,44 @@ export default function EmployeeDetailPage() {
 
     const handleSaveWorkDetails = async () => {
         setSavingWorkDetails(true)
-        const { error } = await supabase
-            .from('employees')
-            .update({
-                phone: workDetailsForm.phone,
-                designation: workDetailsForm.designation,
-                dept_id: workDetailsForm.dept_id || null
+        try {
+            const response = await fetch("/api/employee/update-profile", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    employeeId,
+                    email: workDetailsForm.email,
+                    phone: workDetailsForm.phone,
+                    designation: workDetailsForm.designation,
+                    dept_id: workDetailsForm.dept_id || null
+                })
             })
-            .eq('id', employeeId)
 
-        if (!error) {
+            const resData = await response.json()
+            if (!response.ok) {
+                throw new Error(resData.error || "Failed to save details")
+            }
+
             const newDep = departmentsList.find(d => d.id === workDetailsForm.dept_id)
             setEmployee(prev => prev ? { 
                 ...prev, 
                 phone: workDetailsForm.phone,
+                email: workDetailsForm.email,
                 designation: workDetailsForm.designation,
                 dept_id: workDetailsForm.dept_id,
                 departments: newDep ? { name: newDep.name } : prev.departments
             } : null)
             setIsEditingWorkDetails(false)
-        } else {
-            console.error(error)
-            alert('Failed to save details')
+        } catch (err: any) {
+            console.error(err)
+            alert(err.message || 'Failed to save details')
+        } finally {
+            setSavingWorkDetails(false)
         }
-        setSavingWorkDetails(false)
     }
+
 
     const getPlatformIcon = (platform: string) => {
         let p = (platform || '').toLowerCase().trim()
@@ -700,9 +713,9 @@ export default function EmployeeDetailPage() {
                             <span className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1"><Mail className="w-3 h-3" /> Email Address</span>
                             {isEditingWorkDetails ? (
                                 <Input 
-                                    value={employee.email} 
-                                    disabled
-                                    className="h-8 mt-1 bg-muted/50 cursor-not-allowed opacity-80"
+                                    value={workDetailsForm.email} 
+                                    onChange={(e) => setWorkDetailsForm({...workDetailsForm, email: e.target.value})}
+                                    className="h-8 mt-1"
                                 />
                             ) : (
                                 <span className="text-sm font-medium text-foreground">{employee.email || '—'}</span>

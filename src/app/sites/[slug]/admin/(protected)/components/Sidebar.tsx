@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { useRole } from '@/components/role-provider'
 import { 
   BarChart3, 
   Users, 
@@ -17,22 +18,27 @@ import {
   PanelLeftOpen,
   Sparkles,
   Command,
-  Package
+  Package,
+  Mail
 } from 'lucide-react'
 
 export default function Sidebar({ org }: { org: any }) {
   const params = useParams()
   const pathname = usePathname()
+  const { role } = useRole()
   
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: `/admin/dashboard` },
+    {icon: LayoutDashboard, label: 'Dashboard', href: `/admin/dashboard` },
     { icon: Users, label: 'Employees', href: `/admin/employees` },
     { icon: CreditCard, label: 'NFC Cards', href: `/admin/cards` },
     { icon: LinkIcon, label: 'Manage Links', href: `/admin/links` },
     { icon: Package, label: 'Manage Products', href: `/admin/products` },
     { icon: Magnet, label: 'Leads', href: `/admin/leads` },
+    ...(role === 'employee' ? [
+      { icon: Mail, label: 'Email Auto-response', href: `/admin/settings?tab=email-template` }
+    ] : []),
     { icon: BarChart3, label: 'Analytics', href: `/admin/analytics` },
   ]
 
