@@ -292,27 +292,29 @@ END:VCARD`
           ${emailBodyText.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '<br />').join('')}
         </div>`;
 
-        // Send email via Next.js API proxy
-        fetch("/api/email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            endpoint: "/api/email/updates",
-            to: form.email,
-            subject: emailSubject,
-            html: emailHtml,
-            fromName: liveEmployee.name,
-            replyTo: liveEmployee.email,
-            attachments: liveEmployee.email_attachment_url ? [
-              {
-                filename: `${liveEmployee.name.replace(/\s+/g, '_')}_Brochure.pdf`,
-                path: liveEmployee.email_attachment_url
-              }
-            ] : []
-          })
-        }).catch(err => {
+        // Send email via Next.js API proxy — awaited so WhatsApp redirect doesn't cancel it
+        try {
+          await fetch("/api/email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              endpoint: "/api/email/updates",
+              to: form.email,
+              subject: emailSubject,
+              html: emailHtml,
+              fromName: liveEmployee.name,
+              replyTo: liveEmployee.email,
+              attachments: liveEmployee.email_attachment_url ? [
+                {
+                  filename: `${liveEmployee.name.replace(/\s+/g, '_')}_Brochure.pdf`,
+                  path: liveEmployee.email_attachment_url
+                }
+              ] : []
+            })
+          });
+        } catch (err) {
           console.error("Failed to send auto-response email:", err);
-        });
+        }
       }
 
 

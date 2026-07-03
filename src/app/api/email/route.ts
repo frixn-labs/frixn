@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Resend } from 'resend'
 import { rateLimit } from '@/lib/ratelimit'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
   // Apply email rate limiter: 20 requests per 1 minute by default
@@ -14,7 +17,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { endpoint, ...rest } = body
+    const { endpoint, to, subject, html, fromName, replyTo, attachments } = body
 
     if (!endpoint) {
       const response = NextResponse.json({ error: 'Missing endpoint in request body' }, { status: 400 })
@@ -22,67 +25,59 @@ export async function POST(request: NextRequest) {
       return response
     }
 
-    const apiSecret = process.env.API_SECRET
-    const nodeServerUrl = process.env.NODE_SERVER_URL || 'http://localhost:5000'
-
-    if (!apiSecret) {
-      console.error('Error: API_SECRET is not configured on the Next.js server')
-      const response = NextResponse.json({ error: 'Server authentication configuration missing' }, { status: 500 })
+    if (!to || !subject || !html) {
+      const response = NextResponse.json({ error: 'Missing required fields: to, subject, html' }, { status: 400 })
       limitResult.headers.forEach((val, key) => response.headers.set(key, val))
       return response
     }
 
-    // Parse the endpoint and construct the target URL
-    let relativePath = endpoint
-    if (relativePath.startsWith('http')) {
-      try {
-        const url = new URL(relativePath)
-        relativePath = url.pathname
-      } catch (e) {
-        const response = NextResponse.json({ error: 'Invalid endpoint URL format' }, { status: 400 })
-        limitResult.headers.forEach((val, key) => response.headers.set(key, val))
-        return response
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      console.error('Error: RESEND_API_KEY is not configured')
+      const response = NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
+      limitResult.headers.forEach((val, key) => response.headers.set(key, val))
+      return response
+    }
+
+    // Build the from address
+    const fromEmail = endpoint.includes('updates') ? 'updates@frixn.in' : 'noreply@frixn.in'
+    const from = fromName ? `${fromName} <${fromEmail}>` : fromEmail
+
+    // Build attachment list — support remote URL paths
+    type ResendAttachment = { filename: string; path?: string; content?: Buffer }
+    const resendAttachments: ResendAttachment[] = []
+    if (Array.isArray(attachments)) {
+      for (const att of attachments) {
+        if (att.path && (att.path.startsWith('http://') || att.path.startsWith('https://'))) {
+          resendAttachments.push({ filename: att.filename, path: att.path })
+        } else if (att.content) {
+          resendAttachments.push({ filename: att.filename, content: att.content })
+        }
       }
     }
 
-    // Safety check: ensure it starts with /api/email to prevent SSRF or routing requests to unauthorized paths
-    if (!relativePath.startsWith('/api/email')) {
-      const response = NextResponse.json({ error: 'Forbidden endpoint route' }, { status: 403 })
+    const { data, error } = await resend.emails.send({
+      from,
+      to,
+      subject,
+      html,
+      reply_to: replyTo,
+      attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
+    })
+
+    if (error) {
+      console.error('Resend API Error:', error)
+      const response = NextResponse.json({ error: 'Failed to send email', detail: error }, { status: 500 })
       limitResult.headers.forEach((val, key) => response.headers.set(key, val))
       return response
     }
 
-    const targetUrl = `${nodeServerUrl.replace(/\/$/, '')}${relativePath}`
-
-    const response = await fetch(targetUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiSecret}`
-      },
-      body: JSON.stringify(rest)
-    })
-
-    // Read response text first to handle non-JSON responses gracefully
-    const text = await response.text()
-    let data
-    try {
-      data = JSON.parse(text)
-    } catch (e) {
-      data = { message: text }
-    }
-
-    if (!response.ok) {
-      const errorResponse = NextResponse.json(data || { error: `Node server returned status ${response.status}` }, { status: response.status })
-      limitResult.headers.forEach((val, key) => errorResponse.headers.set(key, val))
-      return errorResponse
-    }
-
-    const successResponse = NextResponse.json(data)
+    const successResponse = NextResponse.json({ success: true, messageId: data?.id })
     limitResult.headers.forEach((val, key) => successResponse.headers.set(key, val))
     return successResponse
+
   } catch (error: any) {
-    console.error('Error in Next.js email proxy route:', error)
+    console.error('Error in email route:', error)
     const errorResponse = NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
     limitResult.headers.forEach((val, key) => errorResponse.headers.set(key, val))
     return errorResponse
