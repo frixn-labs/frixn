@@ -48,6 +48,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
@@ -127,6 +128,12 @@ export default function SettingsPage() {
     const [appChartTheme, setAppChartTheme] = React.useState('signal')
     const [appFont, setAppFont] = React.useState('Inter')
     const [isMounted, setIsMounted] = React.useState(false)
+
+    // Email Template State
+    const [emailSubject, setEmailSubject] = React.useState("Great meeting you!")
+    const [emailBody, setEmailBody] = React.useState("Hi {visitor_name},\n\nGreat meeting you. Let's stay in touch!\n\nBest regards,\n{employee_name}\n{designation}\n{company_name}")
+    const [savingEmailSettings, setSavingEmailSettings] = React.useState(false)
+
 
     const [extraEmails, setExtraEmails] = React.useState<string[]>([])
     const [newEmailInput, setNewEmailInput] = React.useState('')
@@ -310,6 +317,29 @@ export default function SettingsPage() {
             } catch (err) {
                 console.error("Notif fetch error", err)
             }
+
+            // Fetch Employee Email Template if role is employee
+            if (role === 'employee' && orgId) {
+                try {
+                    const { data: empData, error: empErr } = await supabase
+                        .from('employees')
+                        .select('email_template_subject, email_template_body')
+                        .eq('id', orgId)
+                        .maybeSingle()
+
+                    if (empData && !empErr) {
+                        if (empData.email_template_subject) {
+                            setEmailSubject(empData.email_template_subject)
+                        }
+                        if (empData.email_template_body) {
+                            setEmailBody(empData.email_template_body)
+                        }
+                    }
+                } catch (err) {
+                    console.error("Email template fetch error", err)
+                }
+            }
+
 
             // Real-time Notification Subscription
             const notifChannel = supabase
@@ -535,6 +565,28 @@ export default function SettingsPage() {
             .eq('id', notifSettings.id)
     }
 
+    const handleSaveEmailSettings = async () => {
+        setSavingEmailSettings(true)
+        try {
+            const { error } = await supabase
+                .from('employees')
+                .update({
+                    email_template_subject: emailSubject,
+                    email_template_body: emailBody
+                })
+                .eq('id', orgId)
+
+            if (error) throw error
+            alert("Email auto-response template saved successfully!")
+        } catch (err) {
+            console.error("Save Email Template Error:", err)
+            alert("Failed to save email auto-response template.")
+        } finally {
+            setSavingEmailSettings(false)
+        }
+    }
+
+
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file || !orgData) return
@@ -621,6 +673,11 @@ export default function SettingsPage() {
                     <TabsTrigger value="notification" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
                         Notifications
                     </TabsTrigger>
+                    {role === 'employee' && (
+                        <TabsTrigger value="email-template" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
+                            Email Auto-response
+                        </TabsTrigger>
+                    )}
                     {/* <TabsTrigger value="ai" className="pb-3 text-sm px-4 data-[state=active]:text-primary">
             AI Labs
           </TabsTrigger> */}
@@ -1343,6 +1400,77 @@ export default function SettingsPage() {
                             </section>
                         </div>
                     </TabsContent>
+
+                    {/* ── EMAIL AUTO-RESPONSE TAB ────────────────────────────────────── */}
+                    {role === 'employee' && (
+                        <TabsContent value="email-template" className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500 pb-10 w-full">
+                            <div className="flex items-start gap-4 mb-8 border-b border-border/40 pb-6 w-full">
+                                <div className="p-2.5 bg-primary/10 rounded-xl ring-1 ring-primary/20 shrink-0">
+                                    <Mail className="w-[18px] h-[18px] text-primary" />
+                                </div>
+                                <div className="space-y-1.5 mt-0.5">
+                                    <h2 className="text-xl font-bold tracking-tight">Email Auto-response</h2>
+                                    <p className="text-sm text-muted-foreground">Customize the automatic email sent to prospects who fill out your profile form.</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-8 max-w-2xl bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                                <div className="space-y-2.5">
+                                    <Label htmlFor="email-subject" className="text-sm font-bold tracking-wide text-foreground">Email Subject</Label>
+                                    <Input
+                                        id="email-subject"
+                                        placeholder="Great meeting you!"
+                                        value={emailSubject}
+                                        onChange={(e) => setEmailSubject(e.target.value)}
+                                        className="h-12 border-border/40 bg-muted/5 focus:bg-background font-medium"
+                                    />
+                                </div>
+
+                                <div className="space-y-2.5">
+                                    <div className="flex justify-between items-baseline">
+                                        <Label htmlFor="email-body" className="text-sm font-bold tracking-wide text-foreground">Email Body</Label>
+                                        <span className="text-[10px] text-muted-foreground font-semibold">Supports placeholders</span>
+                                    </div>
+                                    <Textarea
+                                        id="email-body"
+                                        placeholder="Hi {visitor_name}, ..."
+                                        value={emailBody}
+                                        onChange={(e) => setEmailBody(e.target.value)}
+                                        className="min-h-[220px] border-border/40 bg-muted/5 focus:bg-background font-medium leading-relaxed resize-y"
+                                    />
+                                    <div className="bg-muted/30 border border-border/30 rounded-xl p-4 mt-2">
+                                        <p className="text-[10px] font-black text-muted-foreground/90 uppercase tracking-widest mb-2">Available Placeholders</p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                                            <div className="flex items-center gap-1.5"><code className="bg-background border border-border/50 px-1 py-0.5 rounded text-primary font-bold">{`{visitor_name}`}</code> <span className="text-muted-foreground font-semibold">Contact's Name</span></div>
+                                            <div className="flex items-center gap-1.5"><code className="bg-background border border-border/50 px-1 py-0.5 rounded text-primary font-bold">{`{employee_name}`}</code> <span className="text-muted-foreground font-semibold">Your Name</span></div>
+                                            <div className="flex items-center gap-1.5"><code className="bg-background border border-border/50 px-1 py-0.5 rounded text-primary font-bold">{`{designation}`}</code> <span className="text-muted-foreground font-semibold">Your Designation</span></div>
+                                            <div className="flex items-center gap-1.5"><code className="bg-background border border-border/50 px-1 py-0.5 rounded text-primary font-bold">{`{company_name}`}</code> <span className="text-muted-foreground font-semibold">Organization Name</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end pt-4 border-t border-border/40">
+                                    <Button
+                                        onClick={handleSaveEmailSettings}
+                                        disabled={savingEmailSettings}
+                                        className="min-w-[160px] h-11 font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all"
+                                    >
+                                        {savingEmailSettings ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                Saving Template...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="w-4 h-4 mr-2" />
+                                                Save Template
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </div>
+                        </TabsContent>
+                    )}
 
                     {/* ── AI LABS TAB ───────────────────────────────────────────────── 
           <TabsContent value="ai" className="space-y-12 animate-in fade-in slide-in-from-top-4 duration-500">

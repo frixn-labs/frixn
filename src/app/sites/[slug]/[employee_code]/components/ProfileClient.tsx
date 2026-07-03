@@ -206,8 +206,47 @@ END:VCARD`
         status: 'new'
       })
       if (error) throw error
-
       setLeadSent(true)
+
+      // Trigger auto-response email to the visitor if email is provided
+      if (form.email) {
+        const subjectTemplate = liveEmployee.email_template_subject || "Great meeting you!";
+        const bodyTemplate = liveEmployee.email_template_body || 
+          "Hi {visitor_name},\n\nGreat meeting you. Let's stay in touch!\n\nBest regards,\n{employee_name}\n{designation}\n{company_name}";
+
+        const replacePlaceholders = (text: string) => {
+          return text
+            .replace(/{visitor_name}/g, form.name || '')
+            .replace(/{employee_name}/g, liveEmployee.name || '')
+            .replace(/{designation}/g, liveEmployee.designation || '')
+            .replace(/{company_name}/g, org.name || '');
+        };
+
+        const emailSubject = replacePlaceholders(subjectTemplate);
+        const emailBodyText = replacePlaceholders(bodyTemplate);
+        
+        // Convert plain text to simple HTML with paragraphs/breaks
+        const emailHtml = `<div style="font-family: Arial, sans-serif; font-size: 15px; color: #334155; line-height: 1.7; max-width: 600px; margin: 0 auto; padding: 20px;">
+          ${emailBodyText.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '<br />').join('')}
+        </div>`;
+
+        // Send email via Next.js API proxy
+        fetch("/api/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            endpoint: "/api/email/updates",
+            to: form.email,
+            subject: emailSubject,
+            html: emailHtml,
+            fromName: liveEmployee.name,
+            replyTo: liveEmployee.email
+          })
+        }).catch(err => {
+          console.error("Failed to send auto-response email:", err);
+        });
+      }
+
 
       if (liveEmployee.phone) {
         let phoneBase = liveEmployee.phone.replace(/[^0-9]/g, '');
