@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { rateLimit } from '@/lib/ratelimit'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize Resend lazily to avoid throwing during static build generation if the environment variable is missing
+const getResendClient = () => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('Missing API key. Pass it to the constructor `new Resend("re_123")`');
+  }
+  return new Resend(apiKey);
+};
 
 export async function POST(request: NextRequest) {
   // Apply email rate limiter: 20 requests per 1 minute by default
@@ -56,12 +63,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const resend = getResendClient()
     const { data, error } = await resend.emails.send({
       from,
       to,
       subject,
       html,
-      reply_to: replyTo,
+      replyTo,
       attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
     })
 
