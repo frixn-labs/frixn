@@ -1,0 +1,11 @@
+{
+  "data": {
+    "id": "8c6a47ba-774c-482e-9eb8-23610704fd5b",
+    "name": "Judah Benilan",
+    "email": "judah.ben2002@gmail.com",
+    "email_template_subject": "Test Subject",
+    "email_template_body": "Test Body",
+    "email_attachment_url": "https://example.com/test.pdf"
+  },
+  "error": null
+}

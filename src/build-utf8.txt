@@ -1,0 +1,63 @@
+﻿
+> frixn@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.2.1 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 8.1s
+  Running TypeScript ...
+  Finished TypeScript in 8.8s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/22) ...
+  Generating static pages using 11 workers (5/22) 
+  Generating static pages using 11 workers (10/22) 
+  Generating static pages using 11 workers (16/22) 
+Γ£ô Generating static pages using 11 workers (22/22) in 618ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ ╞Æ /api/auth/login
+Γö£ ╞Æ /api/auth/logout
+Γö£ ╞Æ /api/debug
+Γö£ ╞Æ /api/leads
+Γö£ ╞Æ /api/superadmin/create-employee
+Γö£ ╞Æ /api/superadmin/create-organization
+Γö£ ╞Æ /api/superadmin/generate-reset-link
+Γö£ ╞Æ /api/superadmin/organizations/[id]
+Γö£ Γùï /contact
+Γö£ Γùï /forgot-password
+Γö£ Γùï /icon.png
+Γö£ Γùï /login
+Γö£ Γùï /privacy
+Γö£ Γùï /reset-password
+Γö£ ╞Æ /sites/[slug]
+Γö£ ╞Æ /sites/[slug]/[employee_code]
+Γö£ ╞Æ /sites/[slug]/admin/analytics
+Γö£ ╞Æ /sites/[slug]/admin/cards
+Γö£ ╞Æ /sites/[slug]/admin/cards/[cardId]
+Γö£ ╞Æ /sites/[slug]/admin/dashboard
+Γö£ ╞Æ /sites/[slug]/admin/employees
+Γö£ ╞Æ /sites/[slug]/admin/employees/[employeeId]
+Γö£ ╞Æ /sites/[slug]/admin/leads
+Γö£ ╞Æ /sites/[slug]/admin/links
+Γö£ ╞Æ /sites/[slug]/admin/login
+Γö£ ╞Æ /sites/[slug]/admin/settings
+Γö£ Γùï /sites/superadmin
+Γö£ Γùï /sites/superadmin/employees
+Γö£ ╞Æ /sites/superadmin/employees/[id]
+Γö£ Γùï /sites/superadmin/employees/new
+Γö£ Γùï /sites/superadmin/organizations
+Γö£ ╞Æ /sites/superadmin/organizations/[id]
+Γö£ Γùï /sites/superadmin/organizations/new
+Γöö Γùï /terms
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

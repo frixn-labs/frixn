@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&amp;family=JetBrains+Mono:wght@500;700;800&amp;display=swap" rel="stylesheet">
+<style>
+html{scroll-behavior:smooth;}
+body{margin:0;background:#F7F4EF;color:#1C1814;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+::selection{background:rgba(255,61,0,.25);}
+@keyframes wordIn{from{opacity:0;transform:translateY(22px);filter:blur(6px);}to{opacity:1;transform:translateY(0);filter:blur(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes blobA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(50px,-30px) scale(1.12);}}
+@keyframes blobB{0%,100%{transform:translate(0,0) scale(1.05);}50%{transform:translate(-60px,40px) scale(.95);}}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+@keyframes tickerScroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@keyframes dashFlow{to{background-position:-40px 0;}}
+@keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(255,61,0,.5);}100%{box-shadow:0 0 0 26px rgba(255,61,0,0);}}
+@keyframes tapHint{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+@keyframes chevronPulse{0%{opacity:0;transform:translateY(0);}30%{opacity:1;}70%{opacity:1;transform:translateY(6px);}100%{opacity:0;transform:translateY(6px);}}
+@media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</helmet>
+
+<div data-screen-label="Frixn v4" style="background:#F7F4EF;color:#1C1814;font-family:Inter,system-ui,sans-serif;overflow:hidden;">
+
+<!-- scroll progress = revenue bar -->
+<div id="scrollProg" style="position:fixed;top:0;left:0;height:3px;width:0%;z-index:60;background:linear-gradient(90deg,#FF3D00,#FF6B2C 60%,#8B3DFF);box-shadow:0 0 12px rgba(255,61,0,.5);"></div>
+
+<!-- floating glass nav -->
+<div id="nav" style="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:55;display:flex;align-items:center;gap:22px;padding:9px 10px 9px 20px;border-radius:100px;background:rgba(247,244,239,0);border:1px solid rgba(28,24,20,0);transition:background .4s,border-color .4s,box-shadow .4s,backdrop-filter .4s;max-width:94vw;box-sizing:border-box;">
+  <a href="#hero" style="font-weight:800;font-size:17px;text-decoration:none;background:linear-gradient(100deg,#FF6B2C,#C77DFF);-webkit-background-clip:text;background-clip:text;color:transparent;flex-shrink:0;">fr⚡xn.</a>
+  <div style="display:flex;align-items:center;gap:18px;font-size:13px;font-weight:600;">
+    <a href="#how" style="color:#544D45;text-decoration:none;" style-hover="color:#E03500;">Product</a>
+    <a href="#who" style="color:#544D45;text-decoration:none;" style-hover="color:#E03500;">Use&nbsp;cases</a>
+    <a href="#dashboard" style="color:#544D45;text-decoration:none;" style-hover="color:#E03500;">Dashboard</a>
+    <a href="#pricing" style="color:#544D45;text-decoration:none;" style-hover="color:#E03500;">Pricing</a>
+  </div>
+  <div style="display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:100px;background:rgba(11,163,96,.1);border:1px solid rgba(11,163,96,.3);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#0BA360;white-space:nowrap;flex-shrink:0;"><span style="width:5px;height:5px;border-radius:50%;background:#0BA360;box-shadow:0 0 6px rgba(11,163,96,.8);"></span>{{ liveTaps }} TAPS</div>
+  <a href="#pricing" style="display:inline-flex;align-items:center;height:36px;padding:0 18px;border-radius:100px;background:linear-gradient(100deg,#FF3D00,#FF6B2C);color:#fff;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 8px 22px -8px rgba(255,61,0,.55);flex-shrink:0;">Get a card</a>
+</div>
+
+<!-- ambient lead pings -->
+<div id="pingWrap" style="position:fixed;left:18px;bottom:18px;z-index:54;display:flex;flex-direction:column;gap:8px;pointer-events:none;"></div>
+
+<!-- ============ 01 HERO — INTERACTIVE TAP DEMO ============ -->
+<section id="hero" data-screen-label="01 Hero" style="position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 24px 40px;box-sizing:border-box;overflow:hidden;">
+  <div style="position:absolute;left:-10%;top:-14%;width:680px;height:680px;border-radius:50%;background:radial-gradient(circle,rgba(255,140,90,.32),transparent 65%);filter:blur(32px);animation:blobA 17s ease-in-out infinite;"></div>
+  <div style="position:absolute;right:-12%;bottom:-18%;width:720px;height:720px;border-radius:50%;background:radial-gradient(circle,rgba(170,130,255,.28),transparent 65%);filter:blur(34px);animation:blobB 21s ease-in-out infinite;"></div>
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(28,24,20,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(28,24,20,.03) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse at 50% 40%,#000 25%,transparent 72%);"></div>
+
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center;max-width:1060px;width:100%;">
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;background:rgba(255,255,255,.8);border:1px solid rgba(255,61,0,.25);box-shadow:0 4px 20px -6px rgba(255,61,0,.25);backdrop-filter:blur(8px);animation:fadeUp .5s cubic-bezier(.16,1,.3,1) .2s both;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#FF3D00;"></span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:#E03500;">OFFLINE TO ONLINE REVENUE OS</span>
+    </div>
+
+    <h1 style="margin:26px 0 0;text-align:center;font-weight:900;font-size:clamp(36px,4.8vw,64px);line-height:1.1;letter-spacing:-.035em;">
+      <span style="display:inline-block;animation:wordIn .6s cubic-bezier(.16,1,.3,1) .35s both;">Meetings</span>
+      <span style="display:inline-block;animation:wordIn .6s cubic-bezier(.16,1,.3,1) .45s both;">are</span>
+      <span style="display:inline-block;animation:wordIn .6s cubic-bezier(.16,1,.3,1) .55s both;">where</span>
+      <span style="display:inline-block;animation:wordIn .6s cubic-bezier(.16,1,.3,1) .65s both;">revenue</span>
+      <span style="display:inline-block;animation:wordIn .6s cubic-bezier(.16,1,.3,1) .75s both;">starts.</span>
+      <br>
+      <span style="display:inline-block;color:#A39B91;animation:wordIn .6s cubic-bezier(.16,1,.3,1) .95s both;">And</span>
+      <span style="display:inline-block;color:#A39B91;animation:wordIn .6s cubic-bezier(.16,1,.3,1) 1.05s both;">where</span>
+      <span style="display:inline-block;color:#A39B91;animation:wordIn .6s cubic-bezier(.16,1,.3,1) 1.15s both;">it</span>
+      <span style="display:inline-block;animation:wordIn .6s cubic-bezier(.16,1,.3,1) 1.25s both;"><span style="background:linear-gradient(100deg,#FF3D00,#8B3DFF);-webkit-background-clip:text;background-clip:text;color:transparent;">quietly</span></span>
+      <span style="display:inline-block;color:#A39B91;animation:wordIn .6s cubic-bezier(.16,1,.3,1) 1.35s both;">dies.</span>
+    </h1>
+
+    <p style="margin:20px 0 0;max-width:480px;text-align:center;font-size:17px;color:#6E675F;line-height:1.65;animation:fadeUp .5s cubic-bezier(.16,1,.3,1) 1.5s both;">Frixn turns a handshake into pipeline, automatically.<br><span style="font-weight:700;color:#1C1814;">Don't take our word for it — tap the card.</span></p>
+
+    <!-- INTERACTIVE STAGE -->
+    <div id="stage" style="position:relative;margin-top:44px;width:min(980px,94vw);height:380px;animation:fadeUp .7s cubic-bezier(.16,1,.3,1) .6s both;">
+
+      <!-- card (clickable) -->
+      <div style="position:absolute;left:2%;bottom:8%;z-index:3;">
+        <div id="tapCard" onClick="{{ runDemo }}" style="cursor:pointer;animation:tapHint 2.6s ease-in-out infinite;border-radius:16px;">
+          <div style="width:min(280px,60vw);height:172px;border-radius:16px;position:relative;background:linear-gradient(148deg,#26221f,#141110 55%,#1e1a17);border:1px solid rgba(255,255,255,.14);box-shadow:0 40px 70px -28px rgba(28,24,20,.55),inset 0 1px 0 rgba(255,255,255,.12),0 14px 50px -12px rgba(255,61,0,.4);display:flex;align-items:center;justify-content:center;transform:rotate(-5deg);transition:transform .3s cubic-bezier(.16,1,.3,1);" style-hover="transform:rotate(-5deg) scale(1.03);">
+            <div style="position:absolute;top:17px;left:19px;width:32px;height:24px;border-radius:5px;background:linear-gradient(135deg,#3d3833,#26221f);border:1px solid rgba(255,255,255,.12);"></div>
+            <div style="font-weight:800;font-size:28px;background:linear-gradient(100deg,#FF6B2C,#C77DFF);-webkit-background-clip:text;background-clip:text;color:transparent;">fr⚡xn.</div>
+            <div style="position:absolute;bottom:15px;left:19px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#57504a;">TAP TO CONNECT</div>
+          </div>
+        </div>
+        <div id="tapLabel" style="margin-top:18px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.12em;color:#E03500;">↑ GO AHEAD, TAP IT</div>
+      </div>
+
+      <!-- connector 1 -->
+      <div id="conn1" style="position:absolute;left:29%;bottom:44%;width:17%;height:3px;transform:rotate(-14deg);transform-origin:left center;background:repeating-linear-gradient(90deg,#FF3D00 0 8px,transparent 8px 20px);background-size:40px 3px;animation:dashFlow 1s linear infinite;border-radius:2px;opacity:0;scale:0 1;transition:opacity .3s,scale .5s cubic-bezier(.16,1,.3,1);"></div>
+
+      <!-- phone (appears on tap) -->
+      <div id="demoPhone" style="position:absolute;left:44%;top:4%;z-index:2;opacity:0;transform:translateY(34px) scale(.94);transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .5s cubic-bezier(.16,1,.3,1);">
+        <div style="width:200px;border-radius:26px;background:#fff;border:1px solid rgba(28,24,20,.1);box-shadow:0 34px 66px -26px rgba(28,24,20,.45);padding:9px;box-sizing:border-box;">
+          <div style="width:56px;height:14px;border-radius:8px;background:#EDE8E1;margin:0 auto 7px;"></div>
+          <div style="position:relative;border-radius:17px;overflow:hidden;height:226px;background:#F3EFE8;">
+            <!-- SCREEN 1 · 3-field capture form -->
+            <div id="demoFormScr" style="position:absolute;inset:0;display:flex;flex-direction:column;background:#FAF7F2;transition:opacity .35s;">
+              <div style="background:#1C1814;padding:8px 11px;display:flex;align-items:center;gap:7px;flex-shrink:0;">
+                <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#FF6B2C,#C77DFF);display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:800;color:#fff;">R</div>
+                <div style="font-size:9.5px;color:#fff;font-weight:600;">Rahul · Frixn</div>
+                <div id="demoAutoBadge" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.08em;color:#FF8A5C;white-space:nowrap;">3 FIELDS</div>
+              </div>
+              <div style="padding:9px 10px 10px;display:flex;flex-direction:column;gap:6px;flex:1;box-sizing:border-box;">
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;color:#8A8177;">NAME</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;padding:5px 8px;border-radius:8px;background:#fff;border:1px solid rgba(28,24,20,.12);min-height:14px;">
+                    <span id="demoF1" style="font-size:9.5px;font-weight:600;color:#1C1814;"></span>
+                    <span id="demoA1" style="opacity:0;transition:opacity .3s;font-family:'JetBrains Mono',monospace;font-size:6px;font-weight:700;color:#0BA360;white-space:nowrap;">AUTO ✓</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;color:#8A8177;">PHONE</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;padding:5px 8px;border-radius:8px;background:#fff;border:1px solid rgba(28,24,20,.12);min-height:14px;">
+                    <span id="demoF2" style="font-size:9.5px;font-weight:600;color:#1C1814;"></span>
+                    <span id="demoA2" style="opacity:0;transition:opacity .3s;font-family:'JetBrains Mono',monospace;font-size:6px;font-weight:700;color:#0BA360;white-space:nowrap;">AUTO ✓</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;color:#8A8177;">COMPANY</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;padding:5px 8px;border-radius:8px;background:#fff;border:1px solid rgba(28,24,20,.12);min-height:14px;">
+                    <span id="demoF3" style="font-size:9.5px;font-weight:600;color:#1C1814;"></span>
+                    <span id="demoA3" style="opacity:0;transition:opacity .3s;font-family:'JetBrains Mono',monospace;font-size:6px;font-weight:700;color:#0BA360;white-space:nowrap;">AUTO ✓</span>
+                  </div>
+                </div>
+                <div style="flex:1;"></div>
+                <div id="demoFormBtn" style="height:28px;border-radius:14px;background:#cfc8bd;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;transition:background .3s,transform .15s,box-shadow .3s;">Send on WhatsApp ➤</div>
+              </div>
+            </div>
+            <!-- SCREEN 2 · whatsapp fires -->
+            <div id="demoWaScr" style="position:absolute;inset:0;display:flex;flex-direction:column;background:#E9F3EE;opacity:0;transition:opacity .35s;">
+              <div style="background:#00a884;padding:8px 11px;display:flex;align-items:center;gap:7px;flex-shrink:0;">
+                <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#FF6B2C,#C77DFF);display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:800;color:#fff;">R</div>
+                <div style="font-size:9.5px;color:#fff;font-weight:600;">Rahul · Frixn</div>
+              </div>
+              <div style="padding:8px 10px 2px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#7d9488;">WHATSAPP FIRES · PRE-FILLED</div>
+              <div style="margin:4px 10px;padding:8px 9px;border-radius:9px;background:#fff;box-shadow:0 2px 6px rgba(28,24,20,.08);color:#1C1814;font-size:9.5px;line-height:1.5;min-height:28px;"><span id="demoMsg"></span><div id="demoDelivered" style="margin-top:3px;font-size:7.5px;color:#8ba396;text-align:right;opacity:0;transition:opacity .3s;">Delivered ✓✓</div></div>
+              <div style="flex:1;"></div>
+              <div style="padding:8px 10px 12px;display:flex;gap:6px;align-items:center;">
+                <div style="flex:1;height:24px;border-radius:12px;background:#fff;"></div>
+                <div style="width:24px;height:24px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;">➤</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- connector 2 -->
+      <div id="conn2" style="position:absolute;left:64%;top:34%;width:13%;height:3px;transform:rotate(-10deg);transform-origin:left center;background:repeating-linear-gradient(90deg,#8B3DFF 0 8px,transparent 8px 20px);background-size:40px 3px;animation:dashFlow 1s linear infinite;border-radius:2px;opacity:0;scale:0 1;transition:opacity .3s,scale .5s cubic-bezier(.16,1,.3,1);"></div>
+
+      <!-- dashboard -->
+      <div id="demoDash" style="position:absolute;right:0;top:12%;width:min(280px,54vw);opacity:.45;filter:saturate(.4);transition:opacity .5s,filter .5s;animation:floatY 8s ease-in-out infinite;">
+        <div style="border-radius:18px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border:1px solid rgba(28,24,20,.08);box-shadow:0 30px 60px -26px rgba(28,24,20,.4);padding:16px;box-sizing:border-box;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:#8B3DFF;">DASHBOARD · LIVE</div>
+            <span style="width:6px;height:6px;border-radius:50%;background:#0BA360;box-shadow:0 0 8px rgba(11,163,96,.7);"></span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <div style="flex:1;padding:9px;border-radius:10px;background:#FFF0E9;"><div id="demoTaps" style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#E03500;">43</div><div style="font-size:8.5px;color:#6E675F;">taps</div></div>
+            <div style="flex:1;padding:9px;border-radius:10px;background:#F1EBFF;"><div id="demoConns" style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#8B3DFF;">38</div><div style="font-size:8.5px;color:#6E675F;">connected</div></div>
+            <div style="flex:1;padding:9px;border-radius:10px;background:#E9F8F0;"><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#0BA360;">₹1.8Cr</div><div style="font-size:8.5px;color:#6E675F;">pipeline</div></div>
+          </div>
+          <div style="margin-top:9px;display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;border-radius:9px;background:#F7F4EF;font-size:10.5px;color:#6E675F;"><span>Priya S. — Expo North</span><span style="font-family:'JetBrains Mono',monospace;color:#B4ABA0;">10:42</span></div>
+            <div id="demoLead" style="display:flex;justify-content:space-between;padding:8px 10px;border-radius:9px;background:#E9F8F0;border:1px solid rgba(11,163,96,.4);font-size:10.5px;color:#1C1814;opacity:0;transform:translateX(30px);transition:opacity .45s,transform .45s cubic-bezier(.16,1,.3,1);"><span style="font-weight:700;">You — captured just now</span><span style="font-family:'JetBrains Mono',monospace;color:#0BA360;font-weight:700;">now</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- verdict chip -->
+      <div id="demoDone" style="position:absolute;left:50%;bottom:0;transform:translate(-50%,10px);opacity:0;transition:opacity .5s,transform .5s cubic-bezier(.16,1,.3,1);display:inline-flex;align-items:center;gap:10px;padding:9px 18px;border-radius:100px;background:#1C1814;color:#FAF7F2;font-size:13px;font-weight:600;box-shadow:0 14px 34px -12px rgba(28,24,20,.6);white-space:nowrap;">
+        <span style="color:#3CBA92;">✓</span><span id="demoDoneText">6 seconds. 3 fields, auto-filled by the tap. Zero typing.</span>
+        <span onClick="{{ runDemo }}" style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;color:#FF8A5C;letter-spacing:.1em;">REPLAY ↺</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:38px;flex-wrap:wrap;justify-content:center;animation:fadeUp .5s cubic-bezier(.16,1,.3,1) 1.7s both;">
+      <a href="#pricing" data-magnet="" style="display:inline-flex;align-items:center;height:50px;padding:0 30px;border-radius:12px;background:linear-gradient(100deg,#FF3D00,#FF6B2C);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 12px 34px -10px rgba(255,61,0,.55);">Start converting meetings</a>
+      <a href="#leak" data-magnet="" style="display:inline-flex;align-items:center;height:50px;padding:0 30px;border-radius:12px;border:1px solid rgba(28,24,20,.18);color:#1C1814;font-size:15px;font-weight:600;text-decoration:none;box-sizing:border-box;background:rgba(255,255,255,.75);backdrop-filter:blur(8px);">Read the story ↓</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 THE LEAK — SCROLL STORY ============ -->
+<section id="leak" data-screen-label="02 The Leak" style="position:relative;height:260vh;">
+  <div style="position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:0 24px;box-sizing:border-box;">
+    <div style="position:absolute;left:-8%;top:10%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(255,140,90,.2),transparent 65%);filter:blur(30px);"></div>
+
+    <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:#8A8177;">A TRUE STORY, EVERY WEEK, EVERYWHERE</p>
+    <h2 id="leakLine" style="margin:16px 0 0;max-width:720px;text-align:center;font-size:clamp(26px,3.2vw,40px);font-weight:900;letter-spacing:-.03em;line-height:1.25;transition:opacity .3s;">Your rep met 31 people at the expo.</h2>
+
+    <!-- 31 person dots -->
+    <div id="leakGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(52px,52px));justify-content:center;gap:14px;margin-top:44px;width:min(760px,90vw);">
+      <sc-for list="{{ people }}" as="p" hint-placeholder-count="31">
+        <div data-person="" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,{{ p.c1 }},{{ p.c2 }});display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;box-shadow:0 8px 20px -8px rgba(28,24,20,.4);transition:opacity .5s,filter .5s,transform .5s;">{{ p.initial }}</div>
+      </sc-for>
+    </div>
+
+    <div id="leakMoneyWrap" style="margin-top:34px;display:flex;align-items:baseline;gap:12px;opacity:0;transition:opacity .5s;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.16em;color:#8A8177;">PIPELINE WALKING AWAY</span>
+      <span id="leakMoney" style="font-family:'JetBrains Mono',monospace;font-size:clamp(24px,3vw,36px);font-weight:800;color:#E03500;letter-spacing:-1px;">₹0</span>
+    </div>
+    <p id="leakFoot" style="margin:24px 0 0;max-width:560px;text-align:center;font-size:15px;color:#6E675F;line-height:1.7;opacity:0;transition:opacity .4s;">The other 27 had budget. They bought from whoever followed up.<br><span style="font-weight:700;color:#E03500;">That's the leak. Frixn plugs it.</span></p>
+  </div>
+</section>
+
+<!-- ============ 03 HOW — ESSAY STYLE ============ -->
+<section id="how" data-screen-label="03 How" style="position:relative;padding:80px 6vw;box-sizing:border-box;">
+  <div style="max-width:1080px;margin:0 auto;">
+    <div style="display:flex;gap:6vw;align-items:flex-start;flex-wrap:wrap;">
+      <div style="flex:1;min-width:300px;position:sticky;top:80px;">
+        <h2 data-reveal="" style="margin:0;font-size:clamp(30px,3.6vw,46px);font-weight:900;letter-spacing:-.03em;line-height:1.12;">Here's the whole<br>product, honestly.</h2>
+        <p data-reveal="" data-delay="120" style="margin:18px 0 0;font-size:16px;color:#6E675F;line-height:1.75;max-width:400px;">No AI theater. No 40-field CRM. A card, a tap, and software that does the follow-up your team means to do but doesn't.<br><br><span style="font-weight:700;color:#1C1814;">Every CRM starts when a contact is added. Frixn starts when a contact is met.</span> That gap is where most revenue disappears — so that's the part we built.</p>
+        <div data-reveal="" data-delay="240" style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;">
+          <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:100px;background:#fff;border:1px solid rgba(28,24,20,.09);box-shadow:0 8px 24px -12px rgba(28,24,20,.25);font-size:12.5px;color:#544D45;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#0BA360;"></span>Under 5 seconds</div>
+          <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:100px;background:#fff;border:1px solid rgba(28,24,20,.09);box-shadow:0 8px 24px -12px rgba(28,24,20,.25);font-size:12.5px;color:#544D45;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#0BA360;"></span>Zero typing</div>
+          <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:100px;background:#fff;border:1px solid rgba(28,24,20,.09);box-shadow:0 8px 24px -12px rgba(28,24,20,.25);font-size:12.5px;color:#544D45;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#0BA360;"></span>No app either side</div>
+        </div>
+      </div>
+
+      <div style="flex:1.1;min-width:320px;display:flex;flex-direction:column;gap:16px;">
+        <div data-reveal="" style="border-radius:22px;background:#fff;border:1px solid rgba(28,24,20,.07);box-shadow:0 26px 60px -38px rgba(28,24,20,.4);padding:26px;display:flex;gap:18px;align-items:flex-start;transition:transform .25s;" style-hover="transform:translateX(6px);">
+          <div style="flex-shrink:0;width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#FF3D00,#FF8A5C);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;box-shadow:0 10px 24px -8px rgba(255,61,0,.5);">01</div>
+          <div><div style="font-size:16px;font-weight:800;">The tap</div><p style="margin:6px 0 0;font-size:14px;color:#6E675F;line-height:1.65;">Your rep's NFC card touches the prospect's phone. A 3-field form opens — auto-filled by the tap 90% of the time — and one press fires WhatsApp, pre-filled, from the prospect's side. That's their entire job.</p></div>
+        </div>
+        <div data-reveal="" data-delay="100" style="border-radius:22px;background:#fff;border:1px solid rgba(28,24,20,.07);box-shadow:0 26px 60px -38px rgba(28,24,20,.4);padding:26px;display:flex;gap:18px;align-items:flex-start;transition:transform .25s;" style-hover="transform:translateX(6px);">
+          <div style="flex-shrink:0;width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#0BA360,#3CBA92);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;box-shadow:0 10px 24px -8px rgba(11,163,96,.5);">02</div>
+          <div><div style="font-size:16px;font-weight:800;">The first move</div><p style="margin:6px 0 0;font-size:14px;color:#6E675F;line-height:1.65;">Frixn fires two things instantly: a warm WhatsApp thread from the rep's own number, and a proposal email that lands before the prospect reaches their next meeting. Configured once by the admin. Runs on every tap. Never spray-and-pray.</p></div>
+        </div>
+        <div data-reveal="" data-delay="200" style="border-radius:22px;background:#fff;border:1px solid rgba(28,24,20,.07);box-shadow:0 26px 60px -38px rgba(28,24,20,.4);padding:26px;display:flex;gap:18px;align-items:flex-start;transition:transform .25s;" style-hover="transform:translateX(6px);">
+          <div style="flex-shrink:0;width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#8B3DFF,#C77DFF);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;box-shadow:0 10px 24px -8px rgba(139,61,255,.5);">03</div>
+          <div><div style="font-size:16px;font-weight:800;">The dashboard</div><p style="margin:6px 0 0;font-size:14px;color:#6E675F;line-height:1.65;">You manage 20 reps; you can't be in 20 meetings. Frixn is. Every tap, lead, rep, and event on one live feed — with response rates and event ROI, not a Monday report.</p></div>
+        </div>
+        <div data-reveal="" data-delay="300" style="border-radius:22px;background:linear-gradient(160deg,#FFF3EC,#fff);border:1px solid rgba(255,61,0,.2);box-shadow:0 26px 60px -38px rgba(255,61,0,.35);padding:26px;display:flex;gap:18px;align-items:flex-start;">
+          <div style="flex-shrink:0;width:44px;height:44px;border-radius:13px;background:#1C1814;display:flex;align-items:center;justify-content:center;color:#FF8A5C;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;">⏱</div>
+          <div><div style="font-size:16px;font-weight:800;">Setup: ten minutes. Boring on purpose.</div><p style="margin:6px 0 0;font-size:14px;color:#6E675F;line-height:1.65;">Admin creates the org, adds reps, sets cadences, connects WhatsApp numbers. Cards ship the same day and work the moment they're in hands. No training sessions. Nothing to install.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 USE CASES ============ -->
+<section id="who" data-screen-label="04 Use Cases" style="padding:60px 6vw;box-sizing:border-box;">
+  <div style="max-width:1080px;margin:0 auto;">
+    <h2 data-reveal="" style="margin:0;font-size:clamp(28px,3.4vw,44px);font-weight:900;letter-spacing:-.03em;">Built for people<br>who live in meetings.</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:32px;">
+
+      <div data-reveal="" style="border-radius:20px;background:#fff;border:1px solid rgba(28,24,20,.07);box-shadow:0 24px 55px -35px rgba(28,24,20,.4);overflow:hidden;display:flex;flex-direction:column;transition:transform .25s;" style-hover="transform:translateY(-6px);">
+        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="uc-founders" shape="rect" credit="Photo by Product School on Unsplash" credit-href="https://unsplash.com/@productschool" placeholder="Founder networking at a conference" src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&amp;fit=crop&amp;w=800&amp;q=60" style="width:100%;height:150px;display:block;" hint-size="100%,150px"></x-import>
+        <div style="padding:20px 22px 24px;display:flex;flex-direction:column;gap:9px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;color:#E03500;">FOUNDERS &amp; BD</div>
+          <p style="margin:0;font-size:13.5px;color:#6E675F;line-height:1.65;">You meet 40 people at every conference and follow up with 6. With Frixn every tap captures who you met and sends your deck before the next conversation.<br><span style="font-weight:700;color:#1C1814;">Your network compounds. Nothing falls through.</span></p>
+        </div>
+      </div>
+
+      <div data-reveal="" data-delay="100" style="border-radius:20px;background:#fff;border:1px solid rgba(28,24,20,.07);box-shadow:0 24px 55px -35px rgba(28,24,20,.4);overflow:hidden;display:flex;flex-direction:column;transition:transform .25s;" style-hover="transform:translateY(-6px);">
+        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="uc-vc" shape="rect" credit="Photo by Austin Distel on Unsplash" credit-href="https://unsplash.com/@austindistel" placeholder="Investor meeting founders at demo day" src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&amp;fit=crop&amp;w=800&amp;q=60" style="width:100%;height:150px;display:block;" hint-size="100%,150px"></x-import>
+        <div style="padding:20px 22px 24px;display:flex;flex-direction:column;gap:9px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;color:#8B3DFF;">VC &amp; INVESTORS</div>
+          <p style="margin:0;font-size:13.5px;color:#6E675F;line-height:1.65;">Demo days, LP events, portfolio dinners. You meet every founder who matters and remember half by Monday. Frixn captures everyone — who, what they're building, when, where.<br><span style="font-weight:700;color:#1C1814;">Deal flow is only as good as follow-up.</span></p>
+        </div>
+      </div>
+
+      <div data-reveal="" data-delay="200" style="border-radius:20px;background:#fff;border:1px solid rgba(28,24,20,.07);box-shadow:0 24px 55px -35px rgba(28,24,20,.4);overflow:hidden;display:flex;flex-direction:column;transition:transform .25s;" style-hover="transform:translateY(-6px);">
+        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="uc-saas" shape="rect" credit="Photo by Annie Spratt on Unsplash" credit-href="https://unsplash.com/@anniespratt" placeholder="SaaS sales team at an industry event" src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&amp;fit=crop&amp;w=800&amp;q=60" style="width:100%;height:150px;display:block;" hint-size="100%,150px"></x-import>
+        <div style="padding:20px 22px 24px;display:flex;flex-direction:column;gap:9px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;color:#0BA360;">SAAS SALES TEAMS</div>
+          <p style="margin:0;font-size:13.5px;color:#6E675F;line-height:1.65;">12 events a quarter, 30 conversations each. Most end with "I'll send you a note." <span style="font-weight:700;color:#E03500;">Most notes never get sent.</span> Frixn sends it while the conversation is still warm — and logs it for the manager.</p>
+        </div>
+      </div>
+
+      <div data-reveal="" data-delay="300" style="border-radius:20px;background:#fff;border:1px solid rgba(28,24,20,.07);box-shadow:0 24px 55px -35px rgba(28,24,20,.4);overflow:hidden;display:flex;flex-direction:column;transition:transform .25s;" style-hover="transform:translateY(-6px);">
+        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="uc-field" shape="rect" credit="Photo by Amy Hirschi on Unsplash" credit-href="https://unsplash.com/@amyhirschi" placeholder="Field rep meeting a client in person" src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&amp;fit=crop&amp;w=800&amp;q=60" style="width:100%;height:150px;display:block;" hint-size="100%,150px"></x-import>
+        <div style="padding:20px 22px 24px;display:flex;flex-direction:column;gap:9px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;color:#E03500;">FIELD SALES <span style="color:#B4ABA0;">· REAL ESTATE · BFSI · INSURANCE</span></div>
+          <p style="margin:0;font-size:13.5px;color:#6E675F;line-height:1.65;">Expos, site visits, branch walk-ins — leads live in pockets and notebooks. Frixn captures every conversation at the source, tags the event, and puts the whole team's pipeline on one live dashboard.<br><span style="font-weight:700;color:#1C1814;">Every visitor becomes a tracked lead.</span></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 PROOF ============ -->
+<section id="proof" data-screen-label="05 Proof" style="padding:40px 0 60px;overflow:hidden;">
+  <div style="overflow:hidden;white-space:nowrap;border-top:1px solid rgba(28,24,20,.08);border-bottom:1px solid rgba(28,24,20,.08);padding:13px 0;background:#fff;">
+    <div style="display:inline-flex;gap:28px;animation:tickerScroll 36s linear infinite;" style-hover="animation-play-state:paused;">
+      <span style="font-size:12px;font-weight:600;color:#8A8177;display:inline-flex;gap:28px;align-items:center;">Founders<span style="color:#FF3D00;">·</span>BD Teams<span style="color:#8B3DFF;">·</span>VC &amp; Investors<span style="color:#FF3D00;">·</span>SaaS Sales<span style="color:#8B3DFF;">·</span>Real Estate<span style="color:#FF3D00;">·</span>Insurance<span style="color:#8B3DFF;">·</span>BFSI<span style="color:#FF3D00;">·</span>Field Sales<span style="color:#8B3DFF;">·</span></span>
+      <span style="font-size:12px;font-weight:600;color:#8A8177;display:inline-flex;gap:28px;align-items:center;">Founders<span style="color:#FF3D00;">·</span>BD Teams<span style="color:#8B3DFF;">·</span>VC &amp; Investors<span style="color:#FF3D00;">·</span>SaaS Sales<span style="color:#8B3DFF;">·</span>Real Estate<span style="color:#FF3D00;">·</span>Insurance<span style="color:#8B3DFF;">·</span>BFSI<span style="color:#FF3D00;">·</span>Field Sales<span style="color:#8B3DFF;">·</span></span>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:16px;justify-content:center;margin-top:44px;flex-wrap:wrap;padding:0 24px;">
+    <div data-reveal="" data-tilt="4" style="min-width:190px;padding:30px 36px;border-radius:18px;background:linear-gradient(160deg,#FFE7DB,#FFF3EC);border:1px solid rgba(255,61,0,.2);text-align:center;box-shadow:0 20px 45px -30px rgba(255,61,0,.4);">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:700;color:#E03500;">&lt; 5s</div>
+      <div style="font-size:13px;color:#6E675F;margin-top:6px;">Tap to lead captured</div>
+    </div>
+    <div data-reveal="" data-delay="100" data-tilt="4" style="min-width:190px;padding:30px 36px;border-radius:18px;background:#fff;border:1px solid rgba(28,24,20,.08);text-align:center;box-shadow:0 20px 45px -30px rgba(28,24,20,.35);">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:700;color:#1C1814;">₹0</div>
+      <div style="font-size:13px;color:#6E675F;margin-top:6px;">Manual data entry required</div>
+    </div>
+    <div data-reveal="" data-delay="200" data-tilt="4" style="min-width:190px;padding:30px 36px;border-radius:18px;background:linear-gradient(160deg,#E2F6EC,#F0FBF5);border:1px solid rgba(11,163,96,.22);text-align:center;box-shadow:0 20px 45px -30px rgba(11,163,96,.4);">
+      <div data-count="100" data-suffix="%" style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:700;color:#0BA360;">100%</div>
+      <div style="font-size:13px;color:#6E675F;margin-top:6px;">Of taps become pipeline</div>
+    </div>
+  </div>
+
+  <div data-reveal="" style="position:relative;max-width:620px;margin:54px auto 0;padding:0 32px;text-align:center;">
+    <div style="position:absolute;left:10px;top:-32px;font-size:84px;font-weight:900;color:#FF3D00;line-height:1;font-family:Georgia,serif;opacity:.85;">“</div>
+    <p style="margin:0;font-size:21px;font-style:italic;color:#544D45;line-height:1.6;">The moment the prospect taps and WhatsApp opens in their hand, they already know this is different.</p>
+    <p style="margin:16px 0 0;font-size:12px;color:#8A8177;">— Design Partner, Sales Lead, Bangalore</p>
+  </div>
+</section>
+
+<!-- ============ 05b MANAGER DASHBOARD ============ -->
+<section id="dashboard" data-screen-label="05b Manager Dashboard" style="position:relative;padding:80px 24px;background:#0F0E13;overflow:hidden;">
+  <div style="position:absolute;left:-10%;top:-18%;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle,rgba(255,61,0,.13),transparent 65%);filter:blur(30px);"></div>
+  <div style="position:absolute;right:-10%;bottom:-24%;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(139,61,255,.12),transparent 65%);filter:blur(30px);"></div>
+
+  <div style="position:relative;max-width:1080px;margin:0 auto;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+      <div>
+        <p data-reveal="" style="margin:0;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:#FF8A5C;">MEANWHILE, ON THE MANAGER'S SCREEN</p>
+        <h2 data-reveal="" data-delay="80" style="margin:14px 0 0;font-size:clamp(28px,3.4vw,44px);font-weight:900;letter-spacing:-.03em;color:#FAF7F2;line-height:1.12;">Your reps tap cards.<br><span style="color:#6f675e;">You watch revenue happen.</span></h2>
+      </div>
+      <p data-reveal="" data-delay="160" style="margin:0;max-width:340px;font-size:14px;color:#8d857c;line-height:1.7;">Every tap on every card, anywhere in the field, lands here in real time. <span style="color:#FAF7F2;font-weight:600;">This one is simulating live taps right now — watch the feed.</span></p>
+    </div>
+
+    <div data-reveal="" data-delay="200" style="margin-top:34px;border-radius:20px;background:#16151C;border:1px solid rgba(255,255,255,.08);box-shadow:0 60px 120px -50px rgba(0,0,0,.9);overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:#111017;">
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#3a3842;"></span>
+          <span style="width:9px;height:9px;border-radius:50%;background:#3a3842;"></span>
+          <span style="width:9px;height:9px;border-radius:50%;background:#3a3842;"></span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;min-width:0;">
+          <div style="padding:4px 16px;border-radius:100px;background:rgba(255,255,255,.05);font-family:'JetBrains Mono',monospace;font-size:10px;color:#8d857c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">app.frixn.in/admin/dashboard</div>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:100px;background:rgba(11,163,96,.12);border:1px solid rgba(11,163,96,.35);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;color:#3CBA92;flex-shrink:0;"><span style="width:5px;height:5px;border-radius:50%;background:#3CBA92;box-shadow:0 0 6px rgba(60,186,146,.8);"></span>LIVE</div>
+      </div>
+
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <!-- stat cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;">
+          <div style="padding:16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="width:30px;height:30px;border-radius:9px;background:rgba(127,168,255,.14);display:flex;align-items:center;justify-content:center;"><span style="width:10px;height:10px;border-radius:50%;background:#7FA8FF;"></span></div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:#FAF7F2;">12</div>
+            </div>
+            <div style="display:flex;margin:12px 0 10px;">
+              <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#FF6B2C,#FF3D00);border:2px solid #16151C;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;">A</div>
+              <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#C77DFF,#8B3DFF);border:2px solid #16151C;margin-left:-7px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;">S</div>
+              <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#3CBA92,#0BA360);border:2px solid #16151C;margin-left:-7px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;">K</div>
+              <div style="width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid #16151C;margin-left:-7px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#8d857c;">+9</div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#6f675e;">ACTIVE EMPLOYEES</div>
+          </div>
+          <div style="padding:16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="width:30px;height:30px;border-radius:9px;background:rgba(139,61,255,.14);display:flex;align-items:center;justify-content:center;"><span style="width:13px;height:9px;border-radius:2px;background:#C77DFF;"></span></div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:#FAF7F2;">12</div>
+            </div>
+            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,.07);margin:20px 0 12px;overflow:hidden;"><div style="width:100%;height:100%;border-radius:2px;background:linear-gradient(90deg,#8B3DFF,#C77DFF);"></div></div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#6f675e;">ACTIVE NFC CARDS</div>
+          </div>
+          <div style="padding:16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,61,0,.22);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="width:30px;height:30px;border-radius:9px;background:rgba(255,61,0,.15);display:flex;align-items:center;justify-content:center;"><span style="width:3px;height:12px;border-radius:2px;background:#FF6B2C;box-shadow:5px 3px 0 #FF6B2C,-5px 6px 0 #FF6B2C;"></span></div>
+              <div id="dashTapNum" style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:#FF8A5C;">{{ liveTaps }}</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:3px;height:18px;margin:14px 0 10px;">
+              <div style="flex:1;height:30%;border-radius:2px;background:rgba(255,107,44,.3);"></div>
+              <div style="flex:1;height:45%;border-radius:2px;background:rgba(255,107,44,.35);"></div>
+              <div style="flex:1;height:35%;border-radius:2px;background:rgba(255,107,44,.35);"></div>
+              <div style="flex:1;height:60%;border-radius:2px;background:rgba(255,107,44,.45);"></div>
+              <div style="flex:1;height:50%;border-radius:2px;background:rgba(255,107,44,.5);"></div>
+              <div style="flex:1;height:80%;border-radius:2px;background:rgba(255,107,44,.7);"></div>
+              <div style="flex:1;height:100%;border-radius:2px;background:#FF6B2C;"></div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#6f675e;">TAPS THIS MONTH</div>
+          </div>
+          <div style="padding:16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="width:30px;height:30px;border-radius:9px;background:rgba(11,163,96,.14);display:flex;align-items:center;justify-content:center;"><span style="width:10px;height:10px;border-radius:3px;background:#3CBA92;transform:rotate(45deg);"></span></div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:#3CBA92;">{{ liveLeads }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin:16px 0 10px;">
+              <div style="height:3px;border-radius:2px;background:#3CBA92;width:90%;"></div>
+              <div style="height:3px;border-radius:2px;background:rgba(60,186,146,.5);width:70%;"></div>
+              <div style="height:3px;border-radius:2px;background:rgba(60,186,146,.25);width:45%;"></div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#6f675e;">LEADS CAPTURED</div>
+          </div>
+        </div>
+
+        <!-- main grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;align-items:stretch;">
+          <!-- performance table -->
+          <div style="border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:16px;box-sizing:border-box;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;">
+              <div style="font-size:13.5px;font-weight:700;color:#FAF7F2;">Employee Performance</div>
+              <div style="padding:3px 10px;border-radius:100px;background:rgba(255,255,255,.06);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#8d857c;">THIS MONTH</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#6f675e;">
+              <div>EMPLOYEE</div><div>ROLE / DEPT</div><div>TAPS ↓</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+              <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#FF6B2C,#FF3D00);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;">A</div>
+                <div style="min-width:0;"><div style="font-size:12px;font-weight:700;color:#FAF7F2;">Arjun T.</div><div style="font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:#FF8A5C;">#1 PERFORMER</div></div>
+              </div>
+              <div style="font-size:11px;color:#8d857c;">Field Sales</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAF7F2;text-align:right;">61</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+              <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#C77DFF,#8B3DFF);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;">S</div>
+                <div style="font-size:12px;font-weight:700;color:#FAF7F2;">Sana K.</div>
+              </div>
+              <div style="font-size:11px;color:#8d857c;">BD</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAF7F2;text-align:right;">54</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+              <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#3CBA92,#0BA360);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;">K</div>
+                <div style="font-size:12px;font-weight:700;color:#FAF7F2;">Kabir S.</div>
+              </div>
+              <div style="font-size:11px;color:#8d857c;">Enterprise</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAF7F2;text-align:right;">47</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+              <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#FFB35C,#FF8A5C);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;">N</div>
+                <div style="font-size:12px;font-weight:700;color:#FAF7F2;">Nia D.</div>
+              </div>
+              <div style="font-size:11px;color:#8d857c;">Field Sales</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAF7F2;text-align:right;">39</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;align-items:center;padding:10px 0;">
+              <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7FA8FF,#4C6FFF);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;">R</div>
+                <div style="font-size:12px;font-weight:700;color:#FAF7F2;">Rohan B.</div>
+              </div>
+              <div style="font-size:11px;color:#8d857c;">BD</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAF7F2;text-align:right;">31</div>
+            </div>
+          </div>
+
+          <!-- right column -->
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:16px;box-sizing:border-box;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
+                <div style="font-size:13.5px;font-weight:700;color:#FAF7F2;">Department Yield</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#6f675e;">THIS MONTH</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;"><span style="color:#c7bfb5;font-weight:600;">Field Sales</span><span style="font-family:'JetBrains Mono',monospace;color:#FF8A5C;">142 taps</span></div>
+                  <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;"><div style="width:100%;height:100%;border-radius:3px;background:linear-gradient(90deg,#FF3D00,#FF8A5C);"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;"><span style="color:#c7bfb5;font-weight:600;">BD</span><span style="font-family:'JetBrains Mono',monospace;color:#C77DFF;">96 taps</span></div>
+                  <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;"><div style="width:68%;height:100%;border-radius:3px;background:linear-gradient(90deg,#8B3DFF,#C77DFF);"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;"><span style="color:#c7bfb5;font-weight:600;">Enterprise</span><span style="font-family:'JetBrains Mono',monospace;color:#3CBA92;">71 taps</span></div>
+                  <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;"><div style="width:50%;height:100%;border-radius:3px;background:linear-gradient(90deg,#0BA360,#3CBA92);"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex:1;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:16px;box-sizing:border-box;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <div style="font-size:13.5px;font-weight:700;color:#FAF7F2;">Live Tap Feed</div>
+                <span style="width:6px;height:6px;border-radius:50%;background:#FF3D00;box-shadow:0 0 8px rgba(255,61,0,.8);"></span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <sc-for list="{{ feed }}" as="f" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);">
+                    <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,{{ f.c1 }},{{ f.c2 }});display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#fff;flex-shrink:0;">{{ f.initial }}</div>
+                    <div style="flex:1;min-width:0;"><div style="font-size:11.5px;font-weight:700;color:#FAF7F2;">{{ f.name }}</div><div style="font-size:9.5px;color:#6f675e;">{{ f.city }}</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#8d857c;flex-shrink:0;">{{ f.time }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-reveal="" data-delay="120" style="margin-top:16px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div style="font-size:12px;color:#6f675e;">Live simulation · names anonymized · real product, real dashboard</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:#8d857c;">EVERY TAP → A ROW HERE. NO REP EVER FILES A REPORT.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 PRICING ============ -->
+<section id="pricing" data-screen-label="06 Pricing" style="position:relative;padding:70px 24px;background:linear-gradient(180deg,#FBF9F5,#F4EFE7);overflow:hidden;">
+  <div style="position:absolute;left:50%;top:6%;width:680px;height:440px;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(255,140,90,.22),transparent 65%);filter:blur(26px);"></div>
+
+  <h2 style="position:relative;margin:0;text-align:center;font-size:clamp(30px,3.6vw,46px);font-weight:900;letter-spacing:-.03em;line-height:1.15;">
+    <span data-reveal="" style="display:inline;">One price. </span><span data-reveal="" data-delay="120" style="display:inline;color:#E03500;">The math isn't subtle.</span>
+  </h2>
+  <p data-reveal="" data-delay="200" style="position:relative;margin:14px auto 0;max-width:480px;text-align:center;font-size:15px;color:#6E675F;line-height:1.65;">One closed deal typically covers six months of Frixn for a ten-rep team. You'll know within thirty days.</p>
+
+  <div data-reveal="" style="position:relative;display:flex;justify-content:center;margin-top:20px;">
+    <div style="display:inline-flex;align-items:center;padding:4px 14px;border-radius:100px;background:#FFF0E9;border:1px solid rgba(255,61,0,.3);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.16em;color:#E03500;">LAUNCHING PRICE</div>
+  </div>
+
+  <div data-reveal="" data-delay="100" style="position:relative;max-width:480px;margin:16px auto 0;padding:40px;box-sizing:border-box;border-radius:24px;background:#fff;border:1px solid rgba(255,61,0,.35);box-shadow:0 40px 90px -40px rgba(255,61,0,.35),0 30px 60px -40px rgba(28,24,20,.3);">
+    <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:64px;font-weight:800;letter-spacing:-2px;color:#E03500;">{{ seatPrice }}</div>
+      <div style="font-size:16px;color:#6E675F;">/seat/month</div>
+    </div>
+    <div style="height:1px;background:rgba(28,24,20,.08);margin:24px 0;"></div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;font-weight:500;color:#544D45;">
+      <div style="display:flex;gap:10px;"><span style="color:#E03500;font-weight:700;">✓</span>Every rep's lead captured automatically</div>
+      <div style="display:flex;gap:10px;"><span style="color:#E03500;font-weight:700;">✓</span>WhatsApp thread started on every tap</div>
+      <div style="display:flex;gap:10px;"><span style="color:#E03500;font-weight:700;">✓</span>Proposal email fired in parallel</div>
+      <div style="display:flex;gap:10px;"><span style="color:#E03500;font-weight:700;">✓</span>Manager dashboard — live, all reps</div>
+      <div style="display:flex;gap:10px;"><span style="color:#E03500;font-weight:700;">✓</span>Team lead feed with source tagging</div>
+      <div style="display:flex;gap:10px;"><span style="color:#E03500;font-weight:700;">✓</span>Event ROI tracking per expo</div>
+      <div style="display:flex;gap:10px;"><span style="color:#E03500;font-weight:700;">✓</span>Unlimited taps. Zero manual entry.</div>
+    </div>
+    <div style="height:1px;background:rgba(28,24,20,.08);margin:24px 0;"></div>
+    <a href="#pricing" data-magnet="" style="display:flex;align-items:center;justify-content:center;height:52px;border-radius:12px;background:linear-gradient(100deg,#FF3D00,#FF6B2C);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 12px 34px -10px rgba(255,61,0,.55);">Start converting meetings</a>
+    <div style="margin-top:12px;text-align:center;font-size:11px;color:#8A8177;">14-day free trial. No credit card required.</div>
+  </div>
+
+  <div style="position:relative;display:flex;gap:50px;justify-content:center;margin-top:32px;flex-wrap:wrap;">
+    <div data-reveal="" style="font-size:13px;color:#6E675F;line-height:1.75;max-width:230px;">At 10 reps: <span style="font-family:'JetBrains Mono',monospace;color:#1C1814;font-weight:700;">{{ price10 }}/mo</span><br>One closed deal covers 6 months.</div>
+    <div data-reveal="" data-delay="120" style="font-size:13px;color:#6E675F;line-height:1.75;max-width:230px;">At 25 reps: <span style="font-family:'JetBrains Mono',monospace;color:#1C1814;font-weight:700;">{{ price25 }}/mo</span><br>Typical ROI: positive within 30 days.</div>
+  </div>
+
+  <div style="position:relative;margin-top:24px;text-align:center;font-size:11px;color:#8A8177;">No lock-in. Cancel anytime. Your data is always yours.</div>
+</section>
+
+<!-- ============ 07 ROADMAP ============ -->
+<sc-if value="{{ showVision }}" hint-placeholder-val="{{ true }}">
+<section id="vision" data-screen-label="07 Roadmap" style="position:relative;padding:70px 24px;overflow:hidden;">
+  <div style="position:absolute;right:0;top:0;width:560px;height:420px;background:radial-gradient(ellipse,rgba(170,130,255,.2),transparent 65%);filter:blur(26px);"></div>
+
+  <h2 style="position:relative;margin:0;text-align:center;letter-spacing:-.03em;line-height:1.15;">
+    <span data-reveal="" style="display:block;font-size:clamp(28px,3.4vw,44px);font-weight:900;color:#1C1814;">Today, Frixn captures.</span>
+    <span data-reveal="" data-delay="160" style="display:block;font-size:clamp(32px,4vw,52px);font-weight:900;background:linear-gradient(100deg,#FF3D00,#8B3DFF);-webkit-background-clip:text;background-clip:text;color:transparent;">Tomorrow, Frixn closes.</span>
+  </h2>
+
+  <div style="position:relative;display:flex;gap:18px;justify-content:center;margin-top:40px;flex-wrap:wrap;">
+    <div data-reveal="" style="width:290px;padding:26px;box-sizing:border-box;border-radius:20px;background:#fff;border:1px solid rgba(11,163,96,.3);box-shadow:0 24px 55px -38px rgba(11,163,96,.5);">
+      <div style="display:flex;align-items:center;gap:8px;"><span style="width:7px;height:7px;border-radius:50%;background:#0BA360;box-shadow:0 0 8px rgba(11,163,96,.7);"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;color:#6E675F;">NOW — AT LAUNCH</span></div>
+      <div style="height:1px;background:rgba(28,24,20,.08);margin:16px 0;"></div>
+      <div style="font-size:13.5px;color:#544D45;line-height:2;">NFC tap-to-lead capture<br>WhatsApp thread started instantly<br>Proposal email fired in parallel<br>Manager dashboard, live<br>Team analytics and event ROI</div>
+    </div>
+    <div data-reveal="" data-delay="140" style="width:290px;padding:26px;box-sizing:border-box;border-radius:20px;background:#fff;border:1px dashed rgba(255,61,0,.4);box-shadow:0 24px 55px -38px rgba(255,61,0,.45);">
+      <div style="display:flex;align-items:center;gap:8px;"><span style="width:7px;height:7px;border-radius:50%;background:#FF3D00;box-shadow:0 0 8px rgba(255,61,0,.7);"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;color:#6E675F;">NEXT — COMING IN V2</span></div>
+      <div style="height:1px;background:rgba(28,24,20,.08);margin:16px 0;"></div>
+      <div style="font-size:13.5px;color:#544D45;line-height:2;">AI-drafted first reply, one-tap approve<br>CRM sync (Zoho, HubSpot, Salesforce)<br>Automated follow-up sequences<br>Proposal timing engine<br>Dormant lead alerts<br>Deal pipeline tracking<br>LinkedIn + QR capture expansion</div>
+    </div>
+    <div data-reveal="" data-delay="280" style="width:290px;padding:26px;box-sizing:border-box;border-radius:20px;background:linear-gradient(165deg,#F6F2FF,#fff);border:1px solid rgba(139,61,255,.3);box-shadow:0 24px 55px -38px rgba(139,61,255,.5);">
+      <div style="display:flex;align-items:center;gap:8px;"><span style="width:7px;height:7px;border-radius:50%;background:#8B3DFF;box-shadow:0 0 8px rgba(139,61,255,.7);"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;color:#6E675F;">VISION — THE DESTINATION</span></div>
+      <div style="height:1px;background:rgba(28,24,20,.08);margin:16px 0;"></div>
+      <div style="font-size:13.5px;color:#544D45;line-height:1.85;">Agentic AI that runs your post-meeting workflow while your reps are in the field.<br><br><span style="color:#1C1814;font-weight:700;">Revenue on autopilot.<br>Offline to Online. Fully automated.</span></div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============ 08 FINAL CTA ============ -->
+<section id="cta" data-screen-label="08 Final CTA" style="position:relative;margin:40px 4vw 0;border-radius:32px 32px 0 0;padding:80px 24px 70px;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;overflow:hidden;background:linear-gradient(170deg,#1E1916,#120F0D 70%);">
+  <div style="position:absolute;left:50%;bottom:-24%;width:900px;height:520px;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(255,61,0,.28),transparent 62%);filter:blur(20px);"></div>
+  <div style="position:absolute;right:-6%;top:-14%;width:520px;height:420px;background:radial-gradient(ellipse,rgba(139,61,255,.24),transparent 65%);filter:blur(22px);"></div>
+
+  <h2 data-reveal="" style="position:relative;margin:0;text-align:center;font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-.02em;line-height:1.4;color:#FAF7F2;">Every meeting you have tomorrow<br>is revenue you can capture.<br><span style="color:#8d857c;">Or revenue you'll lose.</span></h2>
+
+  <div data-reveal="" data-delay="150" data-tilt="9" style="position:relative;margin-top:42px;">
+    <div style="animation:floatY 8s ease-in-out infinite;">
+      <div style="width:min(400px,86vw);height:248px;border-radius:20px;position:relative;background:linear-gradient(148deg,#2c2723,#161311 55%,#221d19);border:1px solid rgba(255,255,255,.14);box-shadow:0 60px 90px -35px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.12),0 20px 70px -10px rgba(255,61,0,.5);display:flex;align-items:center;justify-content:center;">
+        <div style="position:absolute;top:24px;left:28px;width:42px;height:32px;border-radius:7px;background:linear-gradient(135deg,#443e38,#2a2521);border:1px solid rgba(255,255,255,.12);"></div>
+        <div style="font-weight:800;font-size:40px;letter-spacing:-.02em;background:linear-gradient(100deg,#FF6B2C,#C77DFF);-webkit-background-clip:text;background-clip:text;color:transparent;">fr⚡xn.</div>
+        <div style="position:absolute;bottom:22px;left:28px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#6b635a;">OFFLINE TO ONLINE REVENUE OS</div>
+        <div style="position:absolute;left:6%;right:6%;bottom:-3px;height:9px;border-radius:50%;background:linear-gradient(90deg,#FF3D00,#8B3DFF);filter:blur(10px);opacity:.6;"></div>
+      </div>
+    </div>
+  </div>
+
+  <p data-reveal="" data-delay="220" style="position:relative;margin:36px 0 0;font-size:21px;font-weight:900;text-align:center;color:#FAF7F2;">Start converting meetings.</p>
+
+  <div data-reveal="" data-delay="300" style="position:relative;display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;justify-content:center;">
+    <a href="#pricing" data-magnet="" style="display:inline-flex;align-items:center;height:52px;padding:0 30px;border-radius:12px;background:linear-gradient(100deg,#FF3D00,#FF6B2C);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 12px 40px -10px rgba(255,61,0,.7);">{{ ctaPrice }}</a>
+    <a href="#pricing" data-magnet="" style="display:inline-flex;align-items:center;height:52px;padding:0 30px;border-radius:12px;border:1px solid rgba(255,255,255,.3);color:#FAF7F2;font-size:15px;font-weight:600;text-decoration:none;box-sizing:border-box;background:rgba(255,255,255,.06);">Book a 15-minute demo</a>
+  </div>
+
+  <div data-reveal="" data-delay="380" style="position:relative;display:flex;align-items:center;gap:14px;margin-top:24px;font-size:11px;color:#8d857c;flex-wrap:wrap;justify-content:center;">
+    <span>Setup in under 10 minutes.</span>
+    <span style="width:1px;height:12px;background:rgba(255,255,255,.2);"></span>
+    <span>First lead captured within the hour.</span>
+    <span style="width:1px;height:12px;background:rgba(255,255,255,.2);"></span>
+    <span>No credit card required to start.</span>
+  </div>
+
+  <div style="position:relative;width:100%;max-width:1080px;border-top:1px solid rgba(255,255,255,.1);margin-top:60px;padding-top:28px;display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;">
+    <div>
+      <div style="font-weight:800;font-size:18px;background:linear-gradient(100deg,#FF6B2C,#C77DFF);-webkit-background-clip:text;background-clip:text;color:transparent;">fr⚡xn.</div>
+      <div style="font-size:11px;color:#8d857c;margin-top:5px;">Offline to Online Revenue OS</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;font-size:12px;color:#a49b91;flex-wrap:wrap;">
+      <a href="#how" style="color:#a49b91;text-decoration:none;" style-hover="color:#FAF7F2;">Product</a><span style="color:#5a534c;">·</span>
+      <a href="#who" style="color:#a49b91;text-decoration:none;" style-hover="color:#FAF7F2;">Use Cases</a><span style="color:#5a534c;">·</span>
+      <a href="#pricing" style="color:#a49b91;text-decoration:none;" style-hover="color:#FAF7F2;">Pricing</a><span style="color:#5a534c;">·</span>
+      <a href="#hero" style="color:#a49b91;text-decoration:none;" style-hover="color:#FAF7F2;">About</a>
+    </div>
+    <div style="font-size:12px;color:#8d857c;font-style:italic;">Built for field sales. Built in India.</div>
+  </div>
+  <div style="position:relative;width:100%;max-width:1080px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:22px;">
+    <div style="font-size:11px;color:#6b635a;">© 2026 Frixn Solutions Pvt Ltd, Bangalore</div>
+    <div style="font-size:11px;color:#6b635a;display:flex;gap:8px;"><span>Privacy</span><span>·</span><span>Terms</span><span>·</span><span>Security</span></div>
+  </div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;seatPrice&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:499,&quot;min&quot;:99,&quot;max&quot;:1999,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pricing&quot;,&quot;description&quot;:&quot;Per-seat monthly price (₹) — updates pricing card, ROI math, and final CTA&quot;},&quot;showVision&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sections&quot;,&quot;description&quot;:&quot;Show the roadmap (Today/Tomorrow) section&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;full&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;full&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Motion&quot;,&quot;description&quot;:&quot;Reduced disables tilt, magnets, and the scroll story&quot;}}">
+class Component extends DCLogic {
+  state = {
+    taps: 347,
+    leads: 289,
+    feed: [
+      { name: 'Arjun T.', city: 'Bengaluru' },
+      { name: 'Sana K.', city: 'Mumbai' },
+      { name: 'Vikram P.', city: 'Pune' },
+      { name: 'Nia D.', city: 'Hyderabad' }
+    ]
+  };
+
+  componentDidMount() {
+    this.cleanup = [];
+    this.demoRunning = false;
+    this.setupDashLive();
+    const reduced = (this.props.motion === 'reduced') ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.reduced = reduced;
+    this.setupReveals();
+    this.setupCounters();
+    this.setupScrollFx();
+    if (!reduced) {
+      this.setupTilt();
+      this.setupMagnets();
+      this.setupLeakScroll();
+      this.setupPings();
+      // auto-play the hero demo once if the user hasn't tapped yet
+      this.timers = this.timers || [];
+      this.timers.push(setTimeout(() => {
+        if (!this.demoPlayed && window.scrollY < window.innerHeight * 0.5) this.runDemo();
+      }, 2800));
+    }
+  }
+
+  // ---------- scroll progress + nav glass ----------
+  setupScrollFx() {
+    const prog = document.getElementById('scrollProg');
+    const nav = document.getElementById('nav');
+    let ticking = false;
+    const apply = () => {
+      ticking = false;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (prog && max > 0) prog.style.width = ((window.scrollY / max) * 100).toFixed(2) + '%';
+      if (nav) {
+        const on = window.scrollY > 60;
+        nav.style.background = on ? 'rgba(247,244,239,.82)' : 'rgba(247,244,239,0)';
+        nav.style.borderColor = on ? 'rgba(28,24,20,.1)' : 'rgba(28,24,20,0)';
+        nav.style.boxShadow = on ? '0 14px 40px -18px rgba(28,24,20,.35)' : 'none';
+        nav.style.backdropFilter = on ? 'blur(14px)' : 'none';
+      }
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(apply); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    apply();
+    this.cleanup.push(() => window.removeEventListener('scroll', onScroll));
+  }
+
+  // ---------- ambient lead pings ----------
+  setupPings() {
+    const wrap = document.getElementById('pingWrap');
+    if (!wrap) return;
+    const reps = [
+      ['Arjun T.', 'Bengaluru', '#FF6B2C,#FF3D00'], ['Sana K.', 'Mumbai', '#C77DFF,#8B3DFF'],
+      ['Vikram P.', 'Pune', '#3CBA92,#0BA360'], ['Nia D.', 'Hyderabad', '#FFB35C,#FF8A5C'],
+      ['Kabir S.', 'Delhi', '#7FA8FF,#4C6FFF']
+    ];
+    let i = 0, shown = 0;
+    const ping = () => {
+      if (shown >= 5 || window.scrollY < window.innerHeight * 0.6) return;
+      shown++;
+      const [name, city, grad] = reps[i++ % reps.length];
+      const el = document.createElement('div');
+      el.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:100px;background:rgba(28,24,20,.92);backdrop-filter:blur(8px);box-shadow:0 14px 34px -12px rgba(28,24,20,.6);opacity:0;transform:translateY(14px);transition:opacity .45s cubic-bezier(.16,1,.3,1),transform .45s cubic-bezier(.16,1,.3,1);';
+      el.innerHTML = '<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,' + grad + ');display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;font-family:Inter,sans-serif;">' + name.charAt(0) + '</div>' +
+        '<div><div style="font-size:11.5px;font-weight:700;color:#FAF7F2;font-family:Inter,sans-serif;">' + name + ' captured a lead</div>' +
+        '<div style="font-size:9.5px;color:#8d857c;font-family:\'JetBrains Mono\',monospace;">' + city + ' · JUST NOW</div></div>';
+      wrap.appendChild(el);
+      requestAnimationFrame(() => requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }));
+      this.timers.push(setTimeout(() => {
+        el.style.opacity = '0'; el.style.transform = 'translateY(14px)';
+        this.timers.push(setTimeout(() => el.remove(), 500));
+      }, 4200));
+    };
+    const iv = setInterval(ping, 13000);
+    this.cleanup.push(() => clearInterval(iv));
+  }
+
+  componentWillUnmount() {
+    (this.cleanup || []).forEach(f => { try { f(); } catch (e) {} });
+    (this.timers || []).forEach(t => clearTimeout(t));
+  }
+
+  // ---------- interactive tap demo ----------
+  runDemo = () => {
+    if (this.demoRunning) return;
+    this.demoRunning = true;
+    this.demoPlayed = true;
+    this.timers = this.timers || [];
+    const $ = id => document.getElementById(id);
+    const at = (ms, fn) => this.timers.push(setTimeout(fn, ms));
+    const conn1 = $('conn1'), conn2 = $('conn2'), phone = $('demoPhone'),
+      dash = $('demoDash'), lead = $('demoLead'), msg = $('demoMsg'),
+      del = $('demoDelivered'), done = $('demoDone'), label = $('tapLabel'),
+      card = $('tapCard'), taps = $('demoTaps'), conns = $('demoConns'),
+      formScr = $('demoFormScr'), waScr = $('demoWaScr'),
+      btn = $('demoFormBtn'), badge = $('demoAutoBadge');
+    const fields = [1, 2, 3].map(i => [$('demoF' + i), $('demoA' + i)]);
+    if (!card) return;
+    // reset
+    [conn1, conn2].forEach(c => { if (c) { c.style.opacity = '0'; c.style.scale = '0 1'; } });
+    if (phone) { phone.style.opacity = '0'; phone.style.transform = 'translateY(34px) scale(.94)'; }
+    if (formScr) formScr.style.opacity = '1';
+    if (waScr) waScr.style.opacity = '0';
+    fields.forEach(([f, a]) => { if (f) f.textContent = ''; if (a) a.style.opacity = '0'; });
+    if (badge) { badge.textContent = '3 FIELDS'; badge.style.color = '#FF8A5C'; }
+    if (btn) { btn.style.background = '#cfc8bd'; btn.style.transform = 'none'; btn.style.boxShadow = 'none'; }
+    if (dash) { dash.style.opacity = '.45'; dash.style.filter = 'saturate(.4)'; }
+    if (lead) { lead.style.opacity = '0'; lead.style.transform = 'translateX(30px)'; }
+    if (msg) msg.textContent = '';
+    if (del) del.style.opacity = '0';
+    if (done) { done.style.opacity = '0'; done.style.transform = 'translate(-50%,10px)'; }
+
+    // 1. card pulse → NFC handshake
+    card.style.animation = 'none';
+    if (card.animate) card.animate(
+      [{ boxShadow: '0 0 0 0 rgba(255,61,0,.55)' }, { boxShadow: '0 0 0 30px rgba(255,61,0,0)' }],
+      { duration: 700, easing: 'ease-out' });
+    if (label) label.textContent = 'NFC HANDSHAKE…';
+    at(250, () => { if (conn1) { conn1.style.opacity = '1'; conn1.style.scale = '1 1'; } });
+    // 2. form opens on prospect's phone
+    at(650, () => {
+      if (phone) { phone.style.opacity = '1'; phone.style.transform = 'translateY(0) scale(1)'; }
+      if (label) label.textContent = 'FORM OPENS ON THEIR PHONE';
+      if (badge) badge.textContent = '⚡ AUTO-FILLING…';
+    });
+    // 3. three fields auto-fill from the tap
+    const vals = ['Ananya Rao', '+91 98••• •4521', 'Nexlify Tech'];
+    const fill = i => {
+      const [f, a] = fields[i];
+      if (f) f.textContent = vals[i];
+      if (a) a.style.opacity = '1';
+      if (f && f.parentElement && f.parentElement.animate) f.parentElement.animate(
+        [{ background: '#E9F8F0' }, { background: '#ffffff' }], { duration: 600 });
+    };
+    at(1050, () => fill(0));
+    at(1300, () => fill(1));
+    at(1550, () => {
+      fill(2);
+      if (badge) { badge.textContent = '90% AUTO-FILLED ✓'; badge.style.color = '#3CBA92'; }
+      if (label) label.textContent = '3 FIELDS · FILLED BY THE TAP';
+    });
+    // 4. single tap on send → WhatsApp fires
+    at(2150, () => {
+      if (btn) { btn.style.background = 'linear-gradient(100deg,#FF3D00,#FF6B2C)'; btn.style.boxShadow = '0 6px 18px -6px rgba(255,61,0,.6)'; }
+    });
+    at(2600, () => {
+      if (btn) btn.style.transform = 'scale(.94)';
+      if (label) label.textContent = 'ONE TAP → WHATSAPP FIRES';
+    });
+    at(2780, () => { if (btn) btn.style.transform = 'scale(1)'; });
+    at(2950, () => {
+      if (formScr) formScr.style.opacity = '0';
+      if (waScr) waScr.style.opacity = '1';
+    });
+    // 5. message types itself
+    const text = 'Hi Rahul, great meeting you at the expo — send me the details 👍';
+    at(3300, () => {
+      let i = 0;
+      const type = () => {
+        if (!msg) return;
+        msg.textContent = text.slice(0, i);
+        i += 2;
+        if (i <= text.length + 1) this.timers.push(setTimeout(type, 22));
+        else if (del) del.style.opacity = '1';
+      };
+      type();
+    });
+    // 6. dashboard capture
+    at(4400, () => { if (conn2) { conn2.style.opacity = '1'; conn2.style.scale = '1 1'; } });
+    at(4800, () => {
+      if (dash) { dash.style.opacity = '1'; dash.style.filter = 'saturate(1)'; }
+      if (lead) { lead.style.opacity = '1'; lead.style.transform = 'translateX(0)'; }
+      if (label) label.textContent = 'LEAD CAPTURED · AUTO-LOGGED';
+      if (taps) taps.textContent = '44';
+      if (conns) conns.textContent = '39';
+      if (lead && lead.animate) lead.animate(
+        [{ boxShadow: '0 0 0 0 rgba(11,163,96,.5)' }, { boxShadow: '0 0 16px 5px rgba(11,163,96,.25)' }, { boxShadow: '0 0 0 0 rgba(11,163,96,0)' }],
+        { duration: 900 });
+    });
+    // 7. verdict
+    at(5500, () => {
+      if (done) { done.style.opacity = '1'; done.style.transform = 'translate(-50%,0)'; }
+      if (label) label.textContent = '↑ TAP AGAIN ANYTIME';
+      this.demoRunning = false;
+    });
+  };
+
+  // ---------- live dashboard simulation ----------
+  setupDashLive() {
+    const sec = document.getElementById('dashboard');
+    if (!sec) return;
+    const reps = [
+      ['Arjun T.', 'Bengaluru'], ['Sana K.', 'Mumbai'], ['Vikram P.', 'Pune'],
+      ['Nia D.', 'Hyderabad'], ['Rohan B.', 'Bengaluru'], ['Kabir S.', 'Delhi']
+    ];
+    let timer = null;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting && !timer) {
+          timer = setInterval(() => {
+            const [name, city] = reps[Math.floor(Math.random() * reps.length)];
+            this.setState(s => ({
+              taps: s.taps + 1,
+              leads: s.leads + (Math.random() < 0.6 ? 1 : 0),
+              feed: [{ name, city }, ...s.feed].slice(0, 4)
+            }));
+            const num = document.getElementById('dashTapNum');
+            if (num && num.animate) num.animate(
+              [{ transform: 'scale(1.15)', color: '#FF3D00' }, { transform: 'scale(1)', color: '#FF8A5C' }],
+              { duration: 500, easing: 'ease-out' });
+          }, 3200);
+        } else if (!en.isIntersecting && timer) { clearInterval(timer); timer = null; }
+      });
+    }, { threshold: 0.15 });
+    io.observe(sec);
+    this.cleanup.push(() => { io.disconnect(); if (timer) clearInterval(timer); });
+  }
+
+  // ---------- reveals ----------
+  setupReveals() {
+    if (this.reduced) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const t = en.target;
+        io.unobserve(t);
+        setTimeout(() => {
+          t.style.opacity = '1';
+          t.style.translate = '0 0';
+          t.style.scale = '1';
+        }, +(t.dataset.delay || 0));
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-reveal]').forEach(t => {
+      const r = t.getBoundingClientRect();
+      if (r.top > window.innerHeight * 0.92) {
+        t.style.opacity = '0';
+        t.style.translate = '0 18px';
+        t.style.scale = '0.985';
+        t.style.transition = 'opacity .55s cubic-bezier(.16,1,.3,1), translate .55s cubic-bezier(.16,1,.3,1), scale .55s cubic-bezier(.16,1,.3,1)';
+        io.observe(t);
+      }
+    });
+    this.cleanup.push(() => io.disconnect());
+  }
+
+  setupCounters() {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const t = en.target;
+        io.unobserve(t);
+        const end = parseFloat(t.dataset.count);
+        const pre = t.dataset.prefix || '';
+        const suf = t.dataset.suffix || '';
+        if (this.reduced) { t.textContent = pre + end + suf; return; }
+        const dur = Math.min(1600, 600 + Math.abs(end) * 8);
+        const t0 = performance.now();
+        const step = now => {
+          let p = Math.min(1, (now - t0) / dur);
+          p = 1 - Math.pow(1 - p, 3);
+          t.textContent = pre + Math.round(end * p) + suf;
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('[data-count]').forEach(t => io.observe(t));
+    this.cleanup.push(() => io.disconnect());
+  }
+
+  setupTilt() {
+    document.querySelectorAll('[data-tilt]').forEach(el => {
+      const max = +(el.dataset.tilt || 10);
+      el.style.transition = 'transform .35s cubic-bezier(.16,1,.3,1)';
+      el.style.transformStyle = 'preserve-3d';
+      const mm = e => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5;
+        const y = (e.clientY - r.top) / r.height - .5;
+        el.style.transform = 'perspective(900px) rotateX(' + (-y * max).toFixed(2) + 'deg) rotateY(' + (x * max).toFixed(2) + 'deg)';
+      };
+      const ml = () => { el.style.transform = 'perspective(900px)'; };
+      el.addEventListener('mousemove', mm);
+      el.addEventListener('mouseleave', ml);
+      this.cleanup.push(() => { el.removeEventListener('mousemove', mm); el.removeEventListener('mouseleave', ml); });
+    });
+  }
+
+  setupMagnets() {
+    document.querySelectorAll('[data-magnet]').forEach(el => {
+      el.style.transition = 'translate .25s cubic-bezier(.16,1,.3,1), box-shadow .25s';
+      const mm = e => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / r.width;
+        const y = (e.clientY - (r.top + r.height / 2)) / r.height;
+        el.style.translate = (x * 8).toFixed(1) + 'px ' + (y * 6).toFixed(1) + 'px';
+      };
+      const ml = () => { el.style.translate = '0 0'; };
+      el.addEventListener('mousemove', mm);
+      el.addEventListener('mouseleave', ml);
+      this.cleanup.push(() => { el.removeEventListener('mousemove', mm); el.removeEventListener('mouseleave', ml); });
+    });
+  }
+
+  // ---------- leak scroll story ----------
+  setupLeakScroll() {
+    const sec = document.getElementById('leak');
+    const line = document.getElementById('leakLine');
+    const foot = document.getElementById('leakFoot');
+    const money = document.getElementById('leakMoney');
+    const moneyWrap = document.getElementById('leakMoneyWrap');
+    if (!sec) return;
+    const dots = [...document.querySelectorAll('[data-person]')];
+    const captions = [
+      [0, 'Your rep met 31 people at the expo.'],
+      [.25, 'By Friday, she remembers 9.'],
+      [.45, 'She followed up with 4.'],
+      [.65, 'She closed 1.'],
+      [.82, 'The other 27? Gone.']
+    ];
+    // keep-counts per stage: 31, 9, 4, 1, 1
+    const keep = [31, 9, 4, 1, 1];
+    let lastStage = -1;
+    let raf;
+    const loop = () => {
+      const r = sec.getBoundingClientRect();
+      const denom = r.height - window.innerHeight;
+      const p = denom > 0 ? Math.max(0, Math.min(1, -r.top / denom)) : 0;
+      let stage = 0;
+      captions.forEach(([at], i) => { if (p >= at) stage = i; });
+      // ₹ pipeline leaking away, tied to scroll depth
+      if (money && moneyWrap) {
+        moneyWrap.style.opacity = p > 0.28 ? '1' : '0';
+        const amt = Math.round(Math.max(0, (p - 0.25) / 0.75) * 8100000 / 10000) * 10000;
+        money.textContent = '₹' + amt.toLocaleString('en-IN');
+      }
+      if (stage !== lastStage) {
+        lastStage = stage;
+        if (line) {
+          line.style.opacity = '0';
+          setTimeout(() => { line.textContent = captions[stage][1]; line.style.opacity = '1'; }, 160);
+          line.style.color = stage >= 4 ? '#E03500' : '#1C1814';
+        }
+        const k = keep[stage];
+        dots.forEach((d, i) => {
+          const alive = i < k;
+          d.style.opacity = alive ? '1' : '.14';
+          d.style.filter = alive ? 'none' : 'grayscale(1)';
+          d.style.transform = alive ? 'scale(1)' : 'scale(.8)';
+        });
+        if (foot) foot.style.opacity = stage >= 4 ? '1' : '0';
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    this.cleanup.push(() => cancelAnimationFrame(raf));
+  }
+
+  renderVals() {
+    const price = this.props.seatPrice ?? 499;
+    const initials = 'ABCDEFGHIJKLMNPQRSTUVAMKRSPDNV';
+    const pals = [['#FF6B2C', '#FF3D00'], ['#C77DFF', '#8B3DFF'], ['#3CBA92', '#0BA360'], ['#FFB35C', '#FF8A5C'], ['#7FA8FF', '#4C6FFF']];
+    const people = Array.from({ length: 31 }, (_, i) => ({
+      initial: initials[i % initials.length],
+      c1: pals[i % 5][0],
+      c2: pals[i % 5][1]
+    }));
+    const fpal = {
+      'Arjun T.': ['#FF6B2C', '#FF3D00'], 'Sana K.': ['#C77DFF', '#8B3DFF'],
+      'Vikram P.': ['#3CBA92', '#0BA360'], 'Nia D.': ['#FFB35C', '#FF8A5C'],
+      'Rohan B.': ['#7FA8FF', '#4C6FFF'], 'Kabir S.': ['#3CBA92', '#0BA360']
+    };
+    const ago = ['now', '2m', '5m', '9m'];
+    const feed = (this.state.feed || []).map((f, i) => ({
+      name: f.name,
+      city: f.city,
+      initial: f.name.charAt(0),
+      c1: (fpal[f.name] || fpal['Arjun T.'])[0],
+      c2: (fpal[f.name] || fpal['Arjun T.'])[1],
+      time: ago[i] || '12m'
+    }));
+    return {
+      people,
+      feed,
+      liveTaps: this.state.taps,
+      liveLeads: this.state.leads,
+      runDemo: this.runDemo,
+      seatPrice: '₹' + price,
+      price10: '₹' + (price * 10).toLocaleString('en-IN'),
+      price25: '₹' + (price * 25).toLocaleString('en-IN'),
+      ctaPrice: 'Get started — ₹' + price + '/seat',
+      showVision: this.props.showVision ?? true
+    };
+  }
+}
+</script>
+</body>
+</html>

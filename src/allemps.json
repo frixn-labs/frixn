@@ -1,0 +1,61 @@
+{
+  "emps": [
+    {
+      "id": "1e7d044f-cffa-4f0f-941b-598a68b18462",
+      "name": "Emp 1",
+      "email": "emp1@gmail.com",
+      "email_template_subject": null,
+      "email_template_body": null,
+      "email_attachment_url": null
+    },
+    {
+      "id": "0866220f-d71d-4ef5-a20b-0e1f505f981f",
+      "name": "Emp 2",
+      "email": "emp2@gmail.com",
+      "email_template_subject": null,
+      "email_template_body": null,
+      "email_attachment_url": null
+    },
+    {
+      "id": "1f69f7d7-fa6e-47b6-a7a0-a396c71b978f",
+      "name": "Emp 3",
+      "email": "emp3@gmail.com",
+      "email_template_subject": null,
+      "email_template_body": null,
+      "email_attachment_url": null
+    },
+    {
+      "id": "df7e50a6-26dc-4d9f-9bfa-e6c68c952f75",
+      "name": "Emp 4",
+      "email": "emp4@gmail.com",
+      "email_template_subject": null,
+      "email_template_body": null,
+      "email_attachment_url": null
+    },
+    {
+      "id": "8a46c772-e8b1-441f-a23f-244c3e1e786a",
+      "name": "Emp 5",
+      "email": "emp5@gmail.com",
+      "email_template_subject": null,
+      "email_template_body": null,
+      "email_attachment_url": null
+    },
+    {
+      "id": "78a99b21-bc91-4846-9191-e2bc585e6866",
+      "name": "Adithya Kanth",
+      "email": "adithya@automatelabs.in",
+      "email_template_subject": "Great meeting you!",
+      "email_template_body": "Hi {visitor_name},\n\nHello\n\nBest regards,\n{employee_name}\n{designation}\n{company_name}",
+      "email_attachment_url": "https://rntrmtgrxywomnuhntil.supabase.co/storage/v1/object/public/frixn/attachments/frixn/brochure_78a99b21-bc91-4846-9191-e2bc585e6866_1783598757279.pdf"
+    },
+    {
+      "id": "8c6a47ba-774c-482e-9eb8-23610704fd5b",
+      "name": "Judah Benilan",
+      "email": "judah.ben2002@gmail.com",
+      "email_template_subject": "Test Subject",
+      "email_template_body": "hi",
+      "email_attachment_url": "https://example.com/test.pdf"
+    }
+  ],
+  "error": null
+}

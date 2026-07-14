@@ -1,0 +1,35 @@
+{
+  "emp": {
+    "id": "8c6a47ba-774c-482e-9eb8-23610704fd5b",
+    "org_id": "f7323f4a-d243-409e-b6d2-8c87d25a7947",
+    "dept_id": "7a52b1cb-b95f-4612-a521-9be9eebf66b7",
+    "name": "Judah Benilan",
+    "designation": "Co-Founder",
+    "email": "judah.ben2002@gmail.com",
+    "phone": "7667792773",
+    "photo_url": null,
+    "employee_code": "Frixn002",
+    "is_active": true,
+    "created_at": "2026-07-03T19:42:17.612326+00:00",
+    "email_template_subject": "Test Subject",
+    "email_template_body": "hi",
+    "email_attachment_url": "https://example.com/test.pdf",
+    "organizations": {
+      "id": "f7323f4a-d243-409e-b6d2-8c87d25a7947",
+      "name": "Frixn",
+      "plan": "starter",
+      "slug": "frixn",
+      "status": "active",
+      "logo_url": "https://rntrmtgrxywomnuhntil.supabase.co/storage/v1/object/public/frixn/frixn/logo.png",
+      "admin_name": "Adithya Kanth",
+      "created_at": "2026-06-22T17:22:22.188498+00:00",
+      "admin_email": "adithyaasenthilkumar@gmail.com",
+      "admin_phone": "8903584674",
+      "brand_color": "#ff0000",
+      "accent_color": "#641111",
+      "onboarded_at": "2026-06-22T17:22:22.188498+00:00",
+      "max_employees": 2
+    }
+  },
+  "empErr": null
+}

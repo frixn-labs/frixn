@@ -25,34 +25,14 @@ function ForgotPasswordContent() {
 
   const [step, setStep] = React.useState<1 | 2>(1)
   const [email, setEmail] = React.useState("")
-  const [otp, setOtp] = React.useState("")
   const [loading, setLoading] = React.useState(false)
-  const [resendLoading, setResendLoading] = React.useState(false)
-  const [resendSuccess, setResendSuccess] = React.useState("")
   const [error, setError] = React.useState("")
-
-  const handleResendOtp = async () => {
-    setError("")
-    setResendSuccess("")
-    setResendLoading(true)
-    try {
-      const { error: sendError } = await supabase.auth.resetPasswordForEmail(email)
-      if (sendError) {
-        setError(sendError.message)
-        return
-      }
-      setResendSuccess("Code resent successfully!")
-      setTimeout(() => setResendSuccess(""), 4000)
-    } catch (err: any) {
-      setError(err.message ?? "An unexpected error occurred.")
-    } finally {
-      setResendLoading(false)
-    }
-  }
+  const [debugLink, setDebugLink] = React.useState("")
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setDebugLink("")
     if (!email) {
       setError("Please enter your email address.")
       return
@@ -60,45 +40,23 @@ function ForgotPasswordContent() {
 
     setLoading(true)
     try {
-      const { error: sendError } = await supabase.auth.resetPasswordForEmail(email)
-      
-      if (sendError) {
-        setError(sendError.message)
-        return
-      }
-      
-      setStep(2)
-    } catch (err: any) {
-      setError(err.message ?? "An unexpected error occurred.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    
-    if (otp.length < 6) {
-      setError("Please enter a valid 6-digit OTP.")
-      return
-    }
-
-    setLoading(true)
-    try {
-      const { data, error: verifyError } = await supabase.auth.verifyOtp({ 
-        email, 
-        token: otp, 
-        type: 'email'
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
       })
 
-      if (verifyError) {
-        setError(verifyError.message)
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error ?? "Failed to send password recovery request.")
         return
       }
 
-      router.push("/reset-password")
-
+      if (data.debugLink) {
+        setDebugLink(data.debugLink)
+      }
+      setStep(2)
     } catch (err: any) {
       setError(err.message ?? "An unexpected error occurred.")
     } finally {
@@ -112,8 +70,8 @@ function ForgotPasswordContent() {
         title: "Change Your Password",
         subtitle:
           step === 1
-            ? "Enter the email linked to your account and we'll send a reset code"
-            : "Enter the 6-digit code sent to your inbox",
+            ? "Enter the email linked to your account and we'll send a reset link"
+            : "A secure reset link has been sent to your inbox",
         iconBg: "from-[#FF3D00] to-[#E8A020]",
         iconShadow: "shadow-[#FF3D00]/20",
         icon: <Lock className="w-7 h-7 text-white" strokeWidth={2.5} />,
@@ -125,8 +83,8 @@ function ForgotPasswordContent() {
         title: "Password Recovery",
         subtitle:
           step === 1
-            ? "Enter your email to receive a recovery code"
-            : "Enter the 6-digit code sent to your email",
+            ? "Enter your email to receive a recovery link"
+            : "A secure recovery link has been sent to your email",
         iconBg: "from-[#FF3D00] to-[#E8A020]",
         iconShadow: "shadow-[#FF3D00]/20",
         icon: <KeyRound className="w-7 h-7 text-white" strokeWidth={2.5} />,
@@ -203,95 +161,53 @@ function ForgotPasswordContent() {
                   {loading ? (
                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</>
                   ) : (
-                    <span className="flex items-center gap-2">
-                      Send Recovery Code <ArrowRight className="w-4 h-4" />
+                    <span className="flex items-center gap-2 select-none">
+                      Send Reset Link <ArrowRight className="w-4 h-4" />
                     </span>
                   )}
                 </Button>
               </div>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-              <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
-                  Recovery Code
-                </Label>
-                <div className="relative">
-                  <div className="flex justify-between gap-2">
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <Input
-                        key={index}
-                        type="text"
-                        inputMode="numeric"
-                        value={otp[index] || ""}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val && isNaN(Number(val))) return;
-                          
-                          const newOtp = otp.split("");
-                          newOtp[index] = val.substring(val.length - 1);
-                          const newOtpString = newOtp.join("");
-                          setOtp(newOtpString);
-                          
-                          if (val && index < 5) {
-                            const nextInput = document.getElementById(`otp-input-${index + 1}`);
-                            nextInput?.focus();
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Backspace" && !otp[index] && index > 0) {
-                            const prevInput = document.getElementById(`otp-input-${index - 1}`);
-                            prevInput?.focus();
-                          }
-                        }}
-                        onPaste={(e) => {
-                          e.preventDefault();
-                          const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-                          if (pastedData) {
-                            setOtp(pastedData);
-                            const nextIndex = Math.min(pastedData.length, 5);
-                            document.getElementById(`otp-input-${nextIndex}`)?.focus();
-                          }
-                        }}
-                        id={`otp-input-${index}`}
-                        className={`w-12 h-14 text-center text-xl font-bold tracking-widest bg-background/50 border-border/50 rounded-xl focus:ring-2 ${accentFocus} transition-all p-0`}
-                        maxLength={1}
-                        required
-                      />
-                    ))}
-                  </div>
+            <div className="space-y-6 text-center animate-in slide-in-from-right-4 duration-300">
+              <div className="py-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-500 mb-4 animate-bounce">
+                  <Mail className="w-8 h-8" />
                 </div>
+                <h3 className="text-xl font-bold text-foreground">Recovery Link Sent</h3>
+                <p className="text-sm text-muted-foreground mt-2 px-4 leading-relaxed">
+                  We've sent a secure password recovery link to <span className="font-bold text-foreground">{email}</span>. Click the link in the email to set your new password.
+                </p>
               </div>
 
-              <div className="space-y-3">
-                {error && (
-                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 animate-in slide-in-from-bottom-2 duration-300">
+              {debugLink && (
+                <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-left space-y-3">
+                  <div className="flex items-center gap-2 text-orange-500">
                     <AlertCircle className="w-4 h-4 shrink-0" />
-                    <p className="text-xs font-bold leading-tight">{error}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider">Developer Debug Console</p>
                   </div>
-                )}
-                
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className={`w-full h-12 ${btnBg} text-white font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-[0.98]`}
-                >
-                  {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verifying...</> : "Verify & Continue"}
-                </Button>
-                
-                <div className="flex items-center justify-between text-[11px] font-bold tracking-wider text-muted-foreground pt-2">
-                  <button type="button" onClick={() => setStep(1)} className="hover:text-foreground transition-colors flex items-center gap-1">
-                     <ArrowLeft className="w-3 h-3"/> Change Email
-                  </button>
-                  <div className="flex items-center gap-2">
-                    {resendSuccess && <span className="text-emerald-500 transition-opacity animate-in fade-in">{resendSuccess}</span>}
-                    <button type="button" onClick={handleResendOtp} disabled={resendLoading} className="hover:text-[#FF3D00] transition-colors disabled:opacity-50">
-                       {resendLoading ? "Sending..." : "Resend Code"}
-                    </button>
-                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Resend API key is not configured locally, so the email wasn't sent. You can click the link below to test resetting the password:
+                  </p>
+                  <Button
+                    onClick={() => { window.location.href = debugLink }}
+                    className="w-full h-10 bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-lg transition-all"
+                  >
+                    Go to Reset Password
+                  </Button>
                 </div>
+              )}
+
+              <div className="pt-2">
+                <Button
+                  onClick={() => setStep(1)}
+                  variant="outline"
+                  className="w-full h-11 rounded-xl text-xs font-bold uppercase tracking-wider gap-2"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Re-enter Email
+                </Button>
               </div>
-            </form>
+            </div>
           )}
 
           {/* Back link */}

@@ -149,6 +149,14 @@ export default function SettingsPage() {
     const [uploadingAttachment, setUploadingAttachment] = React.useState(false)
     const [savingEmailSettings, setSavingEmailSettings] = React.useState(false)
 
+    const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null)
+    const showToast = (message: string, type: "success" | "error" = "success") => {
+        setToast({ message, type })
+        setTimeout(() => {
+            setToast(null)
+        }, 3000)
+    }
+
     const attachmentInputRef = React.useRef<HTMLInputElement>(null)
 
 
@@ -598,10 +606,10 @@ export default function SettingsPage() {
                 .eq('id', orgId)
 
             if (error) throw error
-            alert("Email auto-response template saved successfully!")
+            showToast("Email auto-response template saved successfully!", "success")
         } catch (err) {
             console.error("Save Email Template Error:", err)
-            alert("Failed to save email auto-response template.")
+            showToast("Failed to save email auto-response template.", "error")
         } finally {
             setSavingEmailSettings(false)
         }
@@ -612,11 +620,11 @@ export default function SettingsPage() {
         if (!file || !orgId) return
 
         if (file.type !== "application/pdf") {
-            alert("Please upload a PDF file.")
+            showToast("Please upload a PDF file.", "error")
             return
         }
         if (file.size > 5 * 1024 * 1024) {
-            alert("File must be under 5MB.")
+            showToast("File must be under 5MB.", "error")
             return
         }
 
@@ -635,9 +643,10 @@ export default function SettingsPage() {
 
             const { data: urlData } = supabase.storage.from("frixn").getPublicUrl(path)
             setEmailAttachmentUrl(urlData.publicUrl)
+            showToast("Attachment uploaded successfully!", "success")
         } catch (err: any) {
             console.error(err)
-            alert(`Upload failed: ${err.message || err}`)
+            showToast(`Upload failed: ${err.message || err}`, "error")
         } finally {
             setUploadingAttachment(false)
         }
@@ -1508,7 +1517,7 @@ export default function SettingsPage() {
 
                                 <div className="space-y-2.5">
                                     <Label className="text-sm font-bold tracking-wide text-foreground">Email Attachment (Optional PDF)</Label>
-                                    
+
                                     <input
                                         type="file"
                                         ref={attachmentInputRef}
@@ -1525,10 +1534,10 @@ export default function SettingsPage() {
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
                                                     <span className="text-xs font-bold text-foreground truncate">Attachment PDF</span>
-                                                    <a 
-                                                        href={emailAttachmentUrl} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer" 
+                                                    <a
+                                                        href={emailAttachmentUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
                                                         className="text-[10px] text-[#FF3D00] hover:underline truncate"
                                                     >
                                                         View uploaded file
@@ -1786,6 +1795,24 @@ export default function SettingsPage() {
           */}
                 </div>
             </Tabs>
+            {toast && (
+                <div
+                    className={cn(
+                        "fixed bottom-5 right-5 z-[9999] flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg backdrop-blur-md transition-all duration-300 animate-in slide-in-from-bottom-5",
+                        toast.type === "success"
+                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                            : "bg-rose-500/10 border-rose-500/20 text-rose-500"
+                    )}
+                    role="alert"
+                >
+                    {toast.type === "success" ? (
+                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                    ) : (
+                        <ShieldAlert className="w-5 h-5 shrink-0" />
+                    )}
+                    <span className="text-sm font-semibold">{toast.message}</span>
+                </div>
+            )}
         </div>
     )
 }
